@@ -48,19 +48,27 @@ export function PetGrid() {
   });
 
   return (
-    <div className="space-y-8">
-      <FiltersSection
-        ageRange={ageRange}
-        onAgeChange={setAgeRange}
-        selectedBreed={selectedBreed}
-        onBreedChange={setSelectedBreed}
-        availableBreeds={availableBreeds}
-      />
+    <div className="flex gap-8">
+      {/* Sidebar */}
+      <aside className="w-64 flex-shrink-0">
+        <div className="sticky top-20 bg-white rounded-lg shadow-sm">
+          <FiltersSection
+            ageRange={ageRange}
+            onAgeChange={setAgeRange}
+            selectedBreed={selectedBreed}
+            onBreedChange={setSelectedBreed}
+            availableBreeds={availableBreeds}
+          />
+        </div>
+      </aside>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-        {filteredPets.map((pet, index) => (
-          <PetCard key={index} {...pet} />
-        ))}
+      {/* Main content */}
+      <div className="flex-grow">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {filteredPets.map((pet, index) => (
+            <PetCard key={index} {...pet} />
+          ))}
+        </div>
       </div>
     </div>
   );
