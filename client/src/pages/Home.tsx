@@ -18,12 +18,14 @@ export default function Home() {
                 🦴
               </div>
             </div>
-            <h1 className="text-2xl font-semibold mb-2">
-              Adopta una mascota
-            </h1>
-            <p className="text-sm text-gray-600 mb-6 max-w-xl mx-auto">
-              Dale una segunda oportunidad a un amigo peludo.
-            </p>
+            <div className="bg-white rounded-3xl shadow-lg inline-block px-8 py-4 mb-6">
+              <h1 className="text-2xl font-semibold mb-2">
+                Adopta una mascota
+              </h1>
+              <p className="text-sm text-gray-600 max-w-xl">
+                Dale una segunda oportunidad a un amigo peludo.
+              </p>
+            </div>
             <Button size="sm" className="rounded-full px-6 bg-primary hover:bg-primary/90">
               Conocer más
             </Button>
