@@ -11,7 +11,7 @@ export default function Home() {
 
       <main className="pt-16">
         {/* Hero Section */}
-        <section className="py-12 px-4">
+        <section id="hero" className="py-12 px-4">
           <div className="max-w-7xl mx-auto text-center">
             <div className="flex justify-center mb-4">
               <div className="w-12 h-12 text-primary">
@@ -31,7 +31,7 @@ export default function Home() {
         </section>
 
         {/* Pets Section */}
-        <section className="py-12 px-4">
+        <section id="mascotas" className="py-12 px-4">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-xl font-semibold text-center mb-2">
               Busca tu amigo
@@ -44,19 +44,19 @@ export default function Home() {
         </section>
 
         {/* Adoption Steps */}
-        <section className="py-12 px-4 bg-gray-50">
+        <section id="proceso" className="py-12 px-4 bg-gray-50">
           <div className="max-w-7xl mx-auto">
             <AdoptionSteps />
           </div>
         </section>
 
         {/* Video Gallery Section */}
-        <section className="py-12 px-4">
+        <section id="consejos" className="py-12 px-4">
           <VideoGallery />
         </section>
 
         {/* Newsletter Section */}
-        <section className="py-12 px-4 bg-gray-50">
+        <section id="contacto" className="py-12 px-4 bg-gray-50">
           <div className="max-w-7xl mx-auto text-center">
             <div className="max-w-md mx-auto">
               <h2 className="text-xl font-semibold mb-2">¿Tienes preguntas?</h2>
@@ -78,7 +78,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="bg-white border-t text-sm text-gray-500 py-8 px-4">
+      <footer id="footer" className="bg-white border-t text-sm text-gray-500 py-8 px-4">
         <div className="max-w-7xl mx-auto text-center">
           <p>© 2024 PetMatch. Todos los derechos reservados.</p>
         </div>

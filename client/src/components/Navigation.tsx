@@ -3,13 +3,13 @@ import { Home, Heart, FileText, Phone, Calendar, Settings, HelpCircle } from "lu
 
 export function Navigation() {
   const navItems = [
-    { icon: Home, label: "Inicio" },
-    { icon: Heart, label: "Mascotas" },
-    { icon: FileText, label: "General" },
-    { icon: Phone, label: "Contactar" },
-    { icon: Calendar, label: "Calendario" },
-    { icon: Settings, label: "Configurar" },
-    { icon: HelpCircle, label: "Ayuda" }
+    { icon: Home, label: "Inicio", href: "#hero" },
+    { icon: Heart, label: "Mascotas", href: "#mascotas" },
+    { icon: FileText, label: "General", href: "#proceso" },
+    { icon: Phone, label: "Contactar", href: "#contacto" },
+    { icon: Calendar, label: "Calendario", href: "#" },
+    { icon: Settings, label: "Configurar", href: "#" },
+    { icon: HelpCircle, label: "Ayuda", href: "#" }
   ];
 
   return (
@@ -23,8 +23,9 @@ export function Navigation() {
           </div>
           <div className="flex gap-4">
             {navItems.map((item, index) => (
-              <button
+              <a
                 key={index}
+                href={item.href}
                 className={cn(
                   "flex flex-col items-center text-xs text-gray-400 hover:text-[#FF5C7F] transition-colors",
                   "focus:outline-none"
@@ -32,7 +33,7 @@ export function Navigation() {
               >
                 <item.icon className="h-3.5 w-3.5 mb-0.5" />
                 <span className="text-[9px]">{item.label}</span>
-              </button>
+              </a>
             ))}
           </div>
         </div>
