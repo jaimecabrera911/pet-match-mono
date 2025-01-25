@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Navigation } from "@/components/Navigation";
 import { PetGrid } from "@/components/PetGrid";
 import { AdoptionSteps } from "@/components/AdoptionSteps";
-import { Tips } from "@/components/Tips";
+import { VideoGallery } from "@/components/VideoGallery";
 
 export default function Home() {
   return (
@@ -50,15 +50,9 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Tips Section */}
+        {/* Video Gallery Section */}
         <section className="py-12 px-4">
-          <div className="max-w-7xl mx-auto">
-            <h2 className="text-xl font-semibold text-center mb-2">Tips</h2>
-            <p className="text-sm text-center text-gray-500 mb-8">
-              Feliz y Saludable ♥
-            </p>
-            <Tips />
-          </div>
+          <VideoGallery />
         </section>
 
         {/* Newsletter Section */}
