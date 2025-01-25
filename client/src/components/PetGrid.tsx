@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { PetCard } from "./PetCard";
 import { FiltersSection } from "./FiltersSection";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 interface Pet {
   name: string;
@@ -64,11 +71,17 @@ export function PetGrid() {
 
       {/* Main content */}
       <div className="flex-grow">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredPets.map((pet, index) => (
-            <PetCard key={index} {...pet} />
-          ))}
-        </div>
+        <Carousel className="w-full">
+          <CarouselContent className="-ml-2 md:-ml-4">
+            {filteredPets.map((pet, index) => (
+              <CarouselItem key={index} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+                <PetCard {...pet} />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
       </div>
     </div>
   );
