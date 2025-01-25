@@ -1,6 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 interface PetCardProps {
   name: string;
@@ -28,7 +27,7 @@ export function PetCard({ name, age, breed, location, imageUrl }: PetCardProps) 
             <p>Raza: {breed}</p>
             <p>Ubicación: {location}</p>
           </div>
-          <Button className="w-full mt-4 bg-primary hover:bg-primary/90" size="sm">
+          <Button className="w-full mt-4 bg-[#FF5C7F] hover:bg-[#FF5C7F]/90" size="sm">
             Conocer más
           </Button>
         </div>
