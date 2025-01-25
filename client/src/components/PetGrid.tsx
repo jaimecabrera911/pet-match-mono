@@ -1,7 +1,20 @@
+import { useState } from "react";
 import { PetCard } from "./PetCard";
+import { FiltersSection } from "./FiltersSection";
+
+interface Pet {
+  name: string;
+  age: string;
+  breed: string;
+  location: string;
+  imageUrl: string;
+}
 
 export function PetGrid() {
-  const pets = [
+  const [ageRange, setAgeRange] = useState<[number, number]>([0, 15]);
+  const [selectedBreed, setSelectedBreed] = useState("");
+
+  const pets: Pet[] = [
     {
       name: "Luna",
       age: "2 años",
@@ -25,11 +38,30 @@ export function PetGrid() {
     }
   ];
 
+  const availableBreeds = Array.from(new Set(pets.map(pet => pet.breed)));
+
+  const filteredPets = pets.filter(pet => {
+    const petAge = parseInt(pet.age);
+    const ageInRange = petAge >= ageRange[0] && petAge <= ageRange[1];
+    const breedMatches = !selectedBreed || pet.breed === selectedBreed;
+    return ageInRange && breedMatches;
+  });
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-      {pets.map((pet, index) => (
-        <PetCard key={index} {...pet} />
-      ))}
+    <div className="space-y-8">
+      <FiltersSection
+        ageRange={ageRange}
+        onAgeChange={setAgeRange}
+        selectedBreed={selectedBreed}
+        onBreedChange={setSelectedBreed}
+        availableBreeds={availableBreeds}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        {filteredPets.map((pet, index) => (
+          <PetCard key={index} {...pet} />
+        ))}
+      </div>
     </div>
   );
 }
