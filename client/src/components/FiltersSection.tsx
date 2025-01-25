@@ -1,5 +1,7 @@
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import { motion } from "framer-motion";
 
 interface FiltersSectionProps {
   ageRange: [number, number];
@@ -23,17 +25,28 @@ export function FiltersSection({
         <div className="space-y-8">
           <div className="space-y-4">
             <Label className="text-sm font-medium">Edad (años)</Label>
-            <Slider
-              defaultValue={ageRange}
-              max={15}
-              min={0}
-              step={1}
-              onValueChange={onAgeChange}
-              className="w-full"
-            />
-            <div className="flex justify-between text-xs text-gray-500">
-              <span>{ageRange[0]} años</span>
-              <span>{ageRange[1]} años</span>
+            <div className="pt-2">
+              <Slider
+                defaultValue={ageRange}
+                max={15}
+                min={0}
+                step={1}
+                onValueChange={onAgeChange}
+                className="w-full"
+              />
+              <motion.div 
+                className="flex justify-between mt-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Card className="px-3 py-1 bg-primary/10 border-none">
+                  <span className="text-sm font-medium text-primary">{ageRange[0]} años</span>
+                </Card>
+                <Card className="px-3 py-1 bg-primary/10 border-none">
+                  <span className="text-sm font-medium text-primary">{ageRange[1]} años</span>
+                </Card>
+              </motion.div>
             </div>
           </div>
 
