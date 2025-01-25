@@ -13,25 +13,23 @@ export function Navigation() {
   ];
 
   return (
-    <nav className="w-full bg-white py-4 fixed top-0 z-50">
+    <nav className="w-full bg-white border-b py-2 fixed top-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-              <Heart className="h-6 w-6 text-white" />
-            </div>
+            <img src="/logo.png" alt="Logo" className="w-8 h-8" />
           </div>
-          <div className="flex gap-8">
+          <div className="flex gap-6">
             {navItems.map((item, index) => (
               <button
                 key={index}
                 className={cn(
-                  "flex flex-col items-center text-sm text-gray-600 hover:text-primary transition-colors",
+                  "flex flex-col items-center text-sm text-gray-500 hover:text-primary transition-colors",
                   "focus:outline-none"
                 )}
               >
-                <item.icon className="h-5 w-5 mb-1" />
-                <span className="text-xs">{item.label}</span>
+                <item.icon className="h-4 w-4 mb-0.5" />
+                <span className="text-[10px]">{item.label}</span>
               </button>
             ))}
           </div>
