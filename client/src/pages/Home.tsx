@@ -4,8 +4,11 @@ import { PetGrid } from "@/components/PetGrid";
 import { AdoptionSteps } from "@/components/AdoptionSteps";
 import { VideoGallery } from "@/components/VideoGallery";
 import { Heart, Instagram, Facebook, MessageCircle } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function Home() {
+  const [_, navigate] = useLocation();
+
   return (
     <div className="min-h-screen bg-white">
       <Navigation />
@@ -33,9 +36,22 @@ export default function Home() {
             <p className="text-sm text-gray-200 mb-6 max-w-xl mx-auto">
               Dale una segunda oportunidad a un amigo peludo.
             </p>
-            <Button size="sm" className="rounded-full px-6 bg-primary hover:bg-primary/90">
-              Conocer más
-            </Button>
+            <div className="flex gap-4 justify-center">
+              <Button 
+                size="sm" 
+                className="rounded-full px-6 bg-primary hover:bg-primary/90"
+                onClick={() => navigate("/quiz")}
+              >
+                Encuentra tu mascota ideal
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="rounded-full px-6 bg-white/10 hover:bg-white/20 text-white border-white/20"
+              >
+                Conocer más
+              </Button>
+            </div>
           </div>
         </section>
 
