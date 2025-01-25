@@ -11,17 +11,25 @@ export default function Home() {
 
       <main className="pt-16">
         {/* Hero Section */}
-        <section id="hero" className="py-12 px-4">
-          <div className="max-w-7xl mx-auto text-center">
+        <section id="hero" className="relative py-24 px-4">
+          <div 
+            className="absolute inset-0 bg-cover bg-center z-0"
+            style={{
+              backgroundImage: "url('https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&w=1920')"
+            }}
+          >
+            <div className="absolute inset-0 bg-black/40" />
+          </div>
+          <div className="max-w-7xl mx-auto text-center relative z-10">
             <div className="flex justify-center mb-4">
               <div className="w-12 h-12 text-primary">
                 🦴
               </div>
             </div>
-            <h1 className="text-2xl font-semibold mb-2">
+            <h1 className="text-3xl font-semibold mb-2 text-white">
               Adopta una mascota
             </h1>
-            <p className="text-sm text-gray-600 mb-6 max-w-xl mx-auto">
+            <p className="text-sm text-gray-200 mb-6 max-w-xl mx-auto">
               Dale una segunda oportunidad a un amigo peludo.
             </p>
             <Button size="sm" className="rounded-full px-6 bg-primary hover:bg-primary/90">
