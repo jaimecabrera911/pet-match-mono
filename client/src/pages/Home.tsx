@@ -3,6 +3,7 @@ import { Navigation } from "@/components/Navigation";
 import { PetGrid } from "@/components/PetGrid";
 import { AdoptionSteps } from "@/components/AdoptionSteps";
 import { VideoGallery } from "@/components/VideoGallery";
+import { Heart, Instagram, Facebook, MessageCircle } from "lucide-react";
 
 export default function Home() {
   return (
@@ -12,7 +13,7 @@ export default function Home() {
       <main className="pt-16">
         {/* Hero Section */}
         <section id="hero" className="relative py-24 px-4">
-          <div 
+          <div
             className="absolute inset-0 bg-cover bg-center z-0"
             style={{
               backgroundImage: "url('https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&w=1920')"
@@ -63,34 +64,73 @@ export default function Home() {
           <VideoGallery />
         </section>
 
-        {/* Newsletter Section */}
+        {/* Contact Section */}
         <section id="contacto" className="py-12 px-4 bg-gray-50">
-          <div className="max-w-7xl mx-auto text-center">
-            <div className="max-w-md mx-auto">
-              <h2 className="text-xl font-semibold mb-2">¿Tienes preguntas?</h2>
-              <p className="text-sm text-gray-500 mb-6">
-                Registra tu correo para recibir las últimas actualizaciones
+          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Left column - About text */}
+            <div className="space-y-4">
+              <div className="w-12 h-12 bg-[#FF5C7F] rounded-full flex items-center justify-center mb-4">
+                <Heart className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-sm text-gray-600">
+                Somos una fundación sin fines de
+                lucro dedicada a rescatar perros en
+                situación de abandono o maltrato.
+                Les brindamos una segunda
+                oportunidad, ofreciéndoles el amor
+                y cuidado que merecen y
+                ayudándoles a encontrar un hogar
+                lleno de cariño.
               </p>
-              <div className="flex gap-2">
+              <div className="flex space-x-4 mt-4">
+                <a href="#" className="text-gray-400 hover:text-gray-600">
+                  <Instagram className="h-5 w-5" />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-gray-600">
+                  <Facebook className="h-5 w-5" />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-gray-600">
+                  <MessageCircle className="h-5 w-5" />
+                </a>
+              </div>
+            </div>
+
+            {/* Right column - Contact form */}
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-[#FF5C7F] font-medium mb-2">¿Tienes inquietudes o consultas?</h3>
+                <p className="text-sm text-gray-600 mb-4">Registra tus datos</p>
+              </div>
+              <form className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="Nombres y apellidos"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#FF5C7F]/20 focus:border-[#FF5C7F]"
+                />
                 <input
                   type="email"
                   placeholder="Correo electrónico"
-                  className="flex-1 px-4 py-2 text-sm border rounded-full focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#FF5C7F]/20 focus:border-[#FF5C7F]"
                 />
-                <Button size="sm" className="rounded-full">
+                <textarea
+                  placeholder="Mensaje"
+                  rows={4}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#FF5C7F]/20 focus:border-[#FF5C7F]"
+                />
+                <Button className="w-full bg-[#FF5C7F] hover:bg-[#FF5C7F]/90">
                   Enviar
                 </Button>
-              </div>
+              </form>
             </div>
           </div>
         </section>
-      </main>
 
-      <footer id="footer" className="bg-white border-t text-sm text-gray-500 py-8 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <p>© 2024 PetMatch. Todos los derechos reservados.</p>
-        </div>
-      </footer>
+        <footer id="footer" className="bg-white border-t text-sm text-gray-500 py-8 px-4">
+          <div className="max-w-7xl mx-auto text-center">
+            <p>© 2024 PetMatch. Todos los derechos reservados.</p>
+          </div>
+        </footer>
+      </main>
     </div>
   );
 }
