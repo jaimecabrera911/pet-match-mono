@@ -3,29 +3,15 @@ import { IVerifyOptions, Strategy as LocalStrategy } from "passport-local";
 import { type Express } from "express";
 import session from "express-session";
 import createMemoryStore from "memorystore";
-import { scrypt, randomBytes, timingSafeEqual } from "crypto";
-import { promisify } from "util";
+import { createHash } from "crypto";
 import { users, insertUserSchema, type SelectUser } from "@db/schema";
 import { db } from "@db";
 import { eq } from "drizzle-orm";
 
-const scryptAsync = promisify(scrypt);
 const crypto = {
-  hash: async (password: string) => {
-    const salt = randomBytes(16).toString("hex");
-    const buf = (await scryptAsync(password, salt, 64)) as Buffer;
-    return `${buf.toString("hex")}.${salt}`;
-  },
-  compare: async (suppliedPassword: string, storedPassword: string) => {
-    const [hashedPassword, salt] = storedPassword.split(".");
-    const suppliedPasswordBuf = (await scryptAsync(
-      suppliedPassword,
-      salt,
-      64
-    )) as Buffer;
-    const hashedPasswordBuf = Buffer.from(hashedPassword, "hex");
-    return timingSafeEqual(hashedPasswordBuf, suppliedPasswordBuf);
-  },
+  hash: (password: string) => {
+    return createHash('sha256').update(password).digest('hex');
+  }
 };
 
 declare global {
@@ -70,10 +56,11 @@ export function setupAuth(app: Express) {
           return done(null, false, { message: "Usuario incorrecto." });
         }
 
-        const isMatch = await crypto.compare(password, user.password);
-        if (!isMatch) {
+        const hashedPassword = crypto.hash(password);
+        if (hashedPassword !== user.password) {
           return done(null, false, { message: "Contraseña incorrecta." });
         }
+
         return done(null, user);
       } catch (err) {
         return done(err);
@@ -119,7 +106,7 @@ export function setupAuth(app: Express) {
         return res.status(400).send("El nombre de usuario ya existe");
       }
 
-      const hashedPassword = await crypto.hash(password);
+      const hashedPassword = crypto.hash(password);
 
       const [newUser] = await db
         .insert(users)
