@@ -20,12 +20,21 @@ export function MobileNav() {
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="p-0 w-64">
+        <SheetContent 
+          side="left" 
+          className="p-0 w-64"
+          aria-labelledby="navigation-title"
+          aria-describedby="navigation-description"
+        >
           <SheetHeader className="px-4 pt-4">
-            <SheetTitle>Navegación</SheetTitle>
-            <SheetDescription>Accede a las diferentes secciones de la aplicación</SheetDescription>
+            <SheetTitle id="navigation-title">Menú de Navegación</SheetTitle>
+            <SheetDescription id="navigation-description">
+              Navegue por las diferentes secciones de la aplicación de adopción de mascotas
+            </SheetDescription>
           </SheetHeader>
-          <Sidebar />
+          <div className="overflow-y-auto">
+            <Sidebar />
+          </div>
         </SheetContent>
       </Sheet>
     </div>
