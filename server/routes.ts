@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { db } from "@db";
-import { pets, type InsertPet } from "@db/schema";
+import { pets, users, type InsertPet, type InsertUser } from "@db/schema";
 import { eq } from "drizzle-orm";
 
 export function registerRoutes(app: Express): Server {
@@ -54,6 +54,58 @@ export function registerRoutes(app: Express): Server {
       res.json({ message: "Mascota eliminada exitosamente" });
     } catch (error) {
       res.status(500).json({ error: "Error al eliminar la mascota" });
+    }
+  });
+
+  // Rutas para usuarios
+  app.get("/api/users", async (_req, res) => {
+    try {
+      const allUsers = await db.select().from(users);
+      res.json(allUsers);
+    } catch (error) {
+      res.status(500).json({ error: "Error al obtener los usuarios" });
+    }
+  });
+
+  app.post("/api/users", async (req, res) => {
+    try {
+      const [newUser] = await db.insert(users).values(req.body as InsertUser).returning();
+      res.json(newUser);
+    } catch (error) {
+      res.status(500).json({ error: "Error al crear el usuario" });
+    }
+  });
+
+  app.put("/api/users/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+      const [updatedUser] = await db
+        .update(users)
+        .set(req.body)
+        .where(eq(users.id, parseInt(id)))
+        .returning();
+      if (!updatedUser) {
+        return res.status(404).json({ error: "Usuario no encontrado" });
+      }
+      res.json(updatedUser);
+    } catch (error) {
+      res.status(500).json({ error: "Error al actualizar el usuario" });
+    }
+  });
+
+  app.delete("/api/users/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+      const [deletedUser] = await db
+        .delete(users)
+        .where(eq(users.id, parseInt(id)))
+        .returning();
+      if (!deletedUser) {
+        return res.status(404).json({ error: "Usuario no encontrado" });
+      }
+      res.json({ message: "Usuario eliminado exitosamente" });
+    } catch (error) {
+      res.status(500).json({ error: "Error al eliminar el usuario" });
     }
   });
 
