@@ -3,6 +3,7 @@ import { Navigation } from "@/components/Navigation";
 import { PetGrid } from "@/components/PetGrid";
 import { AdoptionSteps } from "@/components/AdoptionSteps";
 import { VideoGallery } from "@/components/VideoGallery";
+import { SuccessStories } from "@/components/SuccessStories";
 import { Heart, Instagram, Facebook, MessageCircle } from "lucide-react";
 
 export default function Home() {
@@ -63,6 +64,9 @@ export default function Home() {
         <section id="consejos" className="py-12 px-4">
           <VideoGallery />
         </section>
+
+        {/* Success Stories Section */}
+        <SuccessStories />
 
         {/* Contact Section */}
         <section id="contacto" className="py-12 px-4 bg-gray-50">
