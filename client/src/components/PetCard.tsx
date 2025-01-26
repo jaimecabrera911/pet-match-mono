@@ -43,12 +43,20 @@ export function PetCard({ name, age, breed, location, imageUrl }: PetCardProps) 
                   <p>Ubicación: {location}</p>
                 </div>
               </div>
-              <Button 
-                className="w-full mt-4 bg-[#FF5C7F] hover:bg-[#FF5C7F]/90 transition-colors" 
-                size="sm"
-              >
-                Conocer más
-              </Button>
+              <div className="flex gap-2 mt-4">
+                <Button 
+                  className="flex-1 bg-[#FF5C7F] hover:bg-[#FF5C7F]/90 transition-colors" 
+                  size="sm"
+                >
+                  Adoptar
+                </Button>
+                <Button 
+                  className="flex-1 bg-gray-500 hover:bg-gray-600 transition-colors" 
+                  size="sm"
+                >
+                  Conocer más
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -83,21 +91,13 @@ export function PetCard({ name, age, breed, location, imageUrl }: PetCardProps) 
                 </div>
               </div>
             </div>
-            <div className="flex gap-2 mt-4">
-              <Button 
-                className="flex-1 bg-gray-500 hover:bg-gray-600 transition-colors" 
-                size="sm"
-                onClick={() => setIsFlipped(false)}
-              >
-                Atrás
-              </Button>
-              <Button 
-                className="flex-1 bg-[#FF5C7F] hover:bg-[#FF5C7F]/90 transition-colors z-10" 
-                size="sm"
-              >
-                Adoptar
-              </Button>
-            </div>
+            <Button 
+              className="w-full mt-4 bg-gray-500 hover:bg-gray-600 transition-colors" 
+              size="sm"
+              onClick={() => setIsFlipped(false)}
+            >
+              Volver
+            </Button>
           </CardContent>
         </Card>
       </div>
