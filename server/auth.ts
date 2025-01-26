@@ -44,34 +44,28 @@ export function setupAuth(app: Express) {
   app.use(passport.session());
 
   passport.use(
-    new LocalStrategy(
-      {
-        usernameField: "correo",
-        passwordField: "password",
-      },
-      async (correo, password, done) => {
-        try {
-          const [user] = await db
-            .select()
-            .from(users)
-            .where(eq(users.correo, correo))
-            .limit(1);
+    new LocalStrategy(async (username, password, done) => {
+      try {
+        const [user] = await db
+          .select()
+          .from(users)
+          .where(eq(users.username, username))
+          .limit(1);
 
-          if (!user) {
-            return done(null, false, { message: "Correo electrónico incorrecto." });
-          }
-
-          const hashedPassword = crypto.hash(password);
-          if (hashedPassword !== user.password) {
-            return done(null, false, { message: "Contraseña incorrecta." });
-          }
-
-          return done(null, user);
-        } catch (err) {
-          return done(err);
+        if (!user) {
+          return done(null, false, { message: "Usuario incorrecto." });
         }
+
+        const hashedPassword = crypto.hash(password);
+        if (hashedPassword !== user.password) {
+          return done(null, false, { message: "Contraseña incorrecta." });
+        }
+
+        return done(null, user);
+      } catch (err) {
+        return done(err);
       }
-    )
+    }),
   );
 
   passport.serializeUser((user, done) => {
@@ -94,25 +88,26 @@ export function setupAuth(app: Express) {
   app.post("/api/register", async (req, res, next) => {
     try {
       const result = insertUserSchema.safeParse(req.body);
+      console.log(result);
       if (!result.success) {
         return res
           .status(400)
           .send(
-            "Datos inválidos: " +
-              result.error.issues.map((i) => i.message).join(", ")
+            "Entrada inválida: " +
+              result.error.issues.map((i) => i.message).join(", "),
           );
       }
 
-      const { correo, password } = result.data;
+      const { username, password } = result.data;
 
       const [existingUser] = await db
         .select()
         .from(users)
-        .where(eq(users.correo, correo))
+        .where(eq(users.username, username))
         .limit(1);
 
       if (existingUser) {
-        return res.status(400).send("El correo electrónico ya está registrado");
+        return res.status(400).send("El nombre de usuario ya existe");
       }
 
       const hashedPassword = crypto.hash(password);
@@ -131,12 +126,7 @@ export function setupAuth(app: Express) {
         }
         return res.json({
           message: "Registro exitoso",
-          user: {
-            id: newUser.id,
-            correo: newUser.correo,
-            nombres: newUser.nombres,
-            apellidos: newUser.apellidos,
-          },
+          user: { id: newUser.id, username: newUser.username },
         });
       });
     } catch (error) {
@@ -150,8 +140,8 @@ export function setupAuth(app: Express) {
       return res
         .status(400)
         .send(
-          "Datos inválidos: " +
-            result.error.issues.map((i) => i.message).join(", ")
+          "Entrada inválida: " +
+            result.error.issues.map((i) => i.message).join(", "),
         );
     }
 
@@ -175,15 +165,10 @@ export function setupAuth(app: Express) {
 
           return res.json({
             message: "Inicio de sesión exitoso",
-            user: {
-              id: user.id,
-              correo: user.correo,
-              nombres: user.nombres,
-              apellidos: user.apellidos,
-            },
+            user: { id: user.id, username: user.username },
           });
         });
-      }
+      },
     )(req, res, next);
   });
 
