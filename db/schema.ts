@@ -10,7 +10,7 @@ export const documentTypes = [
   "TARJETA DE IDENTIDAD"
 ] as const;
 
-export const userRoles = ["USER", "ADMIN", "MODERADOR"] as const;
+export const userRoles = ["USER", "ADMIN"] as const;
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),

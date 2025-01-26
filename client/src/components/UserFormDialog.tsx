@@ -29,7 +29,7 @@ import { useToast } from "@/hooks/use-toast";
 import { insertUserSchema, type SelectUser, type InsertUser, documentTypes } from "@db/schema";
 
 // Define available roles
-const userRoles = ["USER", "ADMIN", "MODERATOR"] as const;
+const userRoles = ["USER", "ADMIN"] as const;
 
 interface UserFormDialogProps {
   isOpen: boolean;
@@ -382,7 +382,7 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
                       <SelectContent>
                         {userRoles.map((rol) => (
                           <SelectItem key={rol} value={rol}>
-                            {rol === "USER" ? "Usuario" : rol === "ADMIN" ? "Administrador" : "Moderador"}
+                            {rol === "USER" ? "Usuario" : "Administrador"}
                           </SelectItem>
                         ))}
                       </SelectContent>
