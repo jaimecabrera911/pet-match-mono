@@ -23,18 +23,20 @@ export function UserTable({ users, onEdit, onDelete, isLoading }: UserTableProps
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>ID</TableHead>
-            <TableHead>Usuario</TableHead>
-            <TableHead>Rol</TableHead>
+            <TableHead>Tipo Documento</TableHead>
+            <TableHead>Número Documento</TableHead>
+            <TableHead>Nombre Completo</TableHead>
+            <TableHead>Correo</TableHead>
             <TableHead>Acciones</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {[...Array(5)].map((_, i) => (
             <TableRow key={i}>
-              <TableCell className="animate-pulse bg-muted h-4 w-12 rounded" />
               <TableCell className="animate-pulse bg-muted h-4 w-32 rounded" />
               <TableCell className="animate-pulse bg-muted h-4 w-24 rounded" />
+              <TableCell className="animate-pulse bg-muted h-4 w-40 rounded" />
+              <TableCell className="animate-pulse bg-muted h-4 w-32 rounded" />
               <TableCell className="animate-pulse bg-muted h-4 w-24 rounded" />
             </TableRow>
           ))}
@@ -47,25 +49,27 @@ export function UserTable({ users, onEdit, onDelete, isLoading }: UserTableProps
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>ID</TableHead>
-          <TableHead>Usuario</TableHead>
-          <TableHead>Rol</TableHead>
+          <TableHead>Tipo Documento</TableHead>
+          <TableHead>Número Documento</TableHead>
+          <TableHead>Nombre Completo</TableHead>
+          <TableHead>Correo</TableHead>
           <TableHead>Acciones</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {users.map((user) => (
           <TableRow key={user.id}>
-            <TableCell className="font-medium">#{user.id}</TableCell>
-            <TableCell>{user.username}</TableCell>
-            <TableCell>{user.roleId}</TableCell>
+            <TableCell>{user.tipoDocumento}</TableCell>
+            <TableCell>{user.numeroDocumento}</TableCell>
+            <TableCell>{`${user.nombres} ${user.apellidos}`}</TableCell>
+            <TableCell>{user.correo}</TableCell>
             <TableCell>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={() => onEdit(user)}
-                  aria-label={`Editar ${user.username}`}
+                  aria-label={`Editar ${user.nombres}`}
                 >
                   <Pencil className="h-4 w-4" />
                 </Button>
@@ -73,7 +77,7 @@ export function UserTable({ users, onEdit, onDelete, isLoading }: UserTableProps
                   variant="destructive"
                   size="icon"
                   onClick={() => onDelete(user.id)}
-                  aria-label={`Eliminar ${user.username}`}
+                  aria-label={`Eliminar ${user.nombres}`}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
