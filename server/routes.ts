@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
+import express from 'express';
 
 const storage = multer.diskStorage({
   destination: './uploads/',
@@ -56,10 +57,7 @@ export function registerRoutes(app: Express): Server {
       // Crear el nuevo usuario
       const [newUser] = await db
         .insert(users)
-        .values({
-          ...result.data,
-          fechaNacimiento: new Date(result.data.fechaNacimiento),
-        })
+        .values(result.data)
         .returning();
 
       res.status(201).json(newUser);
@@ -111,6 +109,7 @@ export function registerRoutes(app: Express): Server {
       const allPets = await db.select().from(pets);
       res.json(allPets);
     } catch (error) {
+      console.error("Error fetching pets:", error);
       res.status(500).json({ error: "Error al obtener las mascotas" });
     }
   });
@@ -121,11 +120,16 @@ export function registerRoutes(app: Express): Server {
       const petData = {
         ...req.body,
         imageUrl,
+        // Parse JSON strings back to arrays
+        requirements: JSON.parse(req.body.requirements || '[]'),
+        healthStatus: JSON.parse(req.body.healthStatus || '[]'),
+        personality: JSON.parse(req.body.personality || '[]'),
       } as InsertPet;
 
       const [newPet] = await db.insert(pets).values(petData).returning();
       res.json(newPet);
     } catch (error) {
+      console.error("Error creating pet:", error);
       res.status(500).json({ error: "Error al crear la mascota" });
     }
   });
@@ -143,6 +147,7 @@ export function registerRoutes(app: Express): Server {
       }
       res.json(updatedPet);
     } catch (error) {
+      console.error("Error updating pet:", error);
       res.status(500).json({ error: "Error al actualizar la mascota" });
     }
   });
@@ -228,6 +233,9 @@ export function registerRoutes(app: Express): Server {
       res.status(500).json({ error: "Error al actualizar la solicitud de adopción" });
     }
   });
+
+  // Serve static files from the uploads directory
+  app.use('/uploads', express.static('uploads'));
 
   const httpServer = createServer(app);
   return httpServer;
