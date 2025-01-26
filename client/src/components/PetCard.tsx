@@ -26,20 +26,22 @@ export function PetCard({ name, age, breed, location, imageUrl }: PetCardProps) 
       )}>
         {/* Frente de la tarjeta */}
         <Card className="absolute inset-0 overflow-hidden bg-[#FFD868] border-none backface-hidden">
-          <CardContent className="p-0">
-            <div className="aspect-square overflow-hidden rounded-t-xl">
+          <CardContent className="p-0 h-full flex flex-col">
+            <div className="aspect-square overflow-hidden rounded-t-xl flex-shrink-0">
               <img
                 src={imageUrl}
                 alt={name}
                 className="h-full w-full object-cover"
               />
             </div>
-            <div className="p-4">
-              <h3 className="text-lg font-semibold">{name}</h3>
-              <div className="mt-2 space-y-1 text-sm text-gray-700">
-                <p>Edad: {age}</p>
-                <p>Raza: {breed}</p>
-                <p>Ubicación: {location}</p>
+            <div className="p-4 flex-grow flex flex-col justify-between">
+              <div>
+                <h3 className="text-lg font-semibold">{name}</h3>
+                <div className="mt-2 space-y-1 text-sm text-gray-700">
+                  <p>Edad: {age}</p>
+                  <p>Raza: {breed}</p>
+                  <p>Ubicación: {location}</p>
+                </div>
               </div>
               <Button className="w-full mt-4 bg-[#FF5C7F] hover:bg-[#FF5C7F]/90" size="sm">
                 Conocer más
@@ -50,33 +52,35 @@ export function PetCard({ name, age, breed, location, imageUrl }: PetCardProps) 
 
         {/* Reverso de la tarjeta */}
         <Card className="absolute inset-0 overflow-hidden bg-[#FFD868] border-none backface-hidden rotate-y-180">
-          <CardContent className="p-6 flex flex-col h-full">
-            <h3 className="text-xl font-bold mb-4">{name}</h3>
-            <div className="space-y-4 flex-grow">
-              <div>
-                <h4 className="font-semibold mb-2">Personalidad</h4>
-                <p className="text-sm text-gray-700">
-                  {name} es un perro muy cariñoso y juguetón. Le encanta estar con personas y otros perros.
-                </p>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-2">Salud</h4>
-                <ul className="text-sm text-gray-700 list-disc list-inside">
-                  <li>Vacunas al día</li>
-                  <li>Desparasitado</li>
-                  <li>Esterilizado</li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-2">Requisitos</h4>
-                <ul className="text-sm text-gray-700 list-disc list-inside">
-                  <li>Hogar con espacio</li>
-                  <li>Familia comprometida</li>
-                  <li>Visita previa</li>
-                </ul>
+          <CardContent className="p-6 h-full flex flex-col">
+            <div className="flex-grow">
+              <h3 className="text-xl font-semibold mb-4">{name}</h3>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-2">Personalidad</h4>
+                  <p className="text-sm text-gray-700">
+                    {name} es un perro muy cariñoso y juguetón. Le encanta estar con personas y otros perros.
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Salud</h4>
+                  <ul className="text-sm text-gray-700 list-disc list-inside">
+                    <li>Vacunas al día</li>
+                    <li>Desparasitado</li>
+                    <li>Esterilizado</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Requisitos</h4>
+                  <ul className="text-sm text-gray-700 list-disc list-inside">
+                    <li>Hogar con espacio</li>
+                    <li>Familia comprometida</li>
+                    <li>Visita previa</li>
+                  </ul>
+                </div>
               </div>
             </div>
-            <Button className="w-full mt-4 bg-[#FF5C7F] hover:bg-[#FF5C7F]/90" size="sm">
+            <Button className="w-full mt-4 bg-[#FF5C7F] hover:bg-[#FF5C7F]/90 transform rotate-y-180" size="sm">
               Adoptar
             </Button>
           </CardContent>
