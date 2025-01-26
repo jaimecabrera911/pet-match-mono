@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import ManagePets from "@/pages/manage-pets";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { DesktopHeader } from "@/components/DesktopHeader";
 
 function Router() {
   return (
@@ -25,13 +26,16 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <SidebarProvider defaultOpen={true}>
-        <div className="flex h-screen">
+        <div className="flex h-screen bg-gray-50">
           <Sidebar />
-          <main className="flex-1 overflow-y-auto bg-background ml-64">
-            <div className="container mx-auto p-4">
-              <Router />
-            </div>
-          </main>
+          <div className="flex-1 flex flex-col ml-64">
+            <DesktopHeader />
+            <main className="flex-1 overflow-y-auto p-8">
+              <div className="max-w-7xl mx-auto">
+                <Router />
+              </div>
+            </main>
+          </div>
         </div>
         <Toaster />
       </SidebarProvider>

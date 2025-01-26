@@ -1,69 +1,108 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Home, PawPrint, Heart, Users } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export function Sidebar() {
+  const [location] = useLocation();
+
+  const navItems = [
+    { 
+      icon: Home, 
+      label: "Panel de Control", 
+      href: "/dashboard",
+      description: "Vista general del sistema" 
+    },
+    { 
+      icon: PawPrint, 
+      label: "Mascotas", 
+      href: "/mascotas",
+      description: "Gestionar mascotas disponibles" 
+    },
+    { 
+      icon: Heart, 
+      label: "Adopciones", 
+      href: "/adopciones",
+      description: "Solicitudes de adopción" 
+    },
+    { 
+      icon: Users, 
+      label: "Usuarios", 
+      href: "/usuarios",
+      description: "Gestión de usuarios" 
+    }
+  ];
+
   return (
     <aside 
-      className="fixed left-0 top-0 z-40 h-screen w-64 bg-white border-r border-gray-200"
+      className="fixed left-0 top-0 z-40 h-screen w-64 bg-white border-r border-gray-200 shadow-sm"
       role="navigation"
       aria-label="Menú principal"
     >
-      <div className="h-full px-3 py-4 overflow-y-auto">
-        <div className="flex items-center mb-4">
-          <div className="w-8 h-8 bg-[#FF5C7F] rounded-full flex items-center justify-center">
-            <Heart className="h-4 w-4 text-white" />
+      <div className="flex flex-col h-full">
+        <div className="p-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#FF5C7F] rounded-xl flex items-center justify-center">
+              <Heart className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-xl font-semibold text-gray-900">
+              PetAdopt
+            </span>
           </div>
         </div>
-        <nav className="space-y-2">
-          <Link 
-            href="/dashboard"
-            className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group"
-            role="menuitem"
-            aria-label="Ir al Panel de Control"
-          >
-            <Home 
-              className="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900" 
-              aria-hidden="true"
-            />
-            <span className="ml-3">Dashboard</span>
-          </Link>
-          <Link 
-            href="/mascotas"
-            className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group"
-            role="menuitem"
-            aria-label="Ir a la sección de Mascotas"
-          >
-            <PawPrint 
-              className="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900" 
-              aria-hidden="true"
-            />
-            <span className="ml-3">Mascotas</span>
-          </Link>
-          <Link 
-            href="/adopciones"
-            className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group"
-            role="menuitem"
-            aria-label="Ir a la sección de Adopciones"
-          >
-            <Heart 
-              className="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900" 
-              aria-hidden="true"
-            />
-            <span className="ml-3">Adopciones</span>
-          </Link>
-          <Link 
-            href="/usuarios"
-            className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group"
-            role="menuitem"
-            aria-label="Ir a la sección de Usuarios"
-          >
-            <Users 
-              className="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900" 
-              aria-hidden="true"
-            />
-            <span className="ml-3">Usuarios</span>
-          </Link>
+
+        <nav className="flex-1 px-4 pb-4">
+          <div className="space-y-1">
+            {navItems.map((item) => (
+              <Link 
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex flex-col p-3 rounded-lg transition-colors",
+                  "hover:bg-gray-50 group",
+                  location === item.href 
+                    ? "bg-gray-50 shadow-sm" 
+                    : "text-gray-700"
+                )}
+              >
+                <div className="flex items-center">
+                  <item.icon 
+                    className={cn(
+                      "w-5 h-5 transition-colors",
+                      location === item.href 
+                        ? "text-[#FF5C7F]" 
+                        : "text-gray-400 group-hover:text-gray-600"
+                    )}
+                  />
+                  <span 
+                    className={cn(
+                      "ml-3 font-medium",
+                      location === item.href 
+                        ? "text-gray-900" 
+                        : "text-gray-600 group-hover:text-gray-900"
+                    )}
+                  >
+                    {item.label}
+                  </span>
+                </div>
+                <span className="mt-0.5 ml-8 text-sm text-gray-500">
+                  {item.description}
+                </span>
+              </Link>
+            ))}
+          </div>
         </nav>
+
+        <div className="p-4 mt-auto border-t">
+          <div className="flex items-center gap-3 px-2">
+            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+              <Users className="w-4 h-4 text-gray-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900">Admin</p>
+              <p className="text-xs text-gray-500 truncate">admin@petadopt.es</p>
+            </div>
+          </div>
+        </div>
       </div>
     </aside>
   );
