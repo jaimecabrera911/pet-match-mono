@@ -43,12 +43,6 @@ export function PetCard({ name, age, breed, location, imageUrl }: PetCardProps) 
                   <p>Ubicación: {location}</p>
                 </div>
               </div>
-              <Button 
-                className="w-full mt-4 bg-gray-500 hover:bg-gray-600 transition-colors" 
-                size="lg"
-              >
-                Conocer más
-              </Button>
             </div>
           </CardContent>
         </Card>
