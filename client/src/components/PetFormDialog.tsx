@@ -339,12 +339,12 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
             <FormField
               control={form.control}
               name="imageFile"
-              render={({ field: { onChange, ...field } }) => (
+              render={({ field: { onChange } }) => (
                 <FormItem>
                   <FormLabel>Imagen de la mascota</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="file" 
+                    <Input
+                      type="file"
                       accept="image/*"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
@@ -352,7 +352,6 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
                           onChange(file);
                         }
                       }}
-                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
