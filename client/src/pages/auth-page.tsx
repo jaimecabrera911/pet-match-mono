@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/hooks/use-user";
 import { z } from "zod";
@@ -11,8 +10,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 const authSchema = z.object({
-  username: z.string().min(1, "El nombre de usuario es requerido").min(3, "El nombre de usuario debe tener al menos 3 caracteres"),
-  password: z.string().min(1, "La contraseña es requerida").min(6, "La contraseña debe tener al menos 6 caracteres"),
+  username: z.string().min(1, "El nombre de usuario es requerido"),
+  password: z.string().min(1, "La contraseña es requerida"),
+  roleId: z.number().optional()
 });
 
 type AuthFormData = z.infer<typeof authSchema>;
@@ -32,7 +32,7 @@ export default function AuthPage() {
 
   const onSubmit = async (data: AuthFormData) => {
     try {
-      const result = await (isLogin ? login(data) : register(data));
+      const result = await (isLogin ? login(data) : register({ ...data, roleId: 2 }));
       if (!result.ok) {
         toast({
           variant: "destructive",
