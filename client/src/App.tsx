@@ -28,22 +28,22 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <SidebarProvider defaultOpen={true}>
-        <div className="min-h-screen flex bg-gray-50">
-          {/* Sidebar */}
+        <div className="flex h-screen overflow-hidden bg-gray-50">
+          {/* Sidebar - fixed */}
           <div className="fixed inset-y-0 z-50">
             <Sidebar />
           </div>
 
-          {/* Main content */}
-          <div className="flex-1 ml-64">
-            {/* Header */}
+          {/* Main content wrapper - scrollable */}
+          <div className="flex-1 ml-64 flex flex-col h-screen">
+            {/* Header - fixed */}
             <div className="sticky top-0 z-40 bg-white">
               <DesktopHeader />
             </div>
 
-            {/* Main content area with scroll */}
-            <main className="flex-1 p-8 overflow-auto">
-              <div className="max-w-7xl mx-auto">
+            {/* Main content - scrollable */}
+            <main className="flex-1 overflow-y-auto">
+              <div className="max-w-7xl mx-auto p-8">
                 <Router />
               </div>
             </main>
