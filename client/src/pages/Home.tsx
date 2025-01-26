@@ -22,7 +22,7 @@ export default function Home() {
           >
             <div className="absolute inset-0 bg-black/40" />
           </div>
-          <div className="max-w-7xl mx-auto text-center relative z-10">
+          <div className="max-w-screen-2xl mx-auto text-center relative z-10 px-4 w-full">
             <div className="flex justify-center mb-4">
               <div className="w-12 h-12 text-primary">
                 🦴
@@ -42,7 +42,7 @@ export default function Home() {
 
         {/* Pets Section */}
         <section id="mascotas" className="py-12 px-4">
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-screen-2xl mx-auto px-4 w-full">
             <h2 className="text-xl font-semibold text-center mb-2">
               Busca tu amigo
             </h2>
@@ -55,14 +55,16 @@ export default function Home() {
 
         {/* Adoption Steps */}
         <section id="proceso" className="py-12 px-4 bg-gray-50">
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-screen-2xl mx-auto px-4 w-full">
             <AdoptionSteps />
           </div>
         </section>
 
         {/* Video Gallery Section */}
         <section id="consejos" className="py-12 px-4">
-          <VideoGallery />
+          <div className="max-w-screen-2xl mx-auto px-4 w-full">
+            <VideoGallery />
+          </div>
         </section>
 
         {/* Success Stories Section */}
@@ -70,7 +72,7 @@ export default function Home() {
 
         {/* Contact Section */}
         <section id="contacto" className="py-12 px-4 bg-gray-50">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="max-w-screen-2xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 px-4 w-full">
             {/* Left column - About text */}
             <div className="space-y-4">
               <div className="w-12 h-12 bg-[#FF5C7F] rounded-full flex items-center justify-center mb-4">
@@ -130,7 +132,7 @@ export default function Home() {
         </section>
 
         <footer id="footer" className="bg-white border-t text-sm text-gray-500 py-8 px-4">
-          <div className="max-w-7xl mx-auto text-center">
+          <div className="max-w-screen-2xl mx-auto text-center px-4 w-full">
             <p>© 2024 PetMatch. Todos los derechos reservados.</p>
           </div>
         </footer>
