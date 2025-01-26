@@ -84,7 +84,7 @@ export function PetCard({ name, age, breed, location, imageUrl }: PetCardProps) 
               </div>
             </div>
             <Button 
-              className="w-full mt-4 bg-[#FF5C7F] hover:bg-[#FF5C7F]/90 transition-colors" 
+              className="w-full mt-4 bg-[#FF5C7F] hover:bg-[#FF5C7F]/90 transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg active:scale-95 active:shadow-md" 
               size="lg"
             >
               Adoptar
