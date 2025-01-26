@@ -30,7 +30,6 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-// Schema types with zod validation
 export const insertUserSchema = createInsertSchema(users, {
   tipoDocumento: z.enum(documentTypes),
   numeroDocumento: z.string().min(5, "Número de documento debe tener al menos 5 caracteres"),
@@ -62,6 +61,10 @@ export const pets = pgTable("pets", {
   location: text("location").notNull(),
   imageUrl: text("image_url").notNull(),
   isAdopted: boolean("is_adopted").default(false).notNull(),
+  // Nuevos campos para requisitos, salud y personalidad
+  requirements: text("requirements").array().notNull().default([]),
+  healthStatus: text("health_status").array().notNull().default([]),
+  personality: text("personality").array().notNull().default([]),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -86,7 +89,11 @@ export const adoptionsRelations = relations(adoptions, ({ one }) => ({
 }));
 
 // Schema types
-export const insertPetSchema = createInsertSchema(pets);
+export const insertPetSchema = createInsertSchema(pets, {
+  requirements: z.array(z.string()).min(1, "Debe especificar al menos un requisito"),
+  healthStatus: z.array(z.string()).min(1, "Debe especificar al menos un estado de salud"),
+  personality: z.array(z.string()).min(1, "Debe especificar al menos un rasgo de personalidad"),
+});
 export const selectPetSchema = createSelectSchema(pets);
 export type InsertPet = typeof pets.$inferInsert;
 export type SelectPet = typeof pets.$inferSelect;
