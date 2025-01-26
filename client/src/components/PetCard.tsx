@@ -82,14 +82,14 @@ export function PetCard({ name, age, breed, location, imageUrl }: PetCardProps) 
             </div>
             <div className="flex gap-2 mt-4">
               <Button 
-                className="flex-1 bg-gray-500 hover:bg-gray-600 transform rotate-y-180" 
+                className="flex-1 bg-gray-500 hover:bg-gray-600" 
                 size="sm"
                 onClick={() => setIsFlipped(false)}
               >
                 Atrás
               </Button>
               <Button 
-                className="flex-1 bg-[#FF5C7F] hover:bg-[#FF5C7F]/90 transform rotate-y-180" 
+                className="flex-1 bg-[#FF5C7F] hover:bg-[#FF5C7F]/90" 
                 size="sm"
               >
                 Adoptar
