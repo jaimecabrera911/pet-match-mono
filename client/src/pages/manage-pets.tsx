@@ -12,11 +12,13 @@ import { PlusCircle, Pencil, Trash2 } from "lucide-react";
 import type { SelectPet } from "@db/schema";
 import { Sidebar } from "@/components/Sidebar";
 import { useToast } from "@/hooks/use-toast";
+import { PetFormDialog } from "@/components/PetFormDialog";
 
 export default function ManagePets() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedPet, setSelectedPet] = useState<SelectPet | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   const { data: pets, isLoading } = useQuery<SelectPet[]>({
     queryKey: ["/api/pets"],
@@ -55,6 +57,16 @@ export default function ManagePets() {
     }
   };
 
+  const handleEdit = (pet: SelectPet) => {
+    setSelectedPet(pet);
+    setIsFormOpen(true);
+  };
+
+  const handleAdd = () => {
+    setSelectedPet(null);
+    setIsFormOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Sidebar />
@@ -69,7 +81,7 @@ export default function ManagePets() {
             </div>
             <Button 
               className="flex items-center gap-2"
-              onClick={() => setSelectedPet(null)}
+              onClick={handleAdd}
               aria-label="Agregar nueva mascota"
             >
               <PlusCircle className="h-5 w-5" />
@@ -116,7 +128,7 @@ export default function ManagePets() {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => setSelectedPet(pet)}
+                          onClick={() => handleEdit(pet)}
                           aria-label={`Editar ${pet.name}`}
                         >
                           <Pencil className="h-4 w-4" />
@@ -140,6 +152,11 @@ export default function ManagePets() {
           </div>
         </div>
       </main>
+      <PetFormDialog
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        pet={selectedPet}
+      />
     </div>
   );
 }
