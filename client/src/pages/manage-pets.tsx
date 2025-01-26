@@ -1,12 +1,18 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Pencil, Trash2 } from "lucide-react";
 import type { SelectPet } from "@db/schema";
 import { Sidebar } from "@/components/Sidebar";
 import { useToast } from "@/hooks/use-toast";
 import { PetFormDialog } from "@/components/PetFormDialog";
-import { PetTable } from "@/components/PetTable";
 
 export default function ManagePets() {
   const { toast } = useToast();
@@ -83,13 +89,66 @@ export default function ManagePets() {
             </Button>
           </div>
 
-          <div className="bg-white rounded-lg shadow">
-            <PetTable
-              pets={pets ?? []}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              isLoading={isLoading}
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {isLoading ? (
+              [...Array(6)].map((_, i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardHeader className="space-y-2">
+                    <div className="h-4 bg-muted rounded w-1/2"></div>
+                    <div className="h-3 bg-muted rounded w-1/4"></div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div className="h-3 bg-muted rounded"></div>
+                      <div className="h-3 bg-muted rounded w-3/4"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              pets?.map((pet) => (
+                <Card key={pet.id}>
+                  <CardHeader>
+                    <CardTitle>{pet.name}</CardTitle>
+                    <CardDescription>
+                      {pet.breed} · {pet.age}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <img
+                      src={pet.imageUrl}
+                      alt={`Foto de ${pet.name}`}
+                      className="w-full h-48 object-cover rounded-md mb-4"
+                    />
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">
+                        {pet.location}
+                      </span>
+                      <div className="space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(pet)}
+                          aria-label={`Editar ${pet.name}`}
+                        >
+                          <Pencil className="h-4 w-4 mr-2" />
+                          Editar
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDelete(pet.id)}
+                          aria-label={`Eliminar ${pet.name}`}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Eliminar
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
         </div>
       </main>
