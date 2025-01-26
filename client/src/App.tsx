@@ -32,20 +32,29 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
+function DashboardRouter() {
+  return (
+    <Switch>
+      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/dashboard/mascotas" component={ManagePets} />
+      <Route path="/dashboard/adopciones" component={ManageAdoptions} />
+      <Route path="/dashboard/usuarios" component={ManageUsers} />
+      <Route component={NotFound} />
+    </Switch>
+  );
+}
+
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path="/dashboard" component={() => (
-        <DashboardLayout>
-          <Switch>
-            <Route path="/mascotas" component={ManagePets} />
-            <Route path="/adopciones" component={ManageAdoptions} />
-            <Route path="/usuarios" component={ManageUsers} />
-            <Route path="/" component={Dashboard} />
-          </Switch>
-        </DashboardLayout>
-      )} />
+      <Route path="/dashboard/*">
+        {(params) => (
+          <DashboardLayout>
+            <DashboardRouter />
+          </DashboardLayout>
+        )}
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
