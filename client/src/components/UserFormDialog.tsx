@@ -41,7 +41,7 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
   const form = useForm<InsertUser>({
     resolver: zodResolver(insertUserSchema),
     defaultValues: {
-      tipoDocumento: user?.tipoDocumento ?? "",
+      tipoDocumento: user?.tipoDocumento ?? "CEDULA DE CIUDADANIA",
       numeroDocumento: user?.numeroDocumento ?? "",
       nombres: user?.nombres ?? "",
       apellidos: user?.apellidos ?? "",
@@ -66,7 +66,7 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
       });
     } else {
       form.reset({
-        tipoDocumento: "",
+        tipoDocumento: "CEDULA DE CIUDADANIA",
         numeroDocumento: "",
         nombres: "",
         apellidos: "",
@@ -376,36 +376,36 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="rolNombre"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Rol</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccione rol" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {roles.map((rol) => (
-                          <SelectItem key={rol} value={rol}>
-                            {rol}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            {!user && (
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="rolNombre"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Rol de Usuario</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccione un rol" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {roles.map((rol) => (
+                            <SelectItem key={rol} value={rol}>
+                              {rol}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              {!user && (
                 <FormField
                   control={form.control}
                   name="password"
@@ -419,8 +419,8 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
                     </FormItem>
                   )}
                 />
-              )}
-            </div>
+              </div>
+            )}
 
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={onClose}>
