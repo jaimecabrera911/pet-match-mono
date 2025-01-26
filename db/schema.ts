@@ -10,6 +10,8 @@ export const documentTypes = [
   "TARJETA DE IDENTIDAD"
 ] as const;
 
+export const roles = ["USER", "ADMIN", "MODERATOR"] as const;
+
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   tipoDocumento: text("tipo_documento", { enum: documentTypes }).notNull(),
@@ -24,7 +26,7 @@ export const users = pgTable("users", {
   ocupacion: text("ocupacion"),
   correo: text("correo").unique().notNull(),
   password: text("password").notNull(),
-  rolNombre: text("rol_nombre").notNull().default("USER"),
+  rolNombre: text("rol_nombre", { enum: roles }).notNull().default("USER"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -45,7 +47,10 @@ export const insertUserSchema = createInsertSchema(users, {
   ocupacion: z.string().optional(),
   correo: z.string().email("Correo electrónico inválido"),
   password: z.string().min(6, "Contraseña debe tener al menos 6 caracteres"),
-  rolNombre: z.string().default("USER"),
+  rolNombre: z.enum(roles, {
+    required_error: "Rol es requerido",
+    invalid_type_error: "Rol debe ser USER, ADMIN o MODERATOR",
+  }),
 });
 
 export const selectUserSchema = createSelectSchema(users);

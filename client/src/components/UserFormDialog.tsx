@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { insertUserSchema, type SelectUser, type InsertUser, documentTypes } from "@db/schema";
+import { insertUserSchema, type SelectUser, type InsertUser, documentTypes, roles } from "@db/schema";
 
 interface UserFormDialogProps {
   isOpen: boolean;
@@ -41,19 +41,19 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
   const form = useForm<InsertUser>({
     resolver: zodResolver(insertUserSchema),
     defaultValues: {
-      tipoDocumento: "",
-      numeroDocumento: "",
-      nombres: "",
-      apellidos: "",
-      genero: "M",
-      fechaNacimiento: null,
-      telefono: "",
-      direccion: "",
-      ciudad: "",
-      ocupacion: "",
-      correo: "",
+      tipoDocumento: user?.tipoDocumento ?? "",
+      numeroDocumento: user?.numeroDocumento ?? "",
+      nombres: user?.nombres ?? "",
+      apellidos: user?.apellidos ?? "",
+      genero: user?.genero ?? "M",
+      fechaNacimiento: user?.fechaNacimiento ? new Date(user.fechaNacimiento) : undefined,
+      telefono: user?.telefono ?? "",
+      direccion: user?.direccion ?? "",
+      ciudad: user?.ciudad ?? "",
+      ocupacion: user?.ocupacion ?? "",
+      correo: user?.correo ?? "",
       password: "",
-      rolNombre: "USER",
+      rolNombre: user?.rolNombre ?? "USER",
     },
   });
 
@@ -61,8 +61,7 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
     if (user) {
       form.reset({
         ...user,
-        // Convert the date string to a Date object if it exists
-        fechaNacimiento: user.fechaNacimiento ? new Date(user.fechaNacimiento) : null,
+        fechaNacimiento: user.fechaNacimiento ? new Date(user.fechaNacimiento) : undefined,
         password: "", // Don't show password
       });
     } else {
@@ -72,7 +71,7 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
         nombres: "",
         apellidos: "",
         genero: "M",
-        fechaNacimiento: null,
+        fechaNacimiento: undefined,
         telefono: "",
         direccion: "",
         ciudad: "",
@@ -86,7 +85,6 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
 
   const createUserMutation = useMutation({
     mutationFn: async (data: InsertUser) => {
-      // Convert the Date object to an ISO string for the API
       const formattedData = {
         ...data,
         fechaNacimiento: data.fechaNacimiento ? new Date(data.fechaNacimiento).toISOString() : null,
@@ -126,7 +124,6 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
     mutationFn: async (data: InsertUser) => {
       if (!user) return;
 
-      // Convert the Date object to an ISO string for the API
       const formattedData = {
         ...data,
         fechaNacimiento: data.fechaNacimiento ? new Date(data.fechaNacimiento).toISOString() : null,
@@ -289,8 +286,8 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
                   <FormItem>
                     <FormLabel>Fecha de Nacimiento</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="date" 
+                      <Input
+                        type="date"
                         {...field}
                         value={value ? new Date(value).toISOString().split('T')[0] : ''}
                         onChange={(e) => {
@@ -379,21 +376,51 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
               />
             </div>
 
-            {!user && (
+            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="password"
+                name="rolNombre"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Contraseña</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
+                    <FormLabel>Rol</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccione rol" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {roles.map((rol) => (
+                          <SelectItem key={rol} value={rol}>
+                            {rol}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            )}
+
+              {!user && (
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Contraseña</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
 
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={onClose}>
