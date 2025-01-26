@@ -61,6 +61,8 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
     if (user) {
       form.reset({
         ...user,
+        // Convert the date string to a Date object if it exists
+        fechaNacimiento: user.fechaNacimiento ? new Date(user.fechaNacimiento) : null,
         password: "", // Don't show password
       });
     } else {
@@ -84,10 +86,16 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
 
   const createUserMutation = useMutation({
     mutationFn: async (data: InsertUser) => {
+      // Convert the Date object to an ISO string for the API
+      const formattedData = {
+        ...data,
+        fechaNacimiento: data.fechaNacimiento ? new Date(data.fechaNacimiento).toISOString() : null,
+      };
+
       const response = await fetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(formattedData),
         credentials: "include",
       });
 
@@ -118,10 +126,16 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
     mutationFn: async (data: InsertUser) => {
       if (!user) return;
 
+      // Convert the Date object to an ISO string for the API
+      const formattedData = {
+        ...data,
+        fechaNacimiento: data.fechaNacimiento ? new Date(data.fechaNacimiento).toISOString() : null,
+      };
+
       const response = await fetch(`/api/users/${user.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(formattedData),
         credentials: "include",
       });
 
@@ -271,11 +285,19 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
               <FormField
                 control={form.control}
                 name="fechaNacimiento"
-                render={({ field }) => (
+                render={({ field: { value, onChange, ...field } }) => (
                   <FormItem>
                     <FormLabel>Fecha de Nacimiento</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input 
+                        type="date" 
+                        {...field}
+                        value={value ? new Date(value).toISOString().split('T')[0] : ''}
+                        onChange={(e) => {
+                          const date = e.target.value ? new Date(e.target.value) : null;
+                          onChange(date);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
