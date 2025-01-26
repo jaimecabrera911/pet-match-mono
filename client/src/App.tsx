@@ -10,15 +10,51 @@ import ManageUsers from "@/pages/manage-users";
 import ManageAdoptions from "@/pages/manage-adoptions";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { DesktopHeader } from "@/components/DesktopHeader";
+import Home from "@/pages/Home";
+
+function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex">
+      <aside className="fixed left-0 top-0 h-full w-64">
+        <Sidebar />
+      </aside>
+      <div className="flex-1 pl-64">
+        <header className="fixed top-0 right-0 left-64 bg-white z-10">
+          <DesktopHeader />
+        </header>
+        <main className="pt-16">
+          <div className="max-w-7xl mx-auto p-8">
+            {children}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function DashboardRouter() {
+  return (
+    <Switch>
+      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/dashboard/mascotas" component={ManagePets} />
+      <Route path="/dashboard/adopciones" component={ManageAdoptions} />
+      <Route path="/dashboard/usuarios" component={ManageUsers} />
+      <Route component={NotFound} />
+    </Switch>
+  );
+}
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/mascotas" component={ManagePets} />
-      <Route path="/adopciones" component={ManageAdoptions} />
-      <Route path="/usuarios" component={ManageUsers} />
+      <Route path="/" component={Home} />
+      <Route path="/dashboard/*">
+        {(params) => (
+          <DashboardLayout>
+            <DashboardRouter />
+          </DashboardLayout>
+        )}
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
@@ -28,27 +64,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <SidebarProvider defaultOpen={true}>
-        <div className="flex">
-          {/* Sidebar */}
-          <aside className="fixed left-0 top-0 h-full w-64">
-            <Sidebar />
-          </aside>
-
-          {/* Main content */}
-          <div className="flex-1 pl-64">
-            {/* Header */}
-            <header className="fixed top-0 right-0 left-64 bg-white z-10">
-              <DesktopHeader />
-            </header>
-
-            {/* Main scrollable area */}
-            <main className="pt-16">
-              <div className="max-w-7xl mx-auto p-8">
-                <Router />
-              </div>
-            </main>
-          </div>
-        </div>
+        <Router />
         <Toaster />
       </SidebarProvider>
     </QueryClientProvider>

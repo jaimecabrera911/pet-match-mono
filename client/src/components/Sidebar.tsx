@@ -15,19 +15,19 @@ export function Sidebar() {
     { 
       icon: PawPrint, 
       label: "Mascotas", 
-      href: "/mascotas",
+      href: "/dashboard/mascotas",
       description: "Gestionar mascotas disponibles" 
     },
     { 
       icon: Heart, 
       label: "Adopciones", 
-      href: "/adopciones",
+      href: "/dashboard/adopciones",
       description: "Solicitudes de adopción" 
     },
     { 
       icon: Users, 
       label: "Usuarios", 
-      href: "/usuarios",
+      href: "/dashboard/usuarios",
       description: "Gestión de usuarios" 
     }
   ];
@@ -40,14 +40,14 @@ export function Sidebar() {
     >
       <div className="flex flex-col h-full">
         <div className="p-6">
-          <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <div className="w-10 h-10 bg-[#FF5C7F] rounded-xl flex items-center justify-center">
               <Heart className="h-5 w-5 text-white" />
             </div>
             <span className="text-xl font-semibold text-gray-900">
               PetAdopt
             </span>
-          </div>
+          </Link>
         </div>
 
         <nav className="flex-1 px-4 pb-4">
