@@ -10,13 +10,13 @@ import { eq } from "drizzle-orm";
 
 const crypto = {
   hash: (password: string) => {
-    return createHash('sha256').update(password).digest('hex');
-  }
+    return createHash("sha256").update(password).digest("hex");
+  },
 };
 
 declare global {
   namespace Express {
-    interface User extends SelectUser { }
+    interface User extends SelectUser {}
   }
 }
 
@@ -65,7 +65,7 @@ export function setupAuth(app: Express) {
       } catch (err) {
         return done(err);
       }
-    })
+    }),
   );
 
   passport.serializeUser((user, done) => {
@@ -88,10 +88,14 @@ export function setupAuth(app: Express) {
   app.post("/api/register", async (req, res, next) => {
     try {
       const result = insertUserSchema.safeParse(req.body);
+      console.log(result);
       if (!result.success) {
         return res
           .status(400)
-          .send("Entrada inválida: " + result.error.issues.map(i => i.message).join(", "));
+          .send(
+            "Entrada inválida: " +
+              result.error.issues.map((i) => i.message).join(", "),
+          );
       }
 
       const { username, password } = result.data;
@@ -135,29 +139,37 @@ export function setupAuth(app: Express) {
     if (!result.success) {
       return res
         .status(400)
-        .send("Entrada inválida: " + result.error.issues.map(i => i.message).join(", "));
+        .send(
+          "Entrada inválida: " +
+            result.error.issues.map((i) => i.message).join(", "),
+        );
     }
 
-    passport.authenticate("local", (err: any, user: Express.User | false, info: IVerifyOptions) => {
-      if (err) {
-        return next(err);
-      }
-
-      if (!user) {
-        return res.status(400).send(info.message ?? "Error al iniciar sesión");
-      }
-
-      req.logIn(user, (err) => {
+    passport.authenticate(
+      "local",
+      (err: any, user: Express.User | false, info: IVerifyOptions) => {
         if (err) {
           return next(err);
         }
 
-        return res.json({
-          message: "Inicio de sesión exitoso",
-          user: { id: user.id, username: user.username },
+        if (!user) {
+          return res
+            .status(400)
+            .send(info.message ?? "Error al iniciar sesión");
+        }
+
+        req.logIn(user, (err) => {
+          if (err) {
+            return next(err);
+          }
+
+          return res.json({
+            message: "Inicio de sesión exitoso",
+            user: { id: user.id, username: user.username },
+          });
         });
-      });
-    })(req, res, next);
+      },
+    )(req, res, next);
   });
 
   app.post("/api/logout", (req, res) => {
