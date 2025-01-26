@@ -1,24 +1,12 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { setupAuth } from "./auth";
 import { db } from "@db";
 import { pets, type InsertPet } from "@db/schema";
 import { eq } from "drizzle-orm";
 
 export function registerRoutes(app: Express): Server {
-  // Configurar autenticación y rutas relacionadas
-  setupAuth(app);
-
-  // Middleware para verificar autenticación
-  const requireAuth = (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).send("No autorizado");
-    }
-    next();
-  };
-
-  // Rutas para mascotas
-  app.get("/api/pets", requireAuth, async (_req, res) => {
+  // Rutas para mascotas sin autenticación
+  app.get("/api/pets", async (_req, res) => {
     try {
       const allPets = await db.select().from(pets);
       res.json(allPets);
@@ -27,7 +15,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.post("/api/pets", requireAuth, async (req, res) => {
+  app.post("/api/pets", async (req, res) => {
     try {
       const [newPet] = await db.insert(pets).values(req.body as InsertPet).returning();
       res.json(newPet);
@@ -36,7 +24,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.put("/api/pets/:id", requireAuth, async (req, res) => {
+  app.put("/api/pets/:id", async (req, res) => {
     const { id } = req.params;
     try {
       const [updatedPet] = await db
@@ -53,7 +41,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.delete("/api/pets/:id", requireAuth, async (req, res) => {
+  app.delete("/api/pets/:id", async (req, res) => {
     const { id } = req.params;
     try {
       const [deletedPet] = await db
