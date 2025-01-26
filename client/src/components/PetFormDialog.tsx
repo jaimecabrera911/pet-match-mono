@@ -15,7 +15,7 @@ const petSchema = z.object({
   age: z.string().min(1, "La edad es requerida"),
   breed: z.string().min(1, "La raza es requerida"),
   location: z.string().min(1, "La ubicación es requerida"),
-  imageUrl: z.string().url("Debe ser una URL válida").min(1, "La imagen es requerida"),
+  imageFile: z.any(),
 });
 
 type PetFormData = z.infer<typeof petSchema>;
@@ -107,10 +107,19 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
   });
 
   const onSubmit = async (data: PetFormData) => {
+    const formData = new FormData();
+    formData.append('name', data.name);
+    formData.append('age', data.age);
+    formData.append('breed', data.breed);
+    formData.append('location', data.location);
+    if (data.imageFile) {
+      formData.append('image', data.imageFile);
+    }
+
     if (pet) {
-      await updatePetMutation.mutateAsync({ ...data, id: pet.id });
+      await updatePetMutation.mutateAsync({ formData, id: pet.id });
     } else {
-      await createPetMutation.mutateAsync(data);
+      await createPetMutation.mutateAsync(formData);
     }
   };
 
@@ -176,12 +185,22 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
             />
             <FormField
               control={form.control}
-              name="imageUrl"
-              render={({ field }) => (
+              name="imageFile"
+              render={({ field: { onChange, ...field } }) => (
                 <FormItem>
-                  <FormLabel>URL de la imagen</FormLabel>
+                  <FormLabel>Imagen de la mascota</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          onChange(file);
+                        }
+                      }}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

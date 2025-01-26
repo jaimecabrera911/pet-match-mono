@@ -3,6 +3,18 @@ import { createServer, type Server } from "http";
 import { db } from "@db";
 import { pets, users, adoptions, type InsertPet, type InsertUser, type InsertAdoption, insertUserSchema } from "@db/schema";
 import { eq } from "drizzle-orm";
+import multer from 'multer';
+import { v4 as uuidv4 } from 'uuid';
+import path from 'path';
+
+const storage = multer.diskStorage({
+  destination: './uploads/',
+  filename: (_req, file, cb) => {
+    cb(null, `${uuidv4()}${path.extname(file.originalname)}`);
+  }
+});
+
+const upload = multer({ storage });
 
 export function registerRoutes(app: Express): Server {
   // Rutas para usuarios
@@ -103,9 +115,15 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.post("/api/pets", async (req, res) => {
+  app.post("/api/pets", upload.single('image'), async (req, res) => {
     try {
-      const [newPet] = await db.insert(pets).values(req.body as InsertPet).returning();
+      const imageUrl = `/uploads/${req.file?.filename}`;
+      const petData = {
+        ...req.body,
+        imageUrl,
+      } as InsertPet;
+
+      const [newPet] = await db.insert(pets).values(petData).returning();
       res.json(newPet);
     } catch (error) {
       res.status(500).json({ error: "Error al crear la mascota" });
