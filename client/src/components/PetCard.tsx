@@ -16,7 +16,7 @@ export function PetCard({ name, age, breed, location, imageUrl }: PetCardProps) 
 
   return (
     <div 
-      className="relative h-[400px] w-full [perspective:1000px]"
+      className="relative h-[500px] w-full [perspective:1000px]"
       onMouseEnter={() => setIsFlipped(true)}
       onMouseLeave={() => setIsFlipped(false)}
     >
@@ -34,56 +34,48 @@ export function PetCard({ name, age, breed, location, imageUrl }: PetCardProps) 
                 className="h-full w-full object-cover"
               />
             </div>
-            <div className="p-4 flex-grow flex flex-col justify-between">
+            <div className="p-6 flex-grow flex flex-col justify-between">
               <div>
-                <h3 className="text-lg font-semibold">{name}</h3>
-                <div className="mt-2 space-y-1 text-sm text-gray-700">
+                <h3 className="text-2xl font-semibold mb-3">{name}</h3>
+                <div className="mt-2 space-y-2 text-base text-gray-700">
                   <p>Edad: {age}</p>
                   <p>Raza: {breed}</p>
                   <p>Ubicación: {location}</p>
                 </div>
               </div>
-              <div className="flex gap-2 mt-4">
-                <Button 
-                  className="flex-1 bg-[#FF5C7F] hover:bg-[#FF5C7F]/90 transition-colors" 
-                  size="sm"
-                >
-                  Adoptar
-                </Button>
-                <Button 
-                  className="flex-1 bg-gray-500 hover:bg-gray-600 transition-colors" 
-                  size="sm"
-                >
-                  Conocer más
-                </Button>
-              </div>
+              <Button 
+                className="w-full mt-4 bg-gray-500 hover:bg-gray-600 transition-colors" 
+                size="lg"
+              >
+                Conocer más
+              </Button>
             </div>
           </CardContent>
         </Card>
 
         {/* Reverso de la tarjeta */}
         <Card className="absolute inset-0 overflow-hidden bg-[#FFD868] border-none [backface-visibility:hidden] [transform:rotateY(180deg)]">
-          <CardContent className="p-6 h-full flex flex-col">
+          <CardContent className="p-8 h-full flex flex-col">
             <div className="flex-grow">
-              <h3 className="text-xl font-semibold mb-4">{name}</h3>
-              <div className="space-y-4">
+              <h3 className="text-2xl font-semibold mb-6">{name}</h3>
+              <div className="space-y-6">
                 <div>
-                  <h4 className="font-semibold mb-2">Personalidad</h4>
-                  <p className="text-sm text-gray-700">
+                  <h4 className="text-lg font-semibold mb-2">Personalidad</h4>
+                  <p className="text-base text-gray-700">
                     {name} es un perro muy cariñoso y juguetón. Le encanta estar con personas y otros perros.
                   </p>
                 </div>
                 <div>
-                  <h4 className="font-semibold mb-2">Salud</h4>
-                  <ul className="text-sm text-gray-700 list-disc list-inside">
+                  <h4 className="text-lg font-semibold mb-2">Salud</h4>
+                  <ul className="text-base text-gray-700 list-disc list-inside">
                     <li>Vacunas al día</li>
                     <li>Desparasitado</li>
                     <li>Esterilizado</li>
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-semibold mb-2">Requisitos</h4>
-                  <ul className="text-sm text-gray-700 list-disc list-inside">
+                  <h4 className="text-lg font-semibold mb-2">Requisitos</h4>
+                  <ul className="text-base text-gray-700 list-disc list-inside">
                     <li>Hogar con espacio</li>
                     <li>Familia comprometida</li>
                     <li>Visita previa</li>
@@ -91,13 +83,21 @@ export function PetCard({ name, age, breed, location, imageUrl }: PetCardProps) 
                 </div>
               </div>
             </div>
-            <Button 
-              className="w-full mt-4 bg-gray-500 hover:bg-gray-600 transition-colors" 
-              size="sm"
-              onClick={() => setIsFlipped(false)}
-            >
-              Volver
-            </Button>
+            <div className="flex gap-2 mt-6">
+              <Button 
+                className="flex-1 bg-[#FF5C7F] hover:bg-[#FF5C7F]/90 transition-colors" 
+                size="lg"
+              >
+                Adoptar
+              </Button>
+              <Button 
+                className="flex-1 bg-gray-500 hover:bg-gray-600 transition-colors" 
+                size="lg"
+                onClick={() => setIsFlipped(false)}
+              >
+                Volver
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
