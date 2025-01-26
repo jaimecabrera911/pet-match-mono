@@ -1,6 +1,6 @@
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Sidebar } from "./Sidebar";
 import { useSidebar } from "@/components/ui/sidebar";
 
@@ -21,6 +21,10 @@ export function MobileNav() {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="p-0 w-64">
+          <SheetHeader className="px-4 pt-4">
+            <SheetTitle>Navegación</SheetTitle>
+            <SheetDescription>Accede a las diferentes secciones de la aplicación</SheetDescription>
+          </SheetHeader>
           <Sidebar />
         </SheetContent>
       </Sheet>
