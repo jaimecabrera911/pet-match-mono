@@ -28,20 +28,21 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <SidebarProvider defaultOpen={true}>
-        <div className="flex h-screen overflow-hidden bg-gray-50">
-          {/* Sidebar - fixed */}
-          <div className="fixed inset-y-0 z-50">
+        {/* Use min-h-screen to ensure minimum full viewport height */}
+        <div className="min-h-screen h-screen flex overflow-hidden bg-gray-50">
+          {/* Sidebar - fixed position */}
+          <aside className="fixed inset-y-0 z-50">
             <Sidebar />
-          </div>
+          </aside>
 
-          {/* Main content wrapper - scrollable */}
-          <div className="flex-1 ml-64 flex flex-col h-screen">
-            {/* Header - fixed */}
-            <div className="sticky top-0 z-40 bg-white">
+          {/* Main content area - with margin for sidebar and flex column layout */}
+          <div className="flex-1 ml-64 flex flex-col">
+            {/* Header - sticky at top */}
+            <header className="sticky top-0 z-40 bg-white">
               <DesktopHeader />
-            </div>
+            </header>
 
-            {/* Main content - scrollable */}
+            {/* Main content - scrollable with padding */}
             <main className="flex-1 overflow-y-auto">
               <div className="max-w-7xl mx-auto p-8">
                 <Router />
