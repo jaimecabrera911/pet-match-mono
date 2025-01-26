@@ -11,6 +11,7 @@ import ManageAdoptions from "@/pages/manage-adoptions";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { DesktopHeader } from "@/components/DesktopHeader";
 import Home from "@/pages/Home";
+import AuthPage from "./pages/auth-page";
 
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -23,9 +24,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
           <DesktopHeader />
         </header>
         <main className="pt-16">
-          <div className="max-w-7xl mx-auto p-8">
-            {children}
-          </div>
+          <div className="max-w-7xl mx-auto p-8">{children}</div>
         </main>
       </div>
     </div>
@@ -35,10 +34,17 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
 function DashboardRouter() {
   return (
     <Switch>
-      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/dashboard/panel-de-control" component={Dashboard} />
       <Route path="/dashboard/mascotas" component={ManagePets} />
       <Route path="/dashboard/adopciones" component={ManageAdoptions} />
       <Route path="/dashboard/usuarios" component={ManageUsers} />
+      {/* Redirect /dashboard to /dashboard/panel-de-control */}
+      <Route path="/dashboard">
+        {() => {
+          window.location.href = "/dashboard/panel-de-control";
+          return null;
+        }}
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
@@ -48,6 +54,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/auth/login" component={AuthPage} />
       <Route path="/dashboard/*">
         {(params) => (
           <DashboardLayout>

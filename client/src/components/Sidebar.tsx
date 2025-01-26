@@ -9,7 +9,7 @@ export function Sidebar() {
     { 
       icon: Home, 
       label: "Panel de Control", 
-      href: "/dashboard",
+      href: "/dashboard/panel-de-control",
       description: "Vista general del sistema" 
     },
     { 
