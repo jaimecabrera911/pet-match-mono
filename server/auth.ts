@@ -18,12 +18,12 @@ const crypto = {
   },
   compare: async (suppliedPassword: string, storedPassword: string) => {
     const [hashedPassword, salt] = storedPassword.split(".");
-    const hashedPasswordBuf = Buffer.from(hashedPassword, "hex");
     const suppliedPasswordBuf = (await scryptAsync(
       suppliedPassword,
       salt,
       64
     )) as Buffer;
+    const hashedPasswordBuf = Buffer.from(hashedPassword, "hex");
     return timingSafeEqual(hashedPasswordBuf, suppliedPasswordBuf);
   },
 };
@@ -69,6 +69,7 @@ export function setupAuth(app: Express) {
         if (!user) {
           return done(null, false, { message: "Usuario incorrecto." });
         }
+
         const isMatch = await crypto.compare(password, user.password);
         if (!isMatch) {
           return done(null, false, { message: "Contraseña incorrecta." });
@@ -150,7 +151,7 @@ export function setupAuth(app: Express) {
         .send("Entrada inválida: " + result.error.issues.map(i => i.message).join(", "));
     }
 
-    const cb = (err: any, user: Express.User, info: IVerifyOptions) => {
+    passport.authenticate("local", (err: any, user: Express.User | false, info: IVerifyOptions) => {
       if (err) {
         return next(err);
       }
@@ -169,8 +170,7 @@ export function setupAuth(app: Express) {
           user: { id: user.id, username: user.username },
         });
       });
-    };
-    passport.authenticate("local", cb)(req, res, next);
+    })(req, res, next);
   });
 
   app.post("/api/logout", (req, res) => {
