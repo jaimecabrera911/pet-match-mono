@@ -2,11 +2,14 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Sidebar } from "./Sidebar";
+import { useSidebar } from "@/components/ui/sidebar";
 
 export function MobileNav() {
+  const { openMobile, setOpenMobile } = useSidebar();
+
   return (
     <div className="md:hidden">
-      <Sheet>
+      <Sheet open={openMobile} onOpenChange={setOpenMobile}>
         <SheetTrigger asChild>
           <Button
             variant="ghost"

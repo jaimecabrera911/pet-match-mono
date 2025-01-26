@@ -22,25 +22,30 @@ function Router() {
   );
 }
 
-export default function App() {
+function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <SidebarProvider>
-        {/* Mobile Navigation */}
-        <MobileNav />
+      <SidebarProvider defaultOpen={true}>
+        <div className="flex h-screen">
+          {/* Desktop Sidebar */}
+          <div className="hidden md:block">
+            <Sidebar />
+          </div>
 
-        {/* Desktop Sidebar */}
-        <div className="hidden md:block">
-          <Sidebar />
+          {/* Mobile Navigation */}
+          <MobileNav />
+
+          {/* Main Content */}
+          <main className="flex-1 overflow-y-auto bg-background md:ml-64">
+            <div className="container mx-auto p-4 pt-16 md:pt-4">
+              <Router />
+            </div>
+          </main>
         </div>
-
-        {/* Main Content */}
-        <main className="md:ml-64 min-h-screen bg-background">
-          <Router />
-        </main>
-
         <Toaster />
       </SidebarProvider>
     </QueryClientProvider>
   );
 }
+
+export default App;
