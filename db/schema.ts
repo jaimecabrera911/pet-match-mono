@@ -10,24 +10,19 @@ export const documentTypes = [
   "TARJETA DE IDENTIDAD"
 ] as const;
 
-export const roles = pgTable("roles", {
-  id: serial("id").primaryKey(),
-  name: text("name").unique().notNull(),
-});
-
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  tipoDocumento: text("tipo_documento").notNull(),
+  tipoDocumento: text("tipo_documento", { enum: documentTypes }).notNull(),
   numeroDocumento: text("numero_documento").notNull(),
   nombres: text("nombres").notNull(),
   apellidos: text("apellidos").notNull(),
-  genero: text("genero").notNull(),
+  genero: text("genero", { enum: ["M", "F", "O"] }).notNull(),
   fechaNacimiento: timestamp("fecha_nacimiento").notNull(),
   telefono: text("telefono").notNull(),
   direccion: text("direccion").notNull(),
   ciudad: text("ciudad").notNull(),
   ocupacion: text("ocupacion"),
-  correo: text("correo").notNull(),
+  correo: text("correo").unique().notNull(),
   password: text("password").notNull(),
   rolNombre: text("rol_nombre").notNull().default("USER"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -47,20 +42,15 @@ export const insertUserSchema = createInsertSchema(users, {
   telefono: z.string().min(7, "Teléfono debe tener al menos 7 caracteres"),
   direccion: z.string().min(5, "Dirección debe tener al menos 5 caracteres"),
   ciudad: z.string().min(3, "Ciudad debe tener al menos 3 caracteres"),
-  ocupacion: z.string().nullable(),
+  ocupacion: z.string().optional(),
   correo: z.string().email("Correo electrónico inválido"),
   password: z.string().min(6, "Contraseña debe tener al menos 6 caracteres"),
-  rolNombre: z.string()
+  rolNombre: z.string().default("USER"),
 });
 
 export const selectUserSchema = createSelectSchema(users);
 export type InsertUser = typeof users.$inferInsert;
 export type SelectUser = typeof users.$inferSelect;
-
-// Relations
-export const rolesRelations = relations(roles, ({ many }) => ({
-  users: many(users)
-}));
 
 export const pets = pgTable("pets", {
   id: serial("id").primaryKey(),
@@ -70,15 +60,15 @@ export const pets = pgTable("pets", {
   location: text("location").notNull(),
   imageUrl: text("image_url").notNull(),
   isAdopted: boolean("is_adopted").default(false).notNull(),
-  createdAt: text("created_at").notNull().default(new Date().toISOString()),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const adoptions = pgTable("adoptions", {
   id: serial("id").primaryKey(),
   petId: integer("pet_id").references(() => pets.id).notNull(),
   userId: integer("user_id").references(() => users.id).notNull(),
-  status: text("status").notNull().default("pending"),
-  applicationDate: text("application_date").notNull().default(new Date().toISOString()),
+  status: text("status", { enum: ["pending", "approved", "rejected"] }).notNull().default("pending"),
+  applicationDate: timestamp("application_date").notNull().defaultNow(),
   notes: text("notes"),
 });
 
@@ -98,11 +88,6 @@ export const insertPetSchema = createInsertSchema(pets);
 export const selectPetSchema = createSelectSchema(pets);
 export type InsertPet = typeof pets.$inferInsert;
 export type SelectPet = typeof pets.$inferSelect;
-
-export const insertRoleSchema = createInsertSchema(roles);
-export const selectRoleSchema = createSelectSchema(roles);
-export type InsertRole = typeof roles.$inferInsert;
-export type SelectRole = typeof roles.$inferSelect;
 
 export const insertAdoptionSchema = createInsertSchema(adoptions);
 export const selectAdoptionSchema = createSelectSchema(adoptions);

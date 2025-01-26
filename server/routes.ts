@@ -42,14 +42,14 @@ export function registerRoutes(app: Express): Server {
       }
 
       // Crear el nuevo usuario
-      const userData = {
-        ...result.data,
-        fechaNacimiento: new Date(result.data.fechaNacimiento),
-      };
+      const [newUser] = await db
+        .insert(users)
+        .values({
+          ...result.data,
+          fechaNacimiento: new Date(result.data.fechaNacimiento),
+        })
+        .returning();
 
-      console.log("Processed user data:", userData);
-
-      const [newUser] = await db.insert(users).values(userData).returning();
       res.status(201).json(newUser);
     } catch (error) {
       console.error("Error creating user:", error);
