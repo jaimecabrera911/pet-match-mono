@@ -28,6 +28,9 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { insertUserSchema, type SelectUser, type InsertUser, documentTypes } from "@db/schema";
 
+// Define available roles
+const userRoles = ["USER", "ADMIN", "MODERATOR"] as const;
+
 interface UserFormDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -61,7 +64,6 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
     if (user) {
       form.reset({
         ...user,
-        // Convert the date string to a Date object if it exists
         fechaNacimiento: user.fechaNacimiento ? new Date(user.fechaNacimiento) : null,
         password: "", // Don't show password
       });
@@ -86,7 +88,6 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
 
   const createUserMutation = useMutation({
     mutationFn: async (data: InsertUser) => {
-      // Convert the Date object to an ISO string for the API
       const formattedData = {
         ...data,
         fechaNacimiento: data.fechaNacimiento ? new Date(data.fechaNacimiento).toISOString() : null,
@@ -126,7 +127,6 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
     mutationFn: async (data: InsertUser) => {
       if (!user) return;
 
-      // Convert the Date object to an ISO string for the API
       const formattedData = {
         ...data,
         fechaNacimiento: data.fechaNacimiento ? new Date(data.fechaNacimiento).toISOString() : null,
@@ -289,8 +289,8 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
                   <FormItem>
                     <FormLabel>Fecha de Nacimiento</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="date" 
+                      <Input
+                        type="date"
                         {...field}
                         value={value ? new Date(value).toISOString().split('T')[0] : ''}
                         onChange={(e) => {
@@ -366,13 +366,27 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
 
               <FormField
                 control={form.control}
-                name="ocupacion"
+                name="rolNombre"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Ocupación</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
+                    <FormLabel>Rol</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccione rol" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {userRoles.map((rol) => (
+                          <SelectItem key={rol} value={rol}>
+                            {rol === "USER" ? "Usuario" : rol === "ADMIN" ? "Administrador" : "Moderador"}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
