@@ -18,9 +18,12 @@ export function registerRoutes(app: Express): Server {
 
   app.post("/api/users", async (req, res) => {
     try {
+      console.log("Received user data:", req.body);
+
       // Validar los datos de entrada usando el schema
       const result = insertUserSchema.safeParse(req.body);
       if (!result.success) {
+        console.error("Validation errors:", result.error.errors);
         return res.status(400).json({ 
           error: "Datos de usuario inválidos",
           details: result.error.errors
@@ -39,11 +42,21 @@ export function registerRoutes(app: Express): Server {
       }
 
       // Crear el nuevo usuario
-      const [newUser] = await db.insert(users).values(result.data).returning();
+      const userData = {
+        ...result.data,
+        fechaNacimiento: new Date(result.data.fechaNacimiento),
+      };
+
+      console.log("Processed user data:", userData);
+
+      const [newUser] = await db.insert(users).values(userData).returning();
       res.status(201).json(newUser);
     } catch (error) {
       console.error("Error creating user:", error);
-      res.status(500).json({ error: "Error al crear el usuario" });
+      res.status(500).json({ 
+        error: "Error al crear el usuario",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 
