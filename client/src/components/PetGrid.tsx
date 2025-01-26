@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { PetCard } from "./PetCard";
 import { FiltersSection } from "./FiltersSection";
 import {
@@ -10,55 +11,46 @@ import {
 } from "@/components/ui/carousel";
 
 interface Pet {
+  id: number;
   name: string;
   age: string;
   breed: string;
   location: string;
   imageUrl: string;
+  isAdopted: boolean;
 }
 
 export function PetGrid() {
   const [ageRange, setAgeRange] = useState<[number, number]>([0, 15]);
   const [selectedBreed, setSelectedBreed] = useState("");
 
-  const pets: Pet[] = [
-    {
-      name: "Luna",
-      age: "2 años",
-      breed: "Labrador",
-      location: "Madrid",
-      imageUrl: "https://images.unsplash.com/photo-1508568230916-c2692a5d7b1d"
-    },
-    {
-      name: "Max",
-      age: "1 año",
-      breed: "Yorkshire",
-      location: "Barcelona",
-      imageUrl: "https://images.unsplash.com/photo-1508946621775-9d59b75e074e"
-    },
-    {
-      name: "Rocky",
-      age: "3 años",
-      breed: "Dálmata",
-      location: "Valencia",
-      imageUrl: "https://images.unsplash.com/photo-1509559320938-387dfd4e074b"
-    }
-  ];
+  const { data: pets = [], isLoading } = useQuery<Pet[]>({
+    queryKey: ["/api/pets"],
+  });
 
   const availableBreeds = Array.from(new Set(pets.map(pet => pet.breed)));
 
   const filteredPets = pets.filter(pet => {
-    const petAge = parseInt(pet.age);
-    const ageInRange = petAge >= ageRange[0] && petAge <= ageRange[1];
+    // Convert age string to number for comparison
+    const ageNum = parseInt(pet.age);
+    const ageInRange = isNaN(ageNum) || (ageNum >= ageRange[0] && ageNum <= ageRange[1]);
     const breedMatches = !selectedBreed || pet.breed === selectedBreed;
-    return ageInRange && breedMatches;
+    return ageInRange && breedMatches && !pet.isAdopted;
   });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[500px]">
+        <div className="w-16 h-16 border-4 border-t-[#FF5C7F] border-gray-200 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex gap-8">
-      {/* Sidebar */}
+      {/* Filters Sidebar */}
       <aside className="w-64 flex-shrink-0">
-        <div className="sticky top-20 bg-white rounded-lg shadow-sm">
+        <div className="sticky top-24 bg-white rounded-lg shadow p-6">
           <FiltersSection
             ageRange={ageRange}
             onAgeChange={setAgeRange}
@@ -69,19 +61,20 @@ export function PetGrid() {
         </div>
       </aside>
 
-      {/* Main content */}
+      {/* Pet Grid */}
       <div className="flex-grow">
-        <Carousel className="w-full">
-          <CarouselContent className="-ml-2 md:-ml-4">
-            {filteredPets.map((pet, index) => (
-              <CarouselItem key={index} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
-                <PetCard {...pet} />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
-        </Carousel>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredPets.map((pet) => (
+            <PetCard
+              key={pet.id}
+              name={pet.name}
+              age={pet.age}
+              breed={pet.breed}
+              location={pet.location}
+              imageUrl={pet.imageUrl}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
