@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import ManagePets from "@/pages/manage-pets";
 import ManageUsers from "@/pages/manage-users";
+import ManageAdoptions from "@/pages/manage-adoptions";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { DesktopHeader } from "@/components/DesktopHeader";
 
@@ -16,7 +17,7 @@ function Router() {
       <Route path="/" component={Dashboard} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/mascotas" component={ManagePets} />
-      <Route path="/adopciones" component={Dashboard} />
+      <Route path="/adopciones" component={ManageAdoptions} />
       <Route path="/usuarios" component={ManageUsers} />
       <Route component={NotFound} />
     </Switch>

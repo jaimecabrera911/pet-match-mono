@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { db } from "@db";
-import { pets, users, type InsertPet, type InsertUser } from "@db/schema";
+import { pets, users, adoptions, type InsertPet, type InsertUser, type InsertAdoption } from "@db/schema";
 import { eq } from "drizzle-orm";
 
 export function registerRoutes(app: Express): Server {
@@ -106,6 +106,72 @@ export function registerRoutes(app: Express): Server {
       res.json({ message: "Usuario eliminado exitosamente" });
     } catch (error) {
       res.status(500).json({ error: "Error al eliminar el usuario" });
+    }
+  });
+
+  // Rutas para adopciones
+  app.get("/api/adoptions", async (_req, res) => {
+    try {
+      const allAdoptions = await db
+        .select({
+          id: adoptions.id,
+          status: adoptions.status,
+          applicationDate: adoptions.applicationDate,
+          notes: adoptions.notes,
+          pet: {
+            id: pets.id,
+            name: pets.name,
+            breed: pets.breed,
+          },
+          user: {
+            id: users.id,
+            username: users.username,
+          },
+        })
+        .from(adoptions)
+        .innerJoin(pets, eq(pets.id, adoptions.petId))
+        .innerJoin(users, eq(users.id, adoptions.userId));
+      res.json(allAdoptions);
+    } catch (error) {
+      res.status(500).json({ error: "Error al obtener las adopciones" });
+    }
+  });
+
+  app.post("/api/adoptions", async (req, res) => {
+    try {
+      const [newAdoption] = await db
+        .insert(adoptions)
+        .values(req.body as InsertAdoption)
+        .returning();
+      res.json(newAdoption);
+    } catch (error) {
+      res.status(500).json({ error: "Error al crear la solicitud de adopción" });
+    }
+  });
+
+  app.put("/api/adoptions/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+      const [updatedAdoption] = await db
+        .update(adoptions)
+        .set(req.body)
+        .where(eq(adoptions.id, parseInt(id)))
+        .returning();
+      if (!updatedAdoption) {
+        return res.status(404).json({ error: "Solicitud de adopción no encontrada" });
+      }
+
+      // Si la adopción fue aprobada, actualizar el estado de la mascota
+      if (req.body.status === "approved") {
+        await db
+          .update(pets)
+          .set({ isAdopted: true })
+          .where(eq(pets.id, updatedAdoption.petId));
+      }
+
+      res.json(updatedAdoption);
+    } catch (error) {
+      res.status(500).json({ error: "Error al actualizar la solicitud de adopción" });
     }
   });
 
