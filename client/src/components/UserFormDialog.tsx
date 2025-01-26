@@ -18,8 +18,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { insertUserSchema, type SelectUser, type InsertUser } from "@db/schema";
+import { insertUserSchema, type SelectUser, type InsertUser, documentTypes } from "@db/schema";
 
 interface UserFormDialogProps {
   isOpen: boolean;
@@ -34,24 +41,43 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
   const form = useForm<InsertUser>({
     resolver: zodResolver(insertUserSchema),
     defaultValues: {
-      username: "",
+      tipoDocumento: "",
+      numeroDocumento: "",
+      nombres: "",
+      apellidos: "",
+      genero: "M",
+      fechaNacimiento: null,
+      telefono: "",
+      direccion: "",
+      ciudad: "",
+      ocupacion: "",
+      correo: "",
       password: "",
-      roleId: 1, // Default role
+      rolNombre: "USER",
     },
   });
 
   useEffect(() => {
     if (user) {
       form.reset({
-        username: user.username,
+        ...user,
         password: "", // Don't show password
-        roleId: user.roleId,
       });
     } else {
       form.reset({
-        username: "",
+        tipoDocumento: "",
+        numeroDocumento: "",
+        nombres: "",
+        apellidos: "",
+        genero: "M",
+        fechaNacimiento: null,
+        telefono: "",
+        direccion: "",
+        ciudad: "",
+        ocupacion: "",
+        correo: "",
         password: "",
-        roleId: 1,
+        rolNombre: "USER",
       });
     }
   }, [user, form]);
@@ -132,7 +158,7 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {user ? "Editar Usuario" : "Crear Nuevo Usuario"}
@@ -141,12 +167,158 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="tipoDocumento"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tipo de Documento</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccione tipo de documento" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {documentTypes.map((tipo) => (
+                          <SelectItem key={tipo} value={tipo}>
+                            {tipo}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="numeroDocumento"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Número de Documento</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="nombres"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nombres</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="apellidos"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Apellidos</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="genero"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Género</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccione género" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="M">Masculino</SelectItem>
+                        <SelectItem value="F">Femenino</SelectItem>
+                        <SelectItem value="O">Otro</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="fechaNacimiento"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Fecha de Nacimiento</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="telefono"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Teléfono</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="correo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Correo Electrónico</FormLabel>
+                    <FormControl>
+                      <Input type="email" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <FormField
               control={form.control}
-              name="username"
+              name="direccion"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Usuario</FormLabel>
+                  <FormLabel>Dirección</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -155,21 +327,53 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Contraseña</FormLabel>
-                  <FormControl>
-                    <Input type="password" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="ciudad"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ciudad</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <div className="flex justify-end gap-2">
+              <FormField
+                control={form.control}
+                name="ocupacion"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ocupación</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {!user && (
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contraseña</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar
               </Button>
