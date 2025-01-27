@@ -61,7 +61,6 @@ export const pets = pgTable("pets", {
   location: text("location").notNull(),
   imageUrl: text("image_url").notNull(),
   isAdopted: boolean("is_adopted").default(false).notNull(),
-  // Nuevos campos para requisitos, salud y personalidad
   requirements: text("requirements").array().notNull().default([]),
   healthStatus: text("health_status").array().notNull().default([]),
   personality: text("personality").array().notNull().default([]),
