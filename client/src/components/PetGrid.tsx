@@ -2,29 +2,13 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { PetCard } from "./PetCard";
 import { FiltersSection } from "./FiltersSection";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-
-interface Pet {
-  id: number;
-  name: string;
-  age: string;
-  breed: string;
-  location: string;
-  imageUrl: string;
-  isAdopted: boolean;
-}
+import type { SelectPet } from "@db/schema";
 
 export function PetGrid() {
   const [ageRange, setAgeRange] = useState<[number, number]>([0, 15]);
   const [selectedBreed, setSelectedBreed] = useState("");
 
-  const { data: pets = [], isLoading } = useQuery<Pet[]>({
+  const { data: pets = [], isLoading } = useQuery<SelectPet[]>({
     queryKey: ["/api/pets"],
   });
 
@@ -72,6 +56,9 @@ export function PetGrid() {
               breed={pet.breed}
               location={pet.location}
               imageUrl={pet.imageUrl}
+              requirements={pet.requirements}
+              healthStatus={pet.healthStatus}
+              personality={pet.personality}
             />
           ))}
         </div>

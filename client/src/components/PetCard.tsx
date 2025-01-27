@@ -10,10 +10,23 @@ interface PetCardProps {
   breed: string;
   location: string;
   imageUrl: string;
+  requirements: string[];
+  healthStatus: string[];
+  personality: string[];
   onAdopt?: () => void;
 }
 
-export function PetCard({ name, age, breed, location, imageUrl, onAdopt }: PetCardProps) {
+export function PetCard({ 
+  name, 
+  age, 
+  breed, 
+  location, 
+  imageUrl, 
+  requirements,
+  healthStatus,
+  personality,
+  onAdopt 
+}: PetCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [showAdoptDialog, setShowAdoptDialog] = useState(false);
 
@@ -67,28 +80,38 @@ export function PetCard({ name, age, breed, location, imageUrl, onAdopt }: PetCa
               <div className="flex-grow">
                 <h3 className="text-xl font-semibold mb-4">{name}</h3>
                 <div className="space-y-4">
-                  <div role="region" aria-label="Personalidad">
-                    <h4 className="text-base font-semibold mb-1">Personalidad</h4>
-                    <p className="text-sm text-gray-700">
-                      {name} es un perro muy cariñoso y juguetón. Le encanta estar con personas y otros perros.
-                    </p>
-                  </div>
-                  <div role="region" aria-label="Información de salud">
-                    <h4 className="text-base font-semibold mb-1">Salud</h4>
-                    <ul className="text-sm text-gray-700 list-disc list-inside" aria-label="Estado de salud">
-                      <li>Vacunas al día</li>
-                      <li>Desparasitado</li>
-                      <li>Esterilizado</li>
-                    </ul>
-                  </div>
-                  <div role="region" aria-label="Requisitos de adopción">
-                    <h4 className="text-base font-semibold mb-1">Requisitos</h4>
-                    <ul className="text-sm text-gray-700 list-disc list-inside" aria-label="Requisitos para adoptar">
-                      <li>Hogar con espacio</li>
-                      <li>Familia comprometida</li>
-                      <li>Visita previa</li>
-                    </ul>
-                  </div>
+                  {personality && personality.length > 0 && (
+                    <div role="region" aria-label="Personalidad">
+                      <h4 className="text-base font-semibold mb-1">Personalidad</h4>
+                      <ul className="text-sm text-gray-700 list-disc list-inside">
+                        {personality.map((trait, index) => (
+                          <li key={index}>{trait}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {healthStatus && healthStatus.length > 0 && (
+                    <div role="region" aria-label="Información de salud">
+                      <h4 className="text-base font-semibold mb-1">Salud</h4>
+                      <ul className="text-sm text-gray-700 list-disc list-inside">
+                        {healthStatus.map((status, index) => (
+                          <li key={index}>{status}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {requirements && requirements.length > 0 && (
+                    <div role="region" aria-label="Requisitos de adopción">
+                      <h4 className="text-base font-semibold mb-1">Requisitos</h4>
+                      <ul className="text-sm text-gray-700 list-disc list-inside">
+                        {requirements.map((req, index) => (
+                          <li key={index}>{req}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
               <Button 
