@@ -61,11 +61,21 @@ export const pets = pgTable("pets", {
   location: text("location").notNull(),
   imageUrl: text("image_url").notNull(),
   isAdopted: boolean("is_adopted").default(false).notNull(),
-  requirements: text("requirements").array().notNull().default([]),
-  healthStatus: text("health_status").array().notNull().default([]),
-  personality: text("personality").array().notNull().default([]),
+  requirements: text("requirements").array().notNull(),
+  healthStatus: text("health_status").array().notNull(),
+  personality: text("personality").array().notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
+
+export const insertPetSchema = createInsertSchema(pets, {
+  requirements: z.array(z.string()).min(1, "Debe especificar al menos un requisito"),
+  healthStatus: z.array(z.string()).min(1, "Debe especificar al menos un estado de salud"),
+  personality: z.array(z.string()).min(1, "Debe especificar al menos un rasgo de personalidad"),
+});
+
+export const selectPetSchema = createSelectSchema(pets);
+export type InsertPet = typeof pets.$inferInsert;
+export type SelectPet = typeof pets.$inferSelect;
 
 export const adoptions = pgTable("adoptions", {
   id: serial("id").primaryKey(),
@@ -86,16 +96,6 @@ export const adoptionsRelations = relations(adoptions, ({ one }) => ({
     references: [users.id],
   }),
 }));
-
-// Schema types
-export const insertPetSchema = createInsertSchema(pets, {
-  requirements: z.array(z.string()).min(1, "Debe especificar al menos un requisito"),
-  healthStatus: z.array(z.string()).min(1, "Debe especificar al menos un estado de salud"),
-  personality: z.array(z.string()).min(1, "Debe especificar al menos un rasgo de personalidad"),
-});
-export const selectPetSchema = createSelectSchema(pets);
-export type InsertPet = typeof pets.$inferInsert;
-export type SelectPet = typeof pets.$inferSelect;
 
 export const insertAdoptionSchema = createInsertSchema(adoptions);
 export const selectAdoptionSchema = createSelectSchema(adoptions);

@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { InsertPet, SelectPet } from "@db/schema";
+import type { SelectPet } from "@db/schema";
 import { X } from "lucide-react";
 
 const petSchema = z.object({
@@ -44,7 +44,6 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
       age: pet?.age ?? "",
       breed: pet?.breed ?? "",
       location: pet?.location ?? "",
-      imageUrl: pet?.imageUrl ?? "",
       requirements: pet?.requirements ?? [],
       healthStatus: pet?.healthStatus ?? [],
       personality: pet?.personality ?? [],
@@ -52,16 +51,29 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
   });
 
   const createPetMutation = useMutation({
-    mutationFn: async (data: InsertPet) => {
+    mutationFn: async (data: PetFormData) => {
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("age", data.age);
+      formData.append("breed", data.breed);
+      formData.append("location", data.location);
+      formData.append("requirements", JSON.stringify(data.requirements));
+      formData.append("healthStatus", JSON.stringify(data.healthStatus));
+      formData.append("personality", JSON.stringify(data.personality));
+
+      if (data.imageFile instanceof File) {
+        formData.append("image", data.imageFile);
+      }
+
       const response = await fetch("/api/pets", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: formData,
         credentials: "include",
       });
 
       if (!response.ok) {
-        throw new Error("Error al crear la mascota");
+        const errorText = await response.text();
+        throw new Error(errorText || "Error al crear la mascota");
       }
 
       return response.json();
@@ -75,26 +87,39 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
       onClose();
       form.reset();
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "No se pudo crear la mascota",
+        description: error.message,
       });
     },
   });
 
   const updatePetMutation = useMutation({
-    mutationFn: async (data: InsertPet & { id: number }) => {
+    mutationFn: async (data: PetFormData & { id: number }) => {
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("age", data.age);
+      formData.append("breed", data.breed);
+      formData.append("location", data.location);
+      formData.append("requirements", JSON.stringify(data.requirements));
+      formData.append("healthStatus", JSON.stringify(data.healthStatus));
+      formData.append("personality", JSON.stringify(data.personality));
+
+      if (data.imageFile instanceof File) {
+        formData.append("image", data.imageFile);
+      }
+
       const response = await fetch(`/api/pets/${data.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: formData,
         credentials: "include",
       });
 
       if (!response.ok) {
-        throw new Error("Error al actualizar la mascota");
+        const errorText = await response.text();
+        throw new Error(errorText || "Error al actualizar la mascota");
       }
 
       return response.json();
@@ -107,28 +132,16 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
       });
       onClose();
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "No se pudo actualizar la mascota",
+        description: error.message,
       });
     },
   });
 
   const onSubmit = async (data: PetFormData) => {
-    const formData = new FormData();
-    formData.append("name", data.name);
-    formData.append("age", data.age);
-    formData.append("breed", data.breed);
-    formData.append("location", data.location);
-    formData.append("requirements", JSON.stringify(data.requirements));
-    formData.append("healthStatus", JSON.stringify(data.healthStatus));
-    formData.append("personality", JSON.stringify(data.personality));
-    if (data.imageFile) {
-      formData.append("image", data.imageFile);
-    }
-
     if (pet) {
       await updatePetMutation.mutateAsync({ ...data, id: pet.id });
     } else {
