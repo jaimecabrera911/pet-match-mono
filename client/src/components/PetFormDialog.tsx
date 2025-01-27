@@ -118,15 +118,15 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
 
   const onSubmit = async (data: PetFormData) => {
     const formData = new FormData();
-    formData.append('name', data.name);
-    formData.append('age', data.age);
-    formData.append('breed', data.breed);
-    formData.append('location', data.location);
-    formData.append('requirements', JSON.stringify(data.requirements));
-    formData.append('healthStatus', JSON.stringify(data.healthStatus));
-    formData.append('personality', JSON.stringify(data.personality));
+    formData.append("name", data.name);
+    formData.append("age", data.age);
+    formData.append("breed", data.breed);
+    formData.append("location", data.location);
+    formData.append("requirements", JSON.stringify(data.requirements));
+    formData.append("healthStatus", JSON.stringify(data.healthStatus));
+    formData.append("personality", JSON.stringify(data.personality));
     if (data.imageFile) {
-      formData.append('image', data.imageFile);
+      formData.append("image", data.imageFile);
     }
 
     if (pet) {
