@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { adoptionFormSchema, type AdoptionFormData } from "@/lib/schemas/adoption-form";
@@ -13,11 +12,9 @@ import {
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 
 export default function CuestionarioAdopcion() {
-  const [step, setStep] = useState(0);
   const { toast } = useToast();
 
   const form = useForm<AdoptionFormData>({
@@ -120,103 +117,74 @@ export default function CuestionarioAdopcion() {
     }
   ];
 
-  const currentQuestion = questions[step];
-  const progress = ((step + 1) / questions.length) * 100;
-
   const onSubmit = async (data: AdoptionFormData) => {
-    if (step < questions.length - 1) {
-      // Validate current field before proceeding
-      const currentField = currentQuestion.field as keyof AdoptionFormData;
-      if (!data[currentField]) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Por favor selecciona una opción para continuar"
-        });
-        return;
-      }
-      setStep(step + 1);
-    } else {
-      console.log("Form submitted:", data);
-      toast({
-        title: "¡Gracias!",
-        description: "Tu cuestionario ha sido enviado con éxito"
-      });
-      // TODO: Submit data to backend
-    }
-  };
-
-  const handlePrevious = () => {
-    if (step > 0) {
-      setStep(step - 1);
-    }
+    console.log("Form submitted:", data);
+    toast({
+      title: "¡Gracias!",
+      description: "Tu cuestionario ha sido enviado con éxito"
+    });
+    // TODO: Submit data to backend
   };
 
   return (
-    <div className="container max-w-2xl mx-auto py-8 px-4">
+    <div className="container max-w-3xl mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold text-center mb-8">
         Cuestionario de Adopción
       </h1>
 
-      <div className="mb-4 flex items-center gap-2">
-        <Progress value={progress} className="flex-1" />
-        <span className="text-sm text-gray-500">
-          {step + 1} de {questions.length}
-        </span>
-      </div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-xl">
+                Por favor, responde todas las preguntas para evaluar tu compatibilidad
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-8">
+              {questions.map((question, index) => (
+                <FormField
+                  key={question.field}
+                  control={form.control}
+                  name={question.field as keyof AdoptionFormData}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-semibold">
+                        {index + 1}. {question.title}
+                      </FormLabel>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          className="flex flex-col space-y-2 mt-2"
+                        >
+                          {question.options.map((option) => (
+                            <div key={option} className="flex items-center space-x-3">
+                              <RadioGroupItem value={option} id={`${question.field}-${option}`} />
+                              <FormLabel
+                                htmlFor={`${question.field}-${option}`}
+                                className="font-normal cursor-pointer"
+                              >
+                                {option}
+                              </FormLabel>
+                            </div>
+                          ))}
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
+            </CardContent>
+          </Card>
 
-      <Card className="transition-all duration-300">
-        <CardHeader>
-          <CardTitle className="text-xl">
-            {currentQuestion.title}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name={currentQuestion.field as keyof AdoptionFormData}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <RadioGroup
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        className="flex flex-col space-y-4"
-                      >
-                        {currentQuestion.options.map((option) => (
-                          <div key={option} className="flex items-center space-x-3">
-                            <RadioGroupItem value={option} id={option} />
-                            <FormLabel htmlFor={option} className="font-normal cursor-pointer">
-                              {option}
-                            </FormLabel>
-                          </div>
-                        ))}
-                      </RadioGroup>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex justify-between pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handlePrevious}
-                  disabled={step === 0}
-                >
-                  Anterior
-                </Button>
-                <Button type="submit">
-                  {step === questions.length - 1 ? "Enviar" : "Siguiente"}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+          <div className="flex justify-end">
+            <Button type="submit" size="lg">
+              Enviar Cuestionario
+            </Button>
+          </div>
+        </form>
+      </Form>
     </div>
   );
 }
