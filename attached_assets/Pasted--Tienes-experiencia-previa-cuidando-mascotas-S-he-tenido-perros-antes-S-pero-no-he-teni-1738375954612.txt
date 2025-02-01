@@ -1,0 +1,55 @@
+⦁	¿Tienes experiencia previa cuidando mascotas?
+⦁	Sí, he tenido perros antes
+⦁	Sí, pero no he tenido perros
+⦁	No, nunca he tenido mascotas
+
+⦁	¿Qué tipo de vivienda tienes?
+⦁	Casa con jardín grande
+⦁	Casa con jardín pequeño
+⦁	Apartamento grande
+⦁	Apartamento pequeño
+
+⦁	Si descubres que tienes que estar fuera de casa por más tiempo del habitual, ¿cómo te asegurarías de que tu perro esté bien cuidado?
+⦁	Contrataría un cuidador de mascotas o dejaría a mi perro en una guardería
+⦁	Pediría a un amigo o familiar que lo cuide
+⦁	Dejaría suficiente comida y agua, esperando que se maneje solo.
+
+⦁	¿Hay otras mascotas en tu hogar actualmente?
+⦁	Sí, otro perro
+⦁	Sí, un gato
+⦁	Sí, otras mascotas
+⦁	No, no tengo otras mascotas
+
+⦁	Si planeas mudarte a una nueva vivienda, ¿cómo te asegurarías de que tu perro se adapte bien al nuevo entorno?
+⦁	Llevarlo gradualmente para que se familiarice con el lugar
+⦁	Proporcionarle sus juguetes y objetos familiares
+⦁	No haría nada específico, esperando que se adapte solo
+
+⦁	¿Qué harías si el perro presenta problemas de comportamiento?
+⦁	Consultar a un adiestrador profesional
+⦁	Intentar entrenarlo por mi cuenta
+⦁	Devolverlo al refugio
+
+⦁	¿Cuál es tu presupuesto mensual estimado para los cuidados del perro (alimento, veterinario, juguetes, etc.)?
+⦁	Menos de $250.000
+⦁	Entre $250.000 y $350.000
+⦁	Más de $350.000
+
+
+
+
+
+⦁	¿Estás dispuesto a hacerte cargo de un perro durante toda su vida, que puede ser de 10 a 15 años o más?
+⦁	Sí, estoy comprometido/a
+⦁	No estoy seguro/a
+⦁	No
+
+⦁	¿Qué harías si tu perro se enferma y necesita atención veterinaria inmediata?
+⦁	Llevarlo al veterinario de inmediato, sin importar el costo.
+⦁	Consultar opciones económicas antes de tomar una decisión
+⦁	Esperar a ver si mejora por sí solo
+
+⦁	Si tu perro mastica tus pertenencias, como zapatos o muebles, ¿cómo reaccionarías?
+⦁	Buscaría un adiestrador para corregir el comportamiento
+⦁	Intentaría entrenarlo por mi cuenta y proporcionarle juguetes adecuados
+⦁	Ignoraría el comportamiento, esperando que pase.
