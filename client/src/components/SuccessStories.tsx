@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 interface SuccessStory {
   id: number;
@@ -13,8 +14,10 @@ interface SuccessStory {
   adoptionDate: string;
 }
 
-export function SuccessStories() {
-  const stories: SuccessStory[] = [
+// Simulated API call to fetch success stories
+const fetchSuccessStories = async (): Promise<SuccessStory[]> => {
+  // In a real application, this would be an API call
+  return [
     {
       id: 1,
       petName: "Luna",
@@ -34,6 +37,13 @@ export function SuccessStories() {
       adoptionDate: "Diciembre 2023"
     }
   ];
+};
+
+export function SuccessStories() {
+  const { data: stories = [], isLoading } = useQuery({
+    queryKey: ["success-stories"],
+    queryFn: fetchSuccessStories
+  });
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -56,6 +66,19 @@ export function SuccessStories() {
       }
     }
   };
+
+  if (isLoading) {
+    return (
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="animate-pulse space-y-8">
+            <div className="h-32 bg-gray-200 rounded-lg"></div>
+            <div className="h-32 bg-gray-200 rounded-lg"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-16 bg-gray-50">

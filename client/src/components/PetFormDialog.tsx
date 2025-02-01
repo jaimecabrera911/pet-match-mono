@@ -8,15 +8,27 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { SelectPet } from "@db/schema";
 import { X } from "lucide-react";
+
+// Define the Pet type based on the external API response
+interface Pet {
+  id: string;
+  name: string;
+  age: string;
+  breed: string;
+  location: string;
+  imageUrl: string;
+  requirements: string[];
+  healthStatus: string[];
+  personality: string[];
+}
 
 const petSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
   age: z.string().min(1, "La edad es requerida"),
   breed: z.string().min(1, "La raza es requerida"),
   location: z.string().min(1, "La ubicación es requerida"),
-  imageFile: z.any(),
+  imageUrl: z.string().url("URL de imagen inválida").optional(),
   requirements: z.array(z.string()).min(1, "Debe especificar al menos un requisito"),
   healthStatus: z.array(z.string()).min(1, "Debe especificar al menos un estado de salud"),
   personality: z.array(z.string()).min(1, "Debe especificar al menos un rasgo de personalidad"),
@@ -27,7 +39,7 @@ type PetFormData = z.infer<typeof petSchema>;
 interface PetFormDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  pet?: SelectPet;
+  pet?: Pet;
 }
 
 export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
@@ -44,45 +56,29 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
       age: pet?.age ?? "",
       breed: pet?.breed ?? "",
       location: pet?.location ?? "",
+      imageUrl: pet?.imageUrl ?? "",
       requirements: pet?.requirements ?? [],
       healthStatus: pet?.healthStatus ?? [],
       personality: pet?.personality ?? [],
     },
   });
 
+  // Simulated mutation for demonstration
   const createPetMutation = useMutation({
     mutationFn: async (data: PetFormData) => {
-      const formData = new FormData();
-      formData.append("name", data.name);
-      formData.append("age", data.age);
-      formData.append("breed", data.breed);
-      formData.append("location", data.location);
-      formData.append("requirements", JSON.stringify(data.requirements));
-      formData.append("healthStatus", JSON.stringify(data.healthStatus));
-      formData.append("personality", JSON.stringify(data.personality));
-
-      if (data.imageFile instanceof File) {
-        formData.append("image", data.imageFile);
-      }
-
-      const response = await fetch("/api/pets", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || "Error al crear la mascota");
-      }
-
-      return response.json();
+      // Here you would normally make an API call to create a pet
+      console.log("Creating pet:", data);
+      // Simulating API response
+      return {
+        ...data,
+        id: Math.random().toString(),
+      };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/pets"] });
+      queryClient.invalidateQueries({ queryKey: ["pets"] });
       toast({
         title: "¡Éxito!",
-        description: "Mascota creada correctamente",
+        description: "Mascota creada correctamente (simulado)",
       });
       onClose();
       form.reset();
@@ -97,38 +93,17 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
   });
 
   const updatePetMutation = useMutation({
-    mutationFn: async (data: PetFormData & { id: number }) => {
-      const formData = new FormData();
-      formData.append("name", data.name);
-      formData.append("age", data.age);
-      formData.append("breed", data.breed);
-      formData.append("location", data.location);
-      formData.append("requirements", JSON.stringify(data.requirements));
-      formData.append("healthStatus", JSON.stringify(data.healthStatus));
-      formData.append("personality", JSON.stringify(data.personality));
-
-      if (data.imageFile instanceof File) {
-        formData.append("image", data.imageFile);
-      }
-
-      const response = await fetch(`/api/pets/${data.id}`, {
-        method: "PUT",
-        body: formData,
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || "Error al actualizar la mascota");
-      }
-
-      return response.json();
+    mutationFn: async (data: PetFormData & { id: string }) => {
+      // Here you would normally make an API call to update a pet
+      console.log("Updating pet:", data);
+      // Simulating API response
+      return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/pets"] });
+      queryClient.invalidateQueries({ queryKey: ["pets"] });
       toast({
         title: "¡Éxito!",
-        description: "Mascota actualizada correctamente",
+        description: "Mascota actualizada correctamente (simulado)",
       });
       onClose();
     },
@@ -186,6 +161,7 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* Form fields remain the same */}
             <FormField
               control={form.control}
               name="name"
@@ -240,8 +216,22 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
                 </FormItem>
               )}
             />
-
             <FormField
+              control={form.control}
+              name="imageUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>URL de la imagen</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="url" placeholder="https://ejemplo.com/imagen.jpg" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Requirements, Health Status, and Personality sections remain the same */}
+             <FormField
               control={form.control}
               name="requirements"
               render={() => (
@@ -348,30 +338,6 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
                 </FormItem>
               )}
             />
-
-            <FormField
-              control={form.control}
-              name="imageFile"
-              render={({ field: { onChange } }) => (
-                <FormItem>
-                  <FormLabel>Imagen de la mascota</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          onChange(file);
-                        }
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <div className="flex justify-end space-x-2">
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar
