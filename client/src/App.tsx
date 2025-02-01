@@ -8,6 +8,7 @@ import Dashboard from "@/pages/dashboard";
 import ManagePets from "@/pages/manage-pets";
 import ManageUsers from "@/pages/manage-users";
 import ManageAdoptions from "@/pages/manage-adoptions";
+import CuestionarioAdopcion from "@/pages/cuestionario-adopcion";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { DesktopHeader } from "@/components/DesktopHeader";
 import { MobileNav } from "@/components/MobileNav";
@@ -17,15 +18,10 @@ import AuthPage from "./pages/auth-page";
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Desktop Sidebar */}
       <aside className="hidden md:block fixed left-0 top-0 h-full w-64">
         <Sidebar />
       </aside>
-
-      {/* Mobile Navigation */}
       <MobileNav />
-
-      {/* Main Content */}
       <div className="flex-1 md:pl-64">
         <header className="fixed top-0 right-0 left-0 md:left-64 z-10">
           <DesktopHeader />
@@ -71,6 +67,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/auth/login" component={AuthPage} />
+      <Route path="/cuestionario-adopcion" component={CuestionarioAdopcion} />
       <Route path="/dashboard/*">
         {(params) => (
           <DashboardLayout>
