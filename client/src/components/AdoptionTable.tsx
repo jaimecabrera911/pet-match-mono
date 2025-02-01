@@ -33,6 +33,17 @@ interface AdoptionTableProps {
 }
 
 export function AdoptionTable({ adoptions, onUpdateStatus, isLoading }: AdoptionTableProps) {
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case "approved":
+        return "outline";
+      case "rejected":
+        return "destructive";
+      default:
+        return "secondary";
+    }
+  };
+
   if (isLoading) {
     return (
       <Table>
@@ -89,15 +100,7 @@ export function AdoptionTable({ adoptions, onUpdateStatus, isLoading }: Adoption
               })}
             </TableCell>
             <TableCell>
-              <Badge
-                variant={
-                  adoption.status === "approved"
-                    ? "success"
-                    : adoption.status === "rejected"
-                    ? "destructive"
-                    : "default"
-                }
-              >
+              <Badge variant={getStatusBadgeVariant(adoption.status)}>
                 {adoption.status === "approved"
                   ? "Aprobada"
                   : adoption.status === "rejected"
