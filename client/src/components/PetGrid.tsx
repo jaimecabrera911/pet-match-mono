@@ -2,20 +2,53 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { PetCard } from "./PetCard";
 import { FiltersSection } from "./FiltersSection";
-import type { SelectPet } from "@db/schema";
+
+// Define the Pet type based on the external API response
+interface Pet {
+  id: string;
+  name: string;
+  age: string;
+  breed: string;
+  location: string;
+  imageUrl: string;
+  requirements: string[];
+  healthStatus: string[];
+  personality: string[];
+  isAdopted: boolean;
+}
+
+const fetchPets = async (): Promise<Pet[]> => {
+  // Using the Dog API as an example - replace with your preferred external API
+  const response = await fetch('https://api.thedogapi.com/v1/breeds?limit=10');
+  const data = await response.json();
+
+  // Transform the API response to match our Pet interface
+  return data.map((dog: any) => ({
+    id: dog.id.toString(),
+    name: dog.name,
+    age: "2", // Example age since the API doesn't provide this
+    breed: dog.name,
+    location: "España",
+    imageUrl: dog.image?.url || "https://placedog.net/500",
+    requirements: ["Hogar con espacio adecuado", "Familia responsable"],
+    healthStatus: ["Saludable", "Vacunado"],
+    personality: dog.temperament ? dog.temperament.split(', ') : ["Amigable"],
+    isAdopted: false
+  }));
+};
 
 export function PetGrid() {
   const [ageRange, setAgeRange] = useState<[number, number]>([0, 15]);
   const [selectedBreed, setSelectedBreed] = useState("");
 
-  const { data: pets = [], isLoading } = useQuery<SelectPet[]>({
-    queryKey: ["/api/pets"],
+  const { data: pets = [], isLoading } = useQuery({
+    queryKey: ["pets"],
+    queryFn: fetchPets
   });
 
   const availableBreeds = Array.from(new Set(pets.map(pet => pet.breed)));
 
   const filteredPets = pets.filter(pet => {
-    // Convert age string to number for comparison
     const ageNum = parseInt(pet.age);
     const ageInRange = isNaN(ageNum) || (ageNum >= ageRange[0] && ageNum <= ageRange[1]);
     const breedMatches = !selectedBreed || pet.breed === selectedBreed;
