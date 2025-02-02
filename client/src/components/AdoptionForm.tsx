@@ -49,6 +49,7 @@ type AdoptionFormData = z.infer<typeof adoptionFormSchema>;
 
 export function AdoptionForm() {
   const [currentStage, setCurrentStage] = useState<"cuestionario" | "entrevista" | "adopcion">("cuestionario");
+  const [adoptionId, setAdoptionId] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [, navigate] = useLocation();
   const { toast } = useToast();
@@ -82,19 +83,62 @@ export function AdoptionForm() {
   });
 
   const createAdoptionMutation = useMutation({
-    mutationFn: async (data: AdoptionFormData & { action?: 'aprobar' | 'rechazar' }) => {
+    mutationFn: async (data: AdoptionFormData) => {
       if (isSubmitting) return null;
       setIsSubmitting(true);
 
       try {
-        console.log("Submitting adoption data:", data);
+        const response = await fetch("/api/adoptions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ ...data, status: "creada", etapa: "cuestionario" }),
+          credentials: 'include',
+        });
 
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: "Error al crear la adopción" }));
+          throw new Error(errorData.message || "Error al crear la adopción");
+        }
+
+        return response.json();
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    onSuccess: (result) => {
+      if (!result) return;
+      setAdoptionId(result.id);
+      queryClient.invalidateQueries({ queryKey: ["/api/adoptions"] });
+      setCurrentStage("entrevista");
+      toast({
+        title: "Éxito",
+        description: "Adopción creada. Continuando a la entrevista.",
+      });
+    },
+    onError: (error: Error) => {
+      console.error("Error in mutation:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "No se pudo crear la adopción",
+      });
+    },
+  });
+
+  const updateAdoptionMutation = useMutation({
+    mutationFn: async (data: AdoptionFormData & { action?: 'aprobar' | 'rechazar' }) => {
+      if (isSubmitting || !adoptionId) return null;
+      setIsSubmitting(true);
+
+      try {
         const status = data.action === 'aprobar' ? 'aceptada' : 
                       data.action === 'rechazar' ? 'rechazada' : 
                       currentStage === 'entrevista' ? 'en_entrevista' : 'creada';
 
-        const response = await fetch("/api/adoptions", {
-          method: "POST",
+        const response = await fetch(`/api/adoptions/${adoptionId}`, {
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
@@ -103,8 +147,8 @@ export function AdoptionForm() {
         });
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: "Error al guardar la información" }));
-          throw new Error(errorData.message || "Error al guardar la información");
+          const errorData = await response.json().catch(() => ({ message: "Error al actualizar la adopción" }));
+          throw new Error(errorData.message || "Error al actualizar la adopción");
         }
 
         return response.json();
@@ -117,23 +161,18 @@ export function AdoptionForm() {
 
       queryClient.invalidateQueries({ queryKey: ["/api/adoptions"] });
 
-      const nextStage = currentStage === "cuestionario" ? "entrevista" : 
-                       currentStage === "entrevista" ? "adopcion" : null;
-
-      if (nextStage) {
-        setCurrentStage(nextStage);
+      if (variables.action) {
         toast({
           title: "Éxito",
-          description: `Información guardada. Continuando a la siguiente etapa.`,
-        });
-      } else {
-        toast({
-          title: "Éxito",
-          description: variables.action ? 
-            `Adopción ${variables.action === 'aprobar' ? 'aprobada' : 'rechazada'} correctamente` :
-            "Adopción guardada correctamente"
+          description: `Adopción ${variables.action === 'aprobar' ? 'aprobada' : 'rechazada'} correctamente`,
         });
         navigate("/dashboard/adopciones");
+      } else if (currentStage === "entrevista") {
+        setCurrentStage("adopcion");
+        toast({
+          title: "Éxito",
+          description: "Entrevista guardada. Continuando a la decisión final.",
+        });
       }
     },
     onError: (error: Error) => {
@@ -141,16 +180,13 @@ export function AdoptionForm() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "No se pudo guardar la información",
+        description: error.message || "No se pudo actualizar la adopción",
       });
     },
   });
 
   const onSubmit = async (data: AdoptionFormData, action?: 'aprobar' | 'rechazar') => {
     if (isSubmitting) return;
-
-    console.log("Form submitted with data:", data);
-    console.log("Current stage:", currentStage);
 
     try {
       let isValid = true;
@@ -169,9 +205,6 @@ export function AdoptionForm() {
         ]);
       }
 
-      console.log("Form validation result:", isValid);
-      console.log("Form errors:", form.formState.errors);
-
       if (!isValid) {
         toast({
           variant: "destructive",
@@ -181,7 +214,11 @@ export function AdoptionForm() {
         return;
       }
 
-      await createAdoptionMutation.mutateAsync({ ...data, action });
+      if (currentStage === "cuestionario") {
+        await createAdoptionMutation.mutateAsync(data);
+      } else {
+        await updateAdoptionMutation.mutateAsync({ ...data, action });
+      }
     } catch (error) {
       console.error("Error in form submission:", error);
     }
