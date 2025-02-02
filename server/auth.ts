@@ -105,7 +105,13 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/login", (req, res, next) => {
+  // Always set JSON content type for API routes
+  const jsonResponse = (req: any, res: any, next: any) => {
+    res.setHeader('Content-Type', 'application/json');
+    next();
+  };
+
+  app.post("/api/login", jsonResponse, (req, res, next) => {
     console.log("[Auth] Recibida solicitud de login:", req.body);
 
     passport.authenticate(
@@ -118,9 +124,7 @@ export function setupAuth(app: Express) {
 
         if (!user) {
           console.log("[Auth] Autenticación fallida:", info.message);
-          return res
-            .status(400)
-            .json({ error: info.message ?? "Error al iniciar sesión" });
+          return res.status(400).json({ error: info.message ?? "Error al iniciar sesión" });
         }
 
         req.logIn(user, (err) => {
@@ -141,11 +145,11 @@ export function setupAuth(app: Express) {
             },
           });
         });
-      },
+      }
     )(req, res, next);
   });
 
-  app.post("/api/logout", (req, res) => {
+  app.post("/api/logout", jsonResponse, (req, res) => {
     console.log("[Auth] Recibida solicitud de logout");
     req.logout((err) => {
       if (err) {
@@ -157,8 +161,7 @@ export function setupAuth(app: Express) {
     });
   });
 
-  app.get("/api/user", (req, res) => {
-    res.setHeader('Content-Type', 'application/json');
+  app.get("/api/user", jsonResponse, (req, res) => {
     console.log("[Auth] Verificando usuario actual:", req.isAuthenticated() ? "autenticado" : "no autenticado");
     if (req.isAuthenticated() && req.user) {
       return res.json({

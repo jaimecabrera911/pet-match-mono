@@ -1,0 +1,69 @@
+use-user.tsx:45 [Auth Client] Respuesta no es JSON: text/html; charset=utf-8
+overrideMethod @ hook.js:608
+queryFn @ use-user.tsx:45
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=d0b38608:840
+run @ @tanstack_react-query.js?v=d0b38608:494
+start @ @tanstack_react-query.js?v=d0b38608:536
+fetch @ @tanstack_react-query.js?v=d0b38608:926
+executeFetch_fn @ @tanstack_react-query.js?v=d0b38608:2211
+onSubscribe @ @tanstack_react-query.js?v=d0b38608:1898
+subscribe @ @tanstack_react-query.js?v=d0b38608:24
+(anonymous) @ @tanstack_react-query.js?v=d0b38608:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=d0b38608:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=d0b38608:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=d0b38608:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=d0b38608:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=d0b38608:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=d0b38608:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=d0b38608:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=d0b38608:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=d0b38608:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=d0b38608:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=d0b38608:19432
+commitRoot @ chunk-RPCDYKBN.js?v=d0b38608:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=d0b38608:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=d0b38608:18718
+workLoop @ chunk-RPCDYKBN.js?v=d0b38608:197
+flushWork @ chunk-RPCDYKBN.js?v=d0b38608:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=d0b38608:384Understand this errorAI
+use-user.tsx:53 [Auth Client] Error al verificar sesión: Error: La respuesta del servidor no es JSON
+    at queryFn (use-user.tsx:46:17)
+overrideMethod @ hook.js:608
+queryFn @ use-user.tsx:53
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=d0b38608:840
+run @ @tanstack_react-query.js?v=d0b38608:494
+start @ @tanstack_react-query.js?v=d0b38608:536
+fetch @ @tanstack_react-query.js?v=d0b38608:926
+executeFetch_fn @ @tanstack_react-query.js?v=d0b38608:2211
+onSubscribe @ @tanstack_react-query.js?v=d0b38608:1898
+subscribe @ @tanstack_react-query.js?v=d0b38608:24
+(anonymous) @ @tanstack_react-query.js?v=d0b38608:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=d0b38608:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=d0b38608:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=d0b38608:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=d0b38608:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=d0b38608:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=d0b38608:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=d0b38608:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=d0b38608:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=d0b38608:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=d0b38608:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=d0b38608:19432
+commitRoot @ chunk-RPCDYKBN.js?v=d0b38608:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=d0b38608:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=d0b38608:18718
+workLoop @ chunk-RPCDYKBN.js?v=d0b38608:197
+flushWork @ chunk-RPCDYKBN.js?v=d0b38608:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=d0b38608:384Understand this errorAI
+content.js:2 Uncaught Error: Minified React error #299; visit https://reactjs.org/docs/error-decoder.html?invariant=299 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at n.createRoot (content.js:2:127887)
+    at content.js:2:141096
+    at content.js:2:141166
+    at content.js:2:141169
+n.createRoot @ content.js:2
+(anonymous) @ content.js:2
+(anonymous) @ content.js:2
+(anonymous) @ content.js:2Understand this errorAI
+content_script_bundle.js:1 Attempting initialization Sun Feb
