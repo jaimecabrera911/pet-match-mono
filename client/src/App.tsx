@@ -48,17 +48,17 @@ function DashboardRouter() {
       </Route>
       <ProtectedRoute 
         path="/dashboard/mascotas"
-        requiredRole="shelter"
+        requiredRole={["admin", "shelter"]}
         component={ManagePets} 
       />
       <ProtectedRoute
         path="/dashboard/adopciones"
-        requiredRole="shelter"
+        requiredRole={["admin", "shelter"]}
         component={ManageAdoptions}
       />
       <ProtectedRoute
         path="/dashboard/mis-adopciones"
-        requiredRole="adoptante"
+        requiredRole={["adoptante"]}
         component={UserAdoptions}
       />
       <Route path="/dashboard/adopciones/crear">
@@ -69,7 +69,7 @@ function DashboardRouter() {
       </Route>
       <ProtectedRoute
         path="/dashboard/usuarios"
-        requiredRole="admin"
+        requiredRole={["admin"]}
         component={ManageUsers}
       />
       <Route path="/dashboard">

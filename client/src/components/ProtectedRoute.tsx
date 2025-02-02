@@ -3,7 +3,7 @@ import { Redirect, Route } from "wouter";
 
 type ProtectedRouteProps = {
   path: string;
-  requiredRole?: 'adoptante' | 'admin' | 'shelter';
+  requiredRole?: string[];
   component: React.ComponentType;
 };
 
@@ -28,10 +28,10 @@ export function ProtectedRoute({ path, requiredRole, component: Component }: Pro
     );
   }
 
-  if (requiredRole && user.role !== requiredRole) {
+  if (requiredRole && !requiredRole.includes(user.role)) {
     return (
       <Route path={path}>
-        <Redirect to="/" />
+        <Redirect to="/dashboard/panel-de-control" />
       </Route>
     );
   }
