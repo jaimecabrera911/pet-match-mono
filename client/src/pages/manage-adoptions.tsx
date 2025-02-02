@@ -3,6 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AdoptionsTable } from "@/components/AdoptionsTable";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
+import { useLocation } from "wouter";
 
 interface Adoption {
   id: number;
@@ -26,6 +27,7 @@ interface Adoption {
 export default function ManageAdoptions() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, navigate] = useLocation();
 
   const { data: adoptions = [], isLoading } = useQuery<Adoption[]>({
     queryKey: ["/api/adoptions"],
@@ -63,11 +65,7 @@ export default function ManageAdoptions() {
   });
 
   const handleCreateAdoption = () => {
-    // TODO: Implementar lógica para crear nueva adopción
-    toast({
-      title: "Próximamente",
-      description: "La funcionalidad de crear adopciones estará disponible pronto",
-    });
+    navigate("/adopciones/crear");
   };
 
   const handleUpdateStatus = async (adoptionId: number, status: "approved" | "rejected") => {

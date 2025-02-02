@@ -8,6 +8,7 @@ import Dashboard from "@/pages/dashboard";
 import ManagePets from "@/pages/manage-pets";
 import ManageUsers from "@/pages/manage-users";
 import ManageAdoptions from "@/pages/manage-adoptions";
+import { AdoptionForm } from "@/components/AdoptionForm";
 import CuestionarioAdopcion from "@/pages/cuestionario-adopcion";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { DesktopHeader } from "@/components/DesktopHeader";
@@ -47,6 +48,9 @@ function DashboardRouter() {
       <Route path="/dashboard/adopciones">
         {() => <ManageAdoptions />}
       </Route>
+      <Route path="/adopciones/crear">
+        {() => <AdoptionForm />}
+      </Route>
       <Route path="/dashboard/usuarios">
         {() => <ManageUsers />}
       </Route>
@@ -67,7 +71,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-<Route path="/auth/registro-adoptante" component={RegistroAdoptante} />
+      <Route path="/auth/registro-adoptante" component={RegistroAdoptante} />
       <Route path="/auth/login" component={AuthPage} />
       <Route path="/cuestionario-adopcion" component={CuestionarioAdopcion} />
       <Route path="/dashboard/*">
