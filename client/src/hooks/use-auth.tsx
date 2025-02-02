@@ -7,7 +7,7 @@ type User = {
   id: number;
   nombres: string;
   apellidos: string;
-  role: string; // Será 'admin' o 'user' en minúsculas
+  role: string;
   correo: string;
 };
 
@@ -22,6 +22,8 @@ type AuthContextType = {
   error: Error | null;
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => Promise<void>;
+  loginMutation: ReturnType<typeof useMutation>;
+  logoutMutation: ReturnType<typeof useMutation>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -77,12 +79,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       return res.json();
     },
-    onSuccess: (userData: User) => {
-      sessionStorage.setItem("user", JSON.stringify(userData));
-      queryClient.setQueryData(["/api/user"], userData);
+    onSuccess: (data) => {
+      sessionStorage.setItem("user", JSON.stringify(data.user));
+      queryClient.setQueryData(["/api/user"], data.user);
       toast({
         title: "¡Bienvenido!",
-        description: `Has iniciado sesión como ${userData.role}`,
+        description: `Has iniciado sesión como ${data.user.role}`,
       });
     },
     onError: (error: Error) => {
@@ -136,6 +138,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         error,
         login,
         logout,
+        loginMutation,
+        logoutMutation,
       }}
     >
       {children}
@@ -148,6 +152,5 @@ export function useAuth() {
   if (!context) {
     throw new Error("useAuth debe ser usado dentro de un AuthProvider");
   }
-  console.log(context.user);
-  return context.user;
+  return context;
 }
