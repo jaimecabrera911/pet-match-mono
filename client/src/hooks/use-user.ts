@@ -36,7 +36,7 @@ export function useUser() {
         }
 
         const data = await response.json();
-        return data;
+        return data.user || data;
       } catch (error) {
         console.error("[Auth Client] Error:", error);
         return null;
