@@ -42,10 +42,14 @@ export function useUser() {
           throw new Error(`Error HTTP: ${response.status}`);
         }
 
-        const data = await response.json().catch(() => {
+        // Try to parse JSON response
+        let data;
+        try {
+          data = await response.json();
+        } catch (e) {
           console.error("[Auth Client] Error parsing JSON response");
           return null;
-        });
+        }
 
         if (!data) {
           console.log("[Auth Client] No hay datos de usuario");
@@ -76,14 +80,16 @@ export function useUser() {
         credentials: "include",
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: "Error al iniciar sesión" }));
-        throw new Error(errorData.error || "Error al iniciar sesión");
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        throw new Error("Error al procesar respuesta del servidor");
       }
 
-      const data = await response.json().catch(() => {
-        throw new Error("Error al procesar respuesta del servidor");
-      });
+      if (!response.ok) {
+        throw new Error(data?.error || "Error al iniciar sesión");
+      }
 
       console.log("[Auth Client] Login exitoso:", data);
 
@@ -93,7 +99,7 @@ export function useUser() {
       return {
         ok: true as const,
         user: data.user,
-        message: "Login exitoso",
+        message: data.message || "Login exitoso",
       };
     } catch (error) {
       console.error("[Auth Client] Error en login:", error);
@@ -117,14 +123,16 @@ export function useUser() {
         credentials: "include",
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: "Error al registrar usuario" }));
-        throw new Error(errorData.error || "Error al registrar usuario");
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        throw new Error("Error al procesar respuesta del servidor");
       }
 
-      const data = await response.json().catch(() => {
-        throw new Error("Error al procesar respuesta del servidor");
-      });
+      if (!response.ok) {
+        throw new Error(data?.error || "Error al registrar usuario");
+      }
 
       console.log("[Auth Client] Registro exitoso:", data);
       queryClient.setQueryData(["/api/user"], data.user);
@@ -132,7 +140,7 @@ export function useUser() {
       return {
         ok: true as const,
         user: data.user,
-        message: "Registro exitoso",
+        message: data.message || "Registro exitoso",
       };
     } catch (error) {
       console.error("[Auth Client] Error en registro:", error);
@@ -154,14 +162,24 @@ export function useUser() {
         },
       });
 
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        throw new Error("Error al procesar respuesta del servidor");
+      }
+
       if (!response.ok) {
-        throw new Error("Error al cerrar sesión");
+        throw new Error(data?.error || "Error al cerrar sesión");
       }
 
       console.log("[Auth Client] Logout exitoso");
       queryClient.setQueryData(["/api/user"], null);
       setLocation("/auth/login");
-      return { ok: true as const };
+      return { 
+        ok: true as const,
+        message: data.message || "Sesión cerrada exitosamente"
+      };
     } catch (error) {
       console.error("[Auth Client] Error en logout:", error);
       return {

@@ -17,11 +17,11 @@ export function setupAuth(app: Express) {
   const MemoryStore = createMemoryStore(session);
   const sessionSettings: session.SessionOptions = {
     secret: process.env.REPL_ID || "mascota-adoption-secret",
-    resave: true,
-    saveUninitialized: true,
+    resave: false,
+    saveUninitialized: false,
     cookie: {
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      secure: false, // Set to true only if using HTTPS
+      secure: false,
       httpOnly: true,
       sameSite: 'lax'
     },
@@ -105,13 +105,39 @@ export function setupAuth(app: Express) {
     }
   });
 
-  // Always set JSON content type for API routes
-  const jsonResponse = (req: any, res: any, next: any) => {
+  // Error handler middleware to ensure JSON responses
+  const errorHandler = (err: any, req: any, res: any, next: any) => {
+    console.error("[Auth] Error middleware:", err);
+    res.status(500).json({ error: err.message || "Error interno del servidor" });
+  };
+
+  // JSON response middleware
+  const jsonMiddleware = (req: any, res: any, next: any) => {
     res.setHeader('Content-Type', 'application/json');
+
+    // Override res.send to ensure JSON
+    const originalSend = res.send;
+    res.send = function(body: any) {
+      try {
+        // If body is not already stringified JSON, convert it
+        if (typeof body === 'string' && !body.startsWith('{') && !body.startsWith('[')) {
+          return originalSend.call(this, JSON.stringify({ message: body }));
+        }
+        return originalSend.call(this, body);
+      } catch (err) {
+        next(err);
+      }
+    };
     next();
   };
 
-  app.post("/api/login", jsonResponse, (req, res, next) => {
+  // Apply middlewares to auth routes
+  const authRoutes = ['/api/login', '/api/logout', '/api/user', '/api/register'];
+  authRoutes.forEach(route => {
+    app.use(route, jsonMiddleware);
+  });
+
+  app.post("/api/login", (req, res, next) => {
     console.log("[Auth] Recibida solicitud de login:", req.body);
 
     passport.authenticate(
@@ -149,7 +175,7 @@ export function setupAuth(app: Express) {
     )(req, res, next);
   });
 
-  app.post("/api/logout", jsonResponse, (req, res) => {
+  app.post("/api/logout", (req, res) => {
     console.log("[Auth] Recibida solicitud de logout");
     req.logout((err) => {
       if (err) {
@@ -161,7 +187,7 @@ export function setupAuth(app: Express) {
     });
   });
 
-  app.get("/api/user", jsonResponse, (req, res) => {
+  app.get("/api/user", (req, res) => {
     console.log("[Auth] Verificando usuario actual:", req.isAuthenticated() ? "autenticado" : "no autenticado");
     if (req.isAuthenticated() && req.user) {
       return res.json({
@@ -174,4 +200,7 @@ export function setupAuth(app: Express) {
     }
     res.status(401).json({ error: "No ha iniciado sesión" });
   });
+
+  // Apply error handler
+  app.use(errorHandler);
 }
