@@ -5,14 +5,13 @@ import { Button } from "@/components/ui/button";
 
 export function DesktopHeader() {
   const [location] = useLocation();
-  
+
   // Map routes to Spanish titles
   const routeTitles: Record<string, string> = {
-    "/": "Panel de Control",
-    "/dashboard": "Panel de Control",
-    "/mascotas": "Gestión de Mascotas",
-    "/adopciones": "Proceso de Adopción",
-    "/usuarios": "Gestión de Usuarios"
+    "/dashboard/panel-de-control": "Panel de Control",
+    "/dashboard/mascotas": "Gestión de Mascotas",
+    "/dashboard/adopciones": "Proceso de Adopción",
+    "/dashboard/usuarios": "Gestión de Usuarios"
   };
 
   const currentTitle = routeTitles[location] || "Panel de Control";
@@ -22,7 +21,7 @@ export function DesktopHeader() {
       <div>
         <h1 className="text-2xl font-semibold text-gray-900">{currentTitle}</h1>
       </div>
-      
+
       <div className="flex items-center gap-6">
         <div className="w-96">
           <div className="relative">
@@ -34,7 +33,7 @@ export function DesktopHeader() {
             />
           </div>
         </div>
-        
+
         <Button
           variant="ghost"
           size="icon"

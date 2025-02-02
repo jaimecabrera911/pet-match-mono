@@ -24,15 +24,20 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen bg-gray-50">
+      {/* Sidebar para desktop */}
       <aside className="hidden md:block fixed left-0 top-0 h-full w-64">
         <Sidebar />
       </aside>
+
+      {/* Navegación móvil */}
       <MobileNav />
-      <div className="flex-1 md:pl-64">
-        <header className="fixed top-0 right-0 left-0 md:left-64 z-10">
+
+      {/* Contenido principal */}
+      <div className="flex-1 md:ml-64">
+        <header className="fixed top-0 right-0 left-0 md:left-64 z-10 bg-white border-b">
           <DesktopHeader />
         </header>
-        <main className="pt-16">
+        <main className="pt-16 px-4">
           {children}
         </main>
       </div>
