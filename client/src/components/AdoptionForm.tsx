@@ -35,20 +35,14 @@ const adoptionFormSchema = z.object({
   }),
   status: z.enum(["creada", "en_entrevista", "aceptada", "rechazada"]).default("creada"),
   etapa: z.enum(["cuestionario", "entrevista", "adopcion"]).default("cuestionario"),
-  experienciaPreviaDetalles: z.string().min(1, "Este campo es requerido"),
-  tipoVivienda: z.enum(["casa", "apartamento", "otro"], {
-    required_error: "Por favor seleccione un tipo de vivienda",
-  }),
-  tieneEspacioExterior: z.enum(["si", "no"], {
-    required_error: "Por favor indique si tiene espacio exterior",
-  }),
-  horasAtencionDiaria: z.string().min(1, "Este campo es requerido"),
-  tieneOtrasMascotas: z.enum(["si", "no"], {
-    required_error: "Por favor indique si tiene otras mascotas",
-  }),
+  experienciaPreviaDetalles: z.string().optional(),
+  tipoVivienda: z.enum(["casa", "apartamento", "otro"]).optional(),
+  tieneEspacioExterior: z.enum(["si", "no"]).optional(),
+  horasAtencionDiaria: z.string().optional(),
+  tieneOtrasMascotas: z.enum(["si", "no"]).optional(),
   otrasMascotasDetalles: z.string().optional(),
-  razonAdopcion: z.string().min(1, "Este campo es requerido"),
-  compromisosVeterinarios: z.string().min(1, "Este campo es requerido"),
+  razonAdopcion: z.string().optional(),
+  compromisosVeterinarios: z.string().optional(),
 });
 
 type AdoptionFormData = z.infer<typeof adoptionFormSchema>;
@@ -76,7 +70,14 @@ export function AdoptionForm() {
       etapa: "cuestionario",
       tieneOtrasMascotas: "no",
       otrasMascotasDetalles: "",
+      experienciaPreviaDetalles: "",
+      tipoVivienda: "casa",
+      tieneEspacioExterior: "no",
+      horasAtencionDiaria: "",
+      razonAdopcion: "",
+      compromisosVeterinarios: "",
     },
+    mode: "onChange",
   });
 
   const createAdoptionMutation = useMutation({
@@ -139,25 +140,23 @@ export function AdoptionForm() {
     console.log("Form submitted with data:", data);
     console.log("Current stage:", currentStage);
 
-    // Solo validar los campos necesarios según la etapa actual
-    let fieldsToValidate: (keyof AdoptionFormData)[] = [];
-
-    if (currentStage === "cuestionario") {
-      fieldsToValidate = ["petId", "userId"];
-    } else if (currentStage === "entrevista") {
-      fieldsToValidate = [
-        "experienciaPreviaDetalles",
-        "tipoVivienda",
-        "tieneEspacioExterior",
-        "horasAtencionDiaria",
-        "tieneOtrasMascotas",
-        "razonAdopcion",
-        "compromisosVeterinarios"
-      ];
-    }
-
     try {
-      const isValid = await form.trigger(fieldsToValidate);
+      let isValid = true;
+
+      if (currentStage === "cuestionario") {
+        isValid = await form.trigger(["petId", "userId"]);
+      } else if (currentStage === "entrevista") {
+        isValid = await form.trigger([
+          "experienciaPreviaDetalles",
+          "tipoVivienda",
+          "tieneEspacioExterior",
+          "horasAtencionDiaria",
+          "tieneOtrasMascotas",
+          "razonAdopcion",
+          "compromisosVeterinarios"
+        ]);
+      }
+
       console.log("Form validation result:", isValid);
       console.log("Form errors:", form.formState.errors);
 
@@ -218,7 +217,6 @@ export function AdoptionForm() {
             <form onSubmit={form.handleSubmit((data) => onSubmit(data))} className="space-y-6">
               {currentStage === "cuestionario" && (
                 <div className="space-y-6">
-                  <h3 className="text-lg font-medium text-gray-700">Información Básica</h3>
                   <FormField
                     control={form.control}
                     name="petId"
@@ -227,7 +225,7 @@ export function AdoptionForm() {
                         <FormLabel>Mascota</FormLabel>
                         <Select
                           onValueChange={(value) => field.onChange(parseInt(value))}
-                          defaultValue={field.value?.toString()}
+                          value={field.value?.toString()}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -255,7 +253,7 @@ export function AdoptionForm() {
                         <FormLabel>Adoptante</FormLabel>
                         <Select
                           onValueChange={(value) => field.onChange(parseInt(value))}
-                          defaultValue={field.value?.toString()}
+                          value={field.value?.toString()}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -302,7 +300,7 @@ export function AdoptionForm() {
                         <FormControl>
                           <RadioGroup
                             onValueChange={field.onChange}
-                            defaultValue={field.value}
+                            value={field.value}
                             className="flex flex-col space-y-1"
                           >
                             <FormItem className="flex items-center space-x-3 space-y-0">
@@ -329,7 +327,7 @@ export function AdoptionForm() {
                       </FormItem>
                     )}
                   />
-
+                  
                   <FormField
                     control={form.control}
                     name="tieneEspacioExterior"
@@ -339,7 +337,7 @@ export function AdoptionForm() {
                         <FormControl>
                           <RadioGroup
                             onValueChange={field.onChange}
-                            defaultValue={field.value}
+                            value={field.value}
                             className="flex space-x-4"
                           >
                             <FormItem className="flex items-center space-x-2">
@@ -389,7 +387,7 @@ export function AdoptionForm() {
                                 form.setValue("otrasMascotasDetalles", "");
                               }
                             }}
-                            defaultValue={field.value}
+                            value={field.value}
                             className="flex space-x-4"
                           >
                             <FormItem className="flex items-center space-x-2">
@@ -499,6 +497,7 @@ export function AdoptionForm() {
                     <Button 
                       type="submit"
                       className="bg-[#FF5C7F] hover:bg-[#FF5C7F]/90"
+                      disabled={form.formState.isSubmitting}
                     >
                       Guardar y Continuar
                     </Button>
