@@ -5,9 +5,10 @@ import { queryClient } from "@/lib/queryClient";
 
 type User = {
   id: number;
-  username: string;
+  nombres: string;
+  apellidos: string;
   role: 'adoptante' | 'admin' | 'shelter';
-  email: string;
+  correo: string;
 };
 
 type LoginCredentials = {
@@ -36,7 +37,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (res.status === 401) return null;
         throw new Error('Error al obtener datos del usuario');
       }
-      return res.json();
+      const data = await res.json();
+      return data;
     },
     retry: false,
     staleTime: Infinity,
@@ -48,15 +50,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials),
+        credentials: 'include',
       });
-      if (!res.ok) throw new Error('Credenciales inválidas');
+
+      if (!res.ok) {
+        const errorData = await res.text();
+        throw new Error(errorData || 'Credenciales inválidas');
+      }
+
       return res.json();
     },
-    onSuccess: (userData) => {
+    onSuccess: (userData: User) => {
       queryClient.setQueryData(['/api/user'], userData);
       toast({
         title: "¡Bienvenido!",
-        description: "Has iniciado sesión correctamente",
+        description: `Has iniciado sesión como ${userData.role}`,
       });
     },
     onError: (error: Error) => {
@@ -70,7 +78,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch('/api/logout', { method: 'POST' });
+      const res = await fetch('/api/logout', { 
+        method: 'POST',
+        credentials: 'include'
+      });
       if (!res.ok) throw new Error('Error al cerrar sesión');
     },
     onSuccess: () => {
