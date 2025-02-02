@@ -7,16 +7,25 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { PlusCircle, PawPrint, Heart, Users, MapPin, User } from "lucide-react";
+import { PlusCircle, PawPrint, Heart, Users, MapPin, User, LogOut } from "lucide-react";
 import type { SelectPet } from "@db/schema";
 import { Sidebar } from "@/components/Sidebar";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { data: pets = [], isLoading } = useQuery<SelectPet[]>({
     queryKey: ["/api/pets"],
   });
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      window.location.href = "/auth/login";
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
+  };
 
   const stats = [
     {
@@ -55,7 +64,17 @@ export default function Dashboard() {
       <main className="p-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Panel de Control</h1>
+            <div className="flex justify-between items-center">
+              <h1 className="text-3xl font-bold text-gray-900">Panel de Control</h1>
+              <Button 
+                variant="outline" 
+                onClick={handleLogout}
+                className="flex items-center gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                Cerrar Sesión
+              </Button>
+            </div>
             {user && (
               <div className="mt-2 text-gray-600">
                 <p className="flex items-center gap-2">
