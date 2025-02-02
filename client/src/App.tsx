@@ -21,10 +21,10 @@ import { AdoptionInterview } from "@/components/AdoptionInterview";
 import { useUser } from "@/hooks/use-user";
 import { useEffect } from "react";
 
-function ProtectedRoute({ 
-  children, 
-  allowedRoles = ["USER", "ADMIN"]
-}: { 
+function ProtectedRoute({
+  children,
+  allowedRoles = ["USER", "ADMIN"],
+}: {
   children: React.ReactNode;
   allowedRoles?: Array<"USER" | "ADMIN">;
 }) {
@@ -32,11 +32,14 @@ function ProtectedRoute({
   const [, setLocation] = useLocation();
 
   useEffect(() => {
+    console.log("user", user);
     if (!isLoading) {
       if (!user) {
         setLocation("/auth/login");
       } else if (!allowedRoles.includes(user.rolNombre)) {
-        setLocation(user.rolNombre === "ADMIN" ? "/dashboard" : "/user/adopciones");
+        setLocation(
+          user.rolNombre === "ADMIN" ? "/dashboard" : "/user/adopciones",
+        );
       }
     }
   }, [user, isLoading, allowedRoles, setLocation]);
@@ -63,9 +66,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
         <header className="fixed top-0 right-0 left-0 md:left-64 z-10">
           <DesktopHeader />
         </header>
-        <main className="pt-16">
-          {children}
-        </main>
+        <main className="pt-16">{children}</main>
       </div>
     </div>
   );
@@ -122,9 +123,7 @@ function DashboardRouter() {
           return null;
         }}
       </Route>
-      <Route>
-        {() => <NotFound />}
-      </Route>
+      <Route>{() => <NotFound />}</Route>
     </Switch>
   );
 }
