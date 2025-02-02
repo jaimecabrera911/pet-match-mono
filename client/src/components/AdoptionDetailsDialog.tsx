@@ -18,8 +18,11 @@ interface Adoption {
   experienciaPreviaDetalles: string | null;
   tipoVivienda: string | null;
   tieneEspacioExterior: string | null;
+  horasAtencionDiaria: string | null;
   tieneOtrasMascotas: string | null;
   otrasMascotasDetalles: string | null;
+  razonAdopcion: string | null;
+  compromisosVeterinarios: string | null;
   notes: string | null;
   pet: {
     id: number;
@@ -42,8 +45,17 @@ interface AdoptionDetailsProps {
 }
 
 export function AdoptionDetailsDialog({ adoptionId, isOpen, onClose }: AdoptionDetailsProps) {
-  const { data: adoption, isLoading } = useQuery<Adoption>({
-    queryKey: [`/api/adoptions/${adoptionId}`],
+  const { data: adoption, isLoading, error } = useQuery<Adoption>({
+    queryKey: ["/api/adoptions", adoptionId],
+    queryFn: async () => {
+      const response = await fetch(`/api/adoptions/${adoptionId}`, {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error(`Error al obtener los detalles de la adopción: ${response.statusText}`);
+      }
+      return response.json();
+    },
     enabled: isOpen && !!adoptionId,
   });
 
@@ -83,15 +95,21 @@ export function AdoptionDetailsDialog({ adoptionId, isOpen, onClose }: AdoptionD
     return "Pendiente";
   };
 
+  console.log('AdoptionDetails:', { adoptionId, isLoading, error, adoption });
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Detalles de la Adopción</DialogTitle>
         </DialogHeader>
         {isLoading ? (
           <div className="flex justify-center p-4">
             <Loader2 className="h-6 w-6 animate-spin" />
+          </div>
+        ) : error ? (
+          <div className="text-center text-red-500">
+            Error: {error.toString()}
           </div>
         ) : adoption ? (
           <div className="space-y-6">
@@ -150,7 +168,7 @@ export function AdoptionDetailsDialog({ adoptionId, isOpen, onClose }: AdoptionD
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <h3 className="font-semibold mb-2">Vivienda</h3>
-                <p className="text-sm">Tipo: {adoption.tipoVivienda}</p>
+                <p className="text-sm">Tipo: {adoption.tipoVivienda || 'No especificado'}</p>
                 <p className="text-sm">
                   Espacio exterior: {adoption.tieneEspacioExterior === 'si' ? 'Sí' : 'No'}
                 </p>
@@ -165,6 +183,27 @@ export function AdoptionDetailsDialog({ adoptionId, isOpen, onClose }: AdoptionD
                 )}
               </div>
             </div>
+
+            {adoption.horasAtencionDiaria && (
+              <div>
+                <h3 className="font-semibold mb-2">Atención Diaria</h3>
+                <p className="text-sm">{adoption.horasAtencionDiaria}</p>
+              </div>
+            )}
+
+            {adoption.razonAdopcion && (
+              <div>
+                <h3 className="font-semibold mb-2">Razón de Adopción</h3>
+                <p className="text-sm">{adoption.razonAdopcion}</p>
+              </div>
+            )}
+
+            {adoption.compromisosVeterinarios && (
+              <div>
+                <h3 className="font-semibold mb-2">Compromisos Veterinarios</h3>
+                <p className="text-sm">{adoption.compromisosVeterinarios}</p>
+              </div>
+            )}
 
             {adoption.notes && (
               <div>
