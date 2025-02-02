@@ -26,35 +26,40 @@ export function useUser() {
         console.log("[Auth Client] Verificando sesión de usuario");
         const response = await fetch("/api/user", {
           credentials: "include",
+          headers: {
+            Accept: "application/json",
+          },
         });
 
-        // Handle 401 specifically
+        // Handle 401 specifically and return null (not authenticated)
         if (response.status === 401) {
           console.log("[Auth Client] Usuario no autenticado");
           return null;
         }
 
-        // Check if response is ok before trying to parse JSON
+        // For other non-200 responses, throw an error
         if (!response.ok) {
           throw new Error(`Error HTTP: ${response.status}`);
         }
 
-        // Verify content type
-        const contentType = response.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          console.error("[Auth Client] Respuesta no es JSON:", contentType);
-          throw new Error("La respuesta del servidor no es JSON");
+        const data = await response.json().catch(() => {
+          console.error("[Auth Client] Error parsing JSON response");
+          return null;
+        });
+
+        if (!data) {
+          console.log("[Auth Client] No hay datos de usuario");
+          return null;
         }
 
-        const data = await response.json();
         console.log("[Auth Client] Usuario autenticado:", data);
         return data;
       } catch (error) {
         console.error("[Auth Client] Error al verificar sesión:", error);
-        throw error;
+        return null; // Return null on error to avoid retries
       }
     },
-    retry: 0,
+    retry: false,
     staleTime: Infinity,
   });
 
@@ -65,45 +70,33 @@ export function useUser() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify(credentials),
         credentials: "include",
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Error al iniciar sesión");
+        const errorData = await response.json().catch(() => ({ error: "Error al iniciar sesión" }));
+        throw new Error(errorData.error || "Error al iniciar sesión");
       }
 
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("La respuesta del servidor no es JSON");
-      }
+      const data = await response.json().catch(() => {
+        throw new Error("Error al procesar respuesta del servidor");
+      });
 
-      const data: AuthResponse = await response.json();
       console.log("[Auth Client] Login exitoso:", data);
 
       // Actualizar el caché de React Query con los datos del usuario
       queryClient.setQueryData(["/api/user"], data.user);
 
-      // Redirigir según el rol
-      if (data.user.rolNombre === "ADMIN") {
-        setLocation("/dashboard");
-      } else {
-        setLocation("/user/adopciones");
-      }
-
       return {
         ok: true as const,
         user: data.user,
+        message: "Login exitoso",
       };
     } catch (error) {
       console.error("[Auth Client] Error en login:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Error desconocido",
-        variant: "destructive",
-      });
       return {
         ok: false as const,
         message: error instanceof Error ? error.message : "Error desconocido",
@@ -118,28 +111,28 @@ export function useUser() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify(userData),
         credentials: "include",
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Error al registrar usuario");
+        const errorData = await response.json().catch(() => ({ error: "Error al registrar usuario" }));
+        throw new Error(errorData.error || "Error al registrar usuario");
       }
 
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("La respuesta del servidor no es JSON");
-      }
+      const data = await response.json().catch(() => {
+        throw new Error("Error al procesar respuesta del servidor");
+      });
 
-      const data: AuthResponse = await response.json();
       console.log("[Auth Client] Registro exitoso:", data);
       queryClient.setQueryData(["/api/user"], data.user);
 
       return {
         ok: true as const,
         user: data.user,
+        message: "Registro exitoso",
       };
     } catch (error) {
       console.error("[Auth Client] Error en registro:", error);
@@ -156,6 +149,9 @@ export function useUser() {
       const response = await fetch("/api/logout", {
         method: "POST",
         credentials: "include",
+        headers: {
+          Accept: "application/json",
+        },
       });
 
       if (!response.ok) {
