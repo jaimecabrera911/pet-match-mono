@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { AdoptionsTable } from "@/components/AdoptionsTable";
+import { Button } from "@/components/ui/button";
+import { PlusCircle } from "lucide-react";
 
 interface Adoption {
   id: number;
@@ -60,17 +62,34 @@ export default function ManageAdoptions() {
     },
   });
 
+  const handleCreateAdoption = () => {
+    // TODO: Implementar lógica para crear nueva adopción
+    toast({
+      title: "Próximamente",
+      description: "La funcionalidad de crear adopciones estará disponible pronto",
+    });
+  };
+
   const handleUpdateStatus = async (adoptionId: number, status: "approved" | "rejected") => {
     await updateAdoptionMutation.mutateAsync({ id: adoptionId, status });
   };
 
   return (
     <div className="container mx-auto py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Gestión de Adopciones</h1>
-        <p className="text-muted-foreground">
-          Administra las solicitudes de adopción de mascotas
-        </p>
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold">Gestión de Adopciones</h1>
+          <p className="text-muted-foreground">
+            Administra las solicitudes de adopción de mascotas
+          </p>
+        </div>
+        <Button 
+          onClick={handleCreateAdoption}
+          className="bg-[#FF5C7F] hover:bg-[#FF5C7F]/90"
+        >
+          <PlusCircle className="h-5 w-5 mr-2" />
+          Crear Adopción
+        </Button>
       </div>
 
       <div className="bg-white rounded-lg shadow">
