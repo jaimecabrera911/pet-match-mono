@@ -158,6 +158,46 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  app.get("/api/adoptions/:id", async (req, res) => {
+    try {
+      const adoptionId = parseInt(req.params.id);
+
+      const [adoption] = await db
+        .select({
+          id: adoptions.id,
+          status: adoptions.status,
+          applicationDate: adoptions.applicationDate,
+          notes: adoptions.notes,
+          pet: {
+            id: pets.id,
+            name: pets.name,
+            breed: pets.breed,
+            imageUrl: pets.imageUrl
+          },
+          user: {
+            id: users.id,
+            nombres: users.nombres,
+            apellidos: users.apellidos,
+            correo: users.correo
+          },
+        })
+        .from(adoptions)
+        .where(eq(adoptions.id, adoptionId))
+        .innerJoin(pets, eq(pets.id, adoptions.petId))
+        .innerJoin(users, eq(users.id, adoptions.userId))
+        .limit(1);
+
+      if (!adoption) {
+        return res.status(404).json({ error: "Adopción no encontrada" });
+      }
+
+      res.json(adoption);
+    } catch (error) {
+      console.error("Error fetching adoption:", error);
+      res.status(500).json({ error: "Error al obtener la adopción" });
+    }
+  });
+
   app.put("/api/adoptions/:id", async (req, res) => {
     const { id } = req.params;
     try {

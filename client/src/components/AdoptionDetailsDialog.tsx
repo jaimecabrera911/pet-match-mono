@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -116,6 +117,9 @@ export function AdoptionDetailsDialog({ adoptionId, isOpen, onClose }: AdoptionD
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Detalles de la Adopción</DialogTitle>
+          <DialogDescription>
+            Información detallada sobre la solicitud de adopción
+          </DialogDescription>
         </DialogHeader>
         {isLoading ? (
           <div className="flex justify-center p-4">

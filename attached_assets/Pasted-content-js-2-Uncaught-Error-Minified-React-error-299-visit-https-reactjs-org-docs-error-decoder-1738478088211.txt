@@ -1,0 +1,104 @@
+content.js:2 Uncaught Error: Minified React error #299; visit https://reactjs.org/docs/error-decoder.html?invariant=299 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at n.createRoot (content.js:2:127887)
+    at content.js:2:141096
+    at content.js:2:141166
+    at content.js:2:141169
+n.createRoot @ content.js:2
+(anonymous) @ content.js:2
+(anonymous) @ content.js:2
+(anonymous) @ content.js:2
+content_script_bundle.js:1 Attempting initialization Sun Feb 02 2025 01:32:51 GMT-0500 (hora estándar de Colombia)
+AdoptionDetailsDialog.tsx:112 AdoptionDetails: {adoptionId: 10, isLoading: true, error: null, adoption: undefined}
+AdoptionDetailsDialog.tsx:112 AdoptionDetails: {adoptionId: 10, isLoading: true, error: null, adoption: undefined}
+hook.js:608 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. Error Component Stack
+    at DescriptionWarning (chunk-54S6XMDT.js?v=d0b38608:326:29)
+    at chunk-54S6XMDT.js?v=d0b38608:230:13
+    at chunk-54S6XMDT.js?v=d0b38608:153:58
+    at Presence (chunk-NYR4UMVK.js?v=d0b38608:24:11)
+    at chunk-54S6XMDT.js?v=d0b38608:144:64
+    at chunk-UACHJROW.js?v=d0b38608:52:11
+    at chunk-UACHJROW.js?v=d0b38608:33:11
+    at chunk-RLTE5R7I.js?v=d0b38608:41:13
+    at chunk-3L65UTKK.js?v=d0b38608:258:22
+    at Presence (chunk-NYR4UMVK.js?v=d0b38608:24:11)
+    at Provider (chunk-NPI43BMZ.js?v=d0b38608:38:15)
+    at DialogPortal (chunk-54S6XMDT.js?v=d0b38608:107:11)
+    at _c3 (dialog.tsx:33:6)
+    at Provider (chunk-NPI43BMZ.js?v=d0b38608:38:15)
+    at Dialog (chunk-54S6XMDT.js?v=d0b38608:48:5)
+    at AdoptionDetailsDialog (AdoptionDetailsDialog.tsx:47:41)
+    at AdoptionsTable (AdoptionsTable.tsx:40:21)
+    at div (<anonymous>)
+    at div (<anonymous>)
+    at ManageAdoptions (manage-adoptions.tsx:28:21)
+    at Route (wouter.js?v=d0b38608:323:16)
+    at Switch (wouter.js?v=d0b38608:379:17)
+    at DashboardRouter (<anonymous>)
+    at main (<anonymous>)
+    at div (<anonymous>)
+    at div (<anonymous>)
+    at DashboardLayout (App.tsx:21:28)
+    at Route (wouter.js?v=d0b38608:323:16)
+    at Switch (wouter.js?v=d0b38608:379:17)
+    at Router (<anonymous>)
+    at div (<anonymous>)
+    at Provider (chunk-NPI43BMZ.js?v=d0b38608:38:15)
+    at TooltipProvider (@radix-ui_react-tooltip.js?v=d0b38608:59:5)
+    at sidebar.tsx:77:7
+    at QueryClientProvider (@tanstack_react-query.js?v=d0b38608:2805:3)
+    at App (<anonymous>)
+overrideMethod @ hook.js:608
+(anonymous) @ chunk-54S6XMDT.js?v=d0b38608:334
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=d0b38608:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=d0b38608:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=d0b38608:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=d0b38608:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=d0b38608:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=d0b38608:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=d0b38608:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=d0b38608:19416
+commitRoot @ chunk-RPCDYKBN.js?v=d0b38608:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=d0b38608:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=d0b38608:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=d0b38608:18627
+hook.js:608 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+overrideMethod @ hook.js:608
+(anonymous) @ chunk-54S6XMDT.js?v=d0b38608:334
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=d0b38608:16915
+invokePassiveEffectMountInDEV @ chunk-RPCDYKBN.js?v=d0b38608:18324
+invokeEffectsInDev @ chunk-RPCDYKBN.js?v=d0b38608:19701
+commitDoubleInvokeEffectsInDEV @ chunk-RPCDYKBN.js?v=d0b38608:19686
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=d0b38608:19503
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=d0b38608:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=d0b38608:19416
+commitRoot @ chunk-RPCDYKBN.js?v=d0b38608:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=d0b38608:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=d0b38608:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=d0b38608:18627
+AdoptionDetailsDialog.tsx:69 Error fetching adoption details: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+overrideMethod @ hook.js:608
+queryFn @ AdoptionDetailsDialog.tsx:69
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=d0b38608:840
+run @ @tanstack_react-query.js?v=d0b38608:494
+start @ @tanstack_react-query.js?v=d0b38608:536
+fetch @ @tanstack_react-query.js?v=d0b38608:926
+executeFetch_fn @ @tanstack_react-query.js?v=d0b38608:2211
+onSubscribe @ @tanstack_react-query.js?v=d0b38608:1898
+subscribe @ @tanstack_react-query.js?v=d0b38608:24
+(anonymous) @ @tanstack_react-query.js?v=d0b38608:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=d0b38608:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=d0b38608:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=d0b38608:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=d0b38608:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=d0b38608:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=d0b38608:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=d0b38608:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=d0b38608:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=d0b38608:19416
+commitRoot @ chunk-RPCDYKBN.js?v=d0b38608:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=d0b38608:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=d0b38608:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=d0b38608:18627
+AdoptionDetailsDialog.tsx:112 AdoptionDetails: {adoptionId: 10, isLoading: false, error: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON, adoption: undefined}
+AdoptionDetailsDialog.tsx:112 AdoptionDetails: {adoptionId: 10, isLoading: false, error: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON, adoption: undefined}
