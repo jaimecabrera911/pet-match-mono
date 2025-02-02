@@ -10,11 +10,16 @@ type User = {
   email: string;
 };
 
+type LoginCredentials = {
+  correo: string;
+  password: string;
+};
+
 type AuthContextType = {
   user: User | null;
   isLoading: boolean;
   error: Error | null;
-  login: (credentials: { username: string; password: string }) => Promise<void>;
+  login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -38,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const loginMutation = useMutation({
-    mutationFn: async (credentials: { username: string; password: string }) => {
+    mutationFn: async (credentials: LoginCredentials) => {
       const res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -84,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const login = async (credentials: { username: string; password: string }) => {
+  const login = async (credentials: LoginCredentials) => {
     await loginMutation.mutateAsync(credentials);
   };
 
