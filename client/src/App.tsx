@@ -32,16 +32,8 @@ function ProtectedRoute({
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    console.log("user", user);
-    if (!isLoading) {
-      if (!user) {
-        setLocation("/auth/login");
-      } else if (!allowedRoles.includes(user.rolNombre)) {
-        setLocation(
-          user.rolNombre === "ADMIN" ? "/dashboard" : "/user/adopciones",
-        );
-      }
-    }
+    [Auth Client] Error: Error: Server response was not JSON
+    at queryFn (use-user.ts:41:17)
   }, [user, isLoading, allowedRoles, setLocation]);
 
   if (isLoading) {
