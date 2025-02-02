@@ -25,7 +25,7 @@ export default function AuthPage() {
 
   // If user is already logged in, redirect to dashboard
   if (user) {
-    navigate("/dashboard");
+    navigate("/dashboard/panel-de-control");
     return null;
   }
 
@@ -40,7 +40,7 @@ export default function AuthPage() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       await login(data);
-      navigate("/dashboard");
+      navigate("/dashboard/panel-de-control");
     } catch (error) {
       if (error instanceof Error) {
         toast({
