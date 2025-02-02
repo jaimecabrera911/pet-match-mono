@@ -7,13 +7,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Eye, Check, X } from "lucide-react";
 import { format } from "date-fns";
@@ -24,8 +17,8 @@ import { useLocation } from "wouter";
 interface Adoption {
   id: number;
   status: "creada" | "en_entrevista" | "aceptada" | "rechazada";
-  etapa: "cuestionario" | "entrevista" | "adopcion";
   applicationDate: string;
+  aprobada: boolean | null;
   notes: string | null;
   pet: {
     id: number;
@@ -51,13 +44,13 @@ export function AdoptionsTable() {
   });
 
   const updateAdoptionMutation = useMutation({
-    mutationFn: async ({ id, status, etapa }: { id: number; status?: string; etapa?: string }) => {
+    mutationFn: async ({ id, status, aprobada }: { id: number; status?: string; aprobada?: boolean }) => {
       const response = await fetch(`/api/adoptions/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ status, etapa }),
+        body: JSON.stringify({ status, aprobada }),
       });
 
       if (!response.ok) {
@@ -82,13 +75,8 @@ export function AdoptionsTable() {
     },
   });
 
-  const handleStatusChange = async (adoptionId: number, newStatus: string) => {
-    await updateAdoptionMutation.mutateAsync({ id: adoptionId, status: newStatus });
-  };
-
-  const handleEtapaChange = async (adoptionId: number, newEtapa: string) => {
-    const newStatus = newEtapa === 'entrevista' ? 'en_entrevista' : undefined;
-    await updateAdoptionMutation.mutateAsync({ id: adoptionId, etapa: newEtapa, status: newStatus });
+  const handleStatusChange = async (adoptionId: number, newStatus: string, aprobada: boolean) => {
+    await updateAdoptionMutation.mutateAsync({ id: adoptionId, status: newStatus, aprobada });
   };
 
   if (isLoading) {
@@ -129,6 +117,18 @@ export function AdoptionsTable() {
     }
   };
 
+  const getAprobadaLabel = (aprobada: boolean | null) => {
+    if (aprobada === true) return "Aprobada";
+    if (aprobada === false) return "No Aprobada";
+    return "Pendiente";
+  };
+
+  const getAprobadaBadgeColor = (aprobada: boolean | null) => {
+    if (aprobada === true) return "bg-green-100 text-green-800";
+    if (aprobada === false) return "bg-red-100 text-red-800";
+    return "bg-gray-100 text-gray-800";
+  };
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -137,8 +137,8 @@ export function AdoptionsTable() {
             <TableHead>Mascota</TableHead>
             <TableHead>Solicitante</TableHead>
             <TableHead>Fecha</TableHead>
-            <TableHead>Etapa</TableHead>
             <TableHead>Estado</TableHead>
+            <TableHead>Aprobación</TableHead>
             <TableHead>Acciones</TableHead>
           </TableRow>
         </TableHeader>
@@ -176,25 +176,13 @@ export function AdoptionsTable() {
                 })}
               </TableCell>
               <TableCell>
-                <Select
-                  value={adoption.etapa}
-                  onValueChange={(value: "cuestionario" | "entrevista" | "adopcion") =>
-                    handleEtapaChange(adoption.id, value)
-                  }
-                >
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="cuestionario">Cuestionario</SelectItem>
-                    <SelectItem value="entrevista">Entrevista</SelectItem>
-                    <SelectItem value="adopcion">Adopción</SelectItem>
-                  </SelectContent>
-                </Select>
-              </TableCell>
-              <TableCell>
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor(adoption.status)}`}>
                   {getStatusLabel(adoption.status)}
+                </span>
+              </TableCell>
+              <TableCell>
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getAprobadaBadgeColor(adoption.aprobada)}`}>
+                  {getAprobadaLabel(adoption.aprobada)}
                 </span>
               </TableCell>
               <TableCell>
@@ -206,19 +194,19 @@ export function AdoptionsTable() {
                   >
                     <Eye className="h-4 w-4" />
                   </Button>
-                  {adoption.etapa === "adopcion" && adoption.status !== "aceptada" && adoption.status !== "rechazada" && (
+                  {adoption.status !== "aceptada" && adoption.status !== "rechazada" && (
                     <>
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => handleStatusChange(adoption.id, "aceptada")}
+                        onClick={() => handleStatusChange(adoption.id, "aceptada", true)}
                       >
                         <Check className="h-4 w-4 text-green-500" />
                       </Button>
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => handleStatusChange(adoption.id, "rechazada")}
+                        onClick={() => handleStatusChange(adoption.id, "rechazada", false)}
                       >
                         <X className="h-4 w-4 text-red-500" />
                       </Button>
