@@ -1,11 +1,11 @@
 import { Link, useLocation } from "wouter";
-import { Home, PawPrint, Heart, Users } from "lucide-react";
+import { Home, PawPrint, Heart, Users, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 
 export function Sidebar() {
   const [location] = useLocation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const navItems = [
     {
@@ -43,15 +43,21 @@ export function Sidebar() {
     item => user && item.roles.includes(user.role)
   );
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      window.location.href = "/auth/login";
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
+  };
+
   return (
-    <aside
-      className="fixed left-0 top-0 z-40 h-screen w-64 bg-white border-r border-gray-200 shadow-sm"
-      role="navigation"
-      aria-label="Menú principal"
-    >
+    <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200">
       <div className="flex flex-col h-full">
+        {/* Logo */}
         <div className="p-6">
-          <Link href="/" className="flex items-center gap-3">
+          <Link href="/dashboard/panel-de-control" className="flex items-center gap-3">
             <div className="w-10 h-10 bg-[#FF5C7F] rounded-xl flex items-center justify-center">
               <Heart className="h-5 w-5 text-white" />
             </div>
@@ -61,6 +67,7 @@ export function Sidebar() {
           </Link>
         </div>
 
+        {/* Navigation */}
         <nav className="flex-1 px-4 pb-4 overflow-y-auto">
           <div className="space-y-1">
             {filteredNavItems.map((item) => (
@@ -72,7 +79,7 @@ export function Sidebar() {
                   "hover:bg-gray-50 group",
                   location === item.href
                     ? "bg-gray-50 shadow-sm"
-                    : "text-gray-700",
+                    : "text-gray-700"
                 )}
               >
                 <div className="flex items-center">
@@ -81,7 +88,7 @@ export function Sidebar() {
                       "w-5 h-5 transition-colors",
                       location === item.href
                         ? "text-[#FF5C7F]"
-                        : "text-gray-400 group-hover:text-gray-600",
+                        : "text-gray-400 group-hover:text-gray-600"
                     )}
                   />
                   <span
@@ -89,7 +96,7 @@ export function Sidebar() {
                       "ml-3 font-medium",
                       location === item.href
                         ? "text-gray-900"
-                        : "text-gray-600 group-hover:text-gray-900",
+                        : "text-gray-600 group-hover:text-gray-900"
                     )}
                   >
                     {item.label}
@@ -103,20 +110,30 @@ export function Sidebar() {
           </div>
         </nav>
 
+        {/* User Profile & Logout */}
         <div className="p-4 mt-auto border-t">
           <div className="flex items-center gap-3 px-2">
             <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
               <Users className="w-4 h-4 text-gray-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900">{user?.nombres}</p>
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {user?.nombres}
+              </p>
               <p className="text-xs text-gray-500 truncate">
                 {user?.correo}
               </p>
             </div>
+            <button
+              onClick={handleLogout}
+              className="p-2 rounded-lg hover:bg-gray-100"
+              aria-label="Cerrar sesión"
+            >
+              <LogOut className="w-4 h-4 text-gray-500" />
+            </button>
           </div>
         </div>
       </div>
-    </aside>
+    </div>
   );
 }
