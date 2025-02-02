@@ -31,11 +31,10 @@ const adoptionFormSchema = z.object({
     required_error: "Por favor selecciona una mascota",
   }),
   userId: z.number({
-    required_error: "Por favor selecciona un usuario",
+    required_error: "Por favor selecciona un adoptante",
   }),
   status: z.enum(["creada", "en_entrevista", "aceptada", "rechazada"]).default("creada"),
   etapa: z.enum(["cuestionario", "entrevista", "adopcion"]).default("cuestionario"),
-  notes: z.string().optional(),
   experienciaPreviaDetalles: z.string().min(1, "Este campo es requerido"),
   tipoVivienda: z.enum(["casa", "apartamento", "otro"], {
     required_error: "Por favor seleccione un tipo de vivienda",
@@ -60,11 +59,11 @@ export function AdoptionForm() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: pets = [] } = useQuery<SelectPet[]>({
+  const { data: pets = [] } = useQuery<any[]>({
     queryKey: ["/api/pets"],
   });
 
-  const { data: users = [] } = useQuery<SelectUser[]>({
+  const { data: users = [] } = useQuery<any[]>({
     queryKey: ["/api/users"],
   });
 
@@ -127,21 +126,19 @@ export function AdoptionForm() {
 
   return (
     <div className="container mx-auto py-8">
-      <Card>
+      <Card className="max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle>
-            {currentStage === "cuestionario" && "Cuestionario Inicial de Adopción"}
-            {currentStage === "entrevista" && "Entrevista de Adopción"}
-            {currentStage === "adopcion" && "Fase Final de Adopción"}
+          <CardTitle className="text-2xl">
+            Cuestionario Inicial de Adopción
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="mb-8">
             <div className="flex justify-between items-center">
               <div className="flex space-x-2">
-                <div className="w-3 h-3 rounded-full bg-primary opacity-100" />
-                <div className={`w-3 h-3 rounded-full ${currentStage === "entrevista" || currentStage === "adopcion" ? "bg-primary" : "bg-gray-200"} opacity-40`} />
-                <div className={`w-3 h-3 rounded-full ${currentStage === "adopcion" ? "bg-primary" : "bg-gray-200"} opacity-40`} />
+                <div className="w-3 h-3 rounded-full bg-[#FF5C7F]" />
+                <div className="w-3 h-3 rounded-full bg-gray-200" />
+                <div className="w-3 h-3 rounded-full bg-gray-200" />
               </div>
               <div className="text-sm text-gray-500">
                 Paso {currentStage === "cuestionario" ? "1" : currentStage === "entrevista" ? "2" : "3"} de 3
@@ -153,7 +150,7 @@ export function AdoptionForm() {
             <form onSubmit={form.handleSubmit((data) => onSubmit(data))} className="space-y-6">
               {currentStage === "cuestionario" && (
                 <div className="space-y-6">
-                  <h3 className="text-lg font-medium">Información Básica</h3>
+                  <h3 className="text-lg font-medium text-gray-700">Información Básica</h3>
                   <FormField
                     control={form.control}
                     name="petId"
@@ -209,7 +206,11 @@ export function AdoptionForm() {
                       </FormItem>
                     )}
                   />
+                </div>
+              )}
 
+              {currentStage === "entrevista" && (
+                <div className="space-y-6">
                   <FormField
                     control={form.control}
                     name="experienciaPreviaDetalles"
@@ -291,12 +292,6 @@ export function AdoptionForm() {
                       </FormItem>
                     )}
                   />
-                </div>
-              )}
-
-              {currentStage === "entrevista" && (
-                <div className="space-y-6">
-                  <h3 className="text-lg font-medium">Entrevista Detallada</h3>
 
                   <FormField
                     control={form.control}
@@ -363,12 +358,6 @@ export function AdoptionForm() {
                       )}
                     />
                   )}
-                </div>
-              )}
-
-              {currentStage === "adopcion" && (
-                <div className="space-y-6">
-                  <h3 className="text-lg font-medium">Fase Final de Adopción</h3>
 
                   <FormField
                     control={form.control}
@@ -397,6 +386,15 @@ export function AdoptionForm() {
                       </FormItem>
                     )}
                   />
+                </div>
+              )}
+
+              {currentStage === "adopcion" && (
+                <div className="space-y-6">
+                  <h3 className="text-lg font-medium">Decisión Final</h3>
+                  <p className="text-muted-foreground">
+                    Revisa toda la información proporcionada y decide si apruebas o rechazas la solicitud de adopción.
+                  </p>
                 </div>
               )}
 
@@ -431,7 +429,7 @@ export function AdoptionForm() {
                     </>
                   ) : (
                     <Button type="submit" className="bg-[#FF5C7F] hover:bg-[#FF5C7F]/90">
-                      Guardar {currentStage === "cuestionario" ? "Solicitud" : "Entrevista"}
+                      Guardar {currentStage === "cuestionario" ? "y Continuar" : "Entrevista"}
                     </Button>
                   )}
                 </div>
