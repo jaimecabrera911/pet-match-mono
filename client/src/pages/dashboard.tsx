@@ -5,11 +5,10 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { PlusCircle, PawPrint, Heart, Users, MapPin, User, LogOut } from "lucide-react";
 import type { SelectPet } from "@db/schema";
-import { Sidebar } from "@/components/Sidebar";
+import { DashboardNav } from "@/components/DashboardNav";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function Dashboard() {
@@ -60,7 +59,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Sidebar />
+      <DashboardNav />
       <main className="p-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col mb-8">
