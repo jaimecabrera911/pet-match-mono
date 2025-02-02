@@ -1,104 +1,97 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { InsertUser, SelectUser } from "@db/schema";
 
-type RequestResult =
-  | {
-      ok: true;
-    }
-  | {
-      ok: false;
-      message: string;
-    };
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import type { InsertUser } from "@db/schema";
+import { useLocation } from "wouter";
 
-async function handleRequest(
-  url: string,
-  method: string,
-  body?: InsertUser,
-): Promise<RequestResult> {
-  try {
-    const response = await fetch(url, {
-      method,
-      headers: body ? { "Content-Type": "application/json" } : undefined,
-      body: body ? JSON.stringify(body) : undefined,
-      credentials: "include",
-    });
-
-    if (!response.ok) {
-      if (response.status >= 500) {
-        return { ok: false, message: response.statusText };
-      }
-
-      const message = await response.text();
-      return { ok: false, message };
-    }
-
-    return { ok: true };
-  } catch (e: any) {
-    return { ok: false, message: e.toString() };
-  }
-}
-
-async function fetchUser(): Promise<SelectUser | null> {
-  const response = await fetch("/api/user", {
-    credentials: "include",
-  });
-
-  if (!response.ok) {
-    if (response.status === 401) {
-      return null;
-    }
-
-    if (response.status >= 500) {
-      throw new Error(`${response.status}: ${response.statusText}`);
-    }
-
-    throw new Error(`${response.status}: ${await response.text()}`);
-  }
-
-  return response.json();
+interface AuthResponse {
+  message: string;
+  user: {
+    id: number;
+    correo: string;
+    nombres: string;
+    apellidos: string;
+    rolNombre: "USER" | "ADMIN";
+  };
 }
 
 export function useUser() {
+  const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
-  const {
-    data: user,
-    error,
-    isLoading,
-  } = useQuery<SelectUser | null, Error>({
-    queryKey: ["user"],
-    queryFn: fetchUser,
+  const { data: user, isLoading } = useQuery<AuthResponse["user"]>({
+    queryKey: ["/api/user"],
+    queryFn: async () => {
+      try {
+        const response = await fetch("/api/user", {
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            return null;
+          }
+          throw new Error("Error al obtener datos del usuario");
+        }
+
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error("[Auth Client] Error:", error);
+        return null;
+      }
+    },
     staleTime: Infinity,
     retry: false,
   });
 
-  const loginMutation = useMutation<RequestResult, Error, InsertUser>({
-    mutationFn: (userData) => handleRequest("/api/login", "POST", userData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user"] });
-    },
-  });
+  const login = async (credentials: Pick<InsertUser, "correo" | "password">) => {
+    try {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(credentials),
+        credentials: "include",
+      });
 
-  const logoutMutation = useMutation<RequestResult, Error>({
-    mutationFn: () => handleRequest("/api/logout", "POST"),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user"] });
-    },
-  });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Error al iniciar sesión");
+      }
 
-  const registerMutation = useMutation<RequestResult, Error, InsertUser>({
-    mutationFn: (userData) => handleRequest("/api/register", "POST", userData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user"] });
-    },
-  });
+      const data: AuthResponse = await response.json();
+      queryClient.setQueryData(["/api/user"], data.user);
+
+      if (data.user.rolNombre === "ADMIN") {
+        setLocation("/dashboard");
+      } else {
+        setLocation("/user/adopciones");
+      }
+
+      return {
+        ok: true as const,
+        user: data.user,
+      };
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Error desconocido",
+        variant: "destructive",
+      });
+      return {
+        ok: false as const,
+        message: error instanceof Error ? error.message : "Error desconocido",
+      };
+    }
+  };
 
   return {
     user,
     isLoading,
-    error,
-    login: loginMutation.mutateAsync,
-    logout: logoutMutation.mutateAsync,
-    register: registerMutation.mutateAsync,
+    login,
+    isAuthenticated: !!user,
   };
 }
