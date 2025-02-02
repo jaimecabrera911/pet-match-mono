@@ -19,8 +19,21 @@ export function useUser() {
 
   const { data: user, isLoading } = useQuery<AuthResponse["user"]>({
     queryKey: ["/api/user"],
-    retry: false,
+    queryFn: async () => {
+      const response = await fetch("/api/user", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        if (response.status === 401) {
+          return null;
+        }
+        throw new Error("Error al obtener datos del usuario");
+      }
+      const data = await response.json();
+      return data;
+    },
     staleTime: Infinity,
+    retry: false,
   });
 
   const login = async (credentials: Pick<InsertUser, "correo" | "password">) => {
@@ -39,12 +52,13 @@ export function useUser() {
         throw new Error(data.error || "Error al iniciar sesión");
       }
 
-      const data = await response.json();
+      const data: AuthResponse = await response.json();
+      // Actualizar el caché de React Query con los datos del usuario
       queryClient.setQueryData(["/api/user"], data.user);
 
       return {
         ok: true as const,
-        user: data.user as AuthResponse["user"],
+        user: data.user,
       };
     } catch (error) {
       console.error("Error en login:", error);
@@ -71,12 +85,12 @@ export function useUser() {
         throw new Error(data.error || "Error al registrar usuario");
       }
 
-      const data = await response.json();
+      const data: AuthResponse = await response.json();
       queryClient.setQueryData(["/api/user"], data.user);
 
       return {
         ok: true as const,
-        user: data.user as AuthResponse["user"],
+        user: data.user,
       };
     } catch (error) {
       console.error("Error en registro:", error);
