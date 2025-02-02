@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useUser } from "@/hooks/use-user";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
+import { Eye, Loader2 } from "lucide-react";
 import type { SelectAdoption } from "@db/schema";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -17,6 +17,7 @@ export default function UserAdoptions() {
   const { data: adoptions = [], isLoading, error } = useQuery<SelectAdoption[]>({
     queryKey: ["/api/user/adoptions"],
     enabled: !!user,
+    credentials: 'include'
   });
 
   const getStatusBadgeColor = (status: string) => {
@@ -47,7 +48,7 @@ export default function UserAdoptions() {
         <Navigation />
         <main className="container mx-auto py-8 px-4">
           <div className="flex justify-center items-center h-64">
-            <p className="text-gray-500">Cargando adopciones...</p>
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         </main>
       </div>
@@ -101,17 +102,6 @@ export default function UserAdoptions() {
                   <div className="flex justify-between">
                     <span className="text-gray-600">Fecha de solicitud:</span>
                     <span>{format(new Date(adoption.applicationDate), "PPP", { locale: es })}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Mascota:</span>
-                    <div className="flex items-center space-x-2">
-                      <img
-                        src={adoption.pet.imageUrl}
-                        alt={adoption.pet.name}
-                        className="h-8 w-8 rounded-full object-cover"
-                      />
-                      <span>{adoption.pet.name}</span>
-                    </div>
                   </div>
                   {adoption.notes && (
                     <div className="mt-2">

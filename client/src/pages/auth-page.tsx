@@ -44,7 +44,7 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const { toast } = useToast();
   const { login, register } = useUser();
-  const [, navigate] = useLocation();
+  const [, setLocation] = useLocation();
 
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -92,9 +92,9 @@ export default function AuthPage() {
       });
 
       if (result.user?.rolNombre === "ADMIN") {
-        navigate("/dashboard");
+        setLocation("/dashboard");
       } else {
-        navigate("/user/adopciones");
+        setLocation("/user/adopciones");
       }
     } catch (error) {
       console.error("Error en login:", error);
@@ -125,9 +125,9 @@ export default function AuthPage() {
       });
 
       if (result.user?.rolNombre === "ADMIN") {
-        navigate("/dashboard");
+        setLocation("/dashboard");
       } else {
-        navigate("/user/adopciones");
+        setLocation("/user/adopciones");
       }
     } catch (error) {
       toast({

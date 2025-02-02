@@ -19,18 +19,29 @@ import RegistroAdoptante from "@/pages/registro-adoptante";
 import AuthPage from "./pages/auth-page";
 import { AdoptionInterview } from "@/components/AdoptionInterview";
 import { useUser } from "@/hooks/use-user";
+import { Loader2 } from "lucide-react";
 
 function ProtectedRoute({ 
   children, 
-  allowedRoles = ["USER", "ADMIN"]
+  allowedRoles = ["USER", "ADMIN"],
+  redirectTo = "/auth/login"
 }: { 
   children: React.ReactNode;
   allowedRoles?: Array<"USER" | "ADMIN">;
+  redirectTo?: string;
 }) {
-  const { user } = useUser();
+  const { user, isLoading } = useUser();
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   if (!user) {
-    window.location.href = "/auth/login";
+    window.location.href = redirectTo;
     return null;
   }
 
@@ -120,11 +131,29 @@ function DashboardRouter() {
 }
 
 function Router() {
+  const { user, isLoading } = useUser();
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/auth/registro-adoptante" component={RegistroAdoptante} />
-      <Route path="/auth/login" component={AuthPage} />
+      <Route path="/auth/login">
+        {() => {
+          if (user) {
+            window.location.href = user.rolNombre === "ADMIN" ? "/dashboard" : "/user/adopciones";
+            return null;
+          }
+          return <AuthPage />;
+        }}
+      </Route>
       <Route path="/cuestionario-adopcion" component={CuestionarioAdopcion} />
       <Route path="/user/adopciones">
         {() => (
