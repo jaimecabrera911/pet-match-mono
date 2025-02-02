@@ -81,9 +81,11 @@ export function AdoptionForm() {
 
   const createAdoptionMutation = useMutation({
     mutationFn: async (data: AdoptionFormData & { action?: 'aprobar' | 'rechazar' }) => {
+      console.log("Submitting adoption data:", data);
+
       const status = data.action === 'aprobar' ? 'aceptada' : 
-                     data.action === 'rechazar' ? 'rechazada' : 
-                     currentStage === 'entrevista' ? 'en_entrevista' : 'creada';
+                    data.action === 'rechazar' ? 'rechazada' : 
+                    currentStage === 'entrevista' ? 'en_entrevista' : 'creada';
 
       const response = await fetch("/api/adoptions", {
         method: "POST",
@@ -91,10 +93,12 @@ export function AdoptionForm() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ ...data, status, etapa: currentStage }),
+        credentials: 'include',
       });
 
       if (!response.ok) {
-        throw new Error("Error al guardar la información");
+        const errorData = await response.json().catch(() => ({ message: "Error al guardar la información" }));
+        throw new Error(errorData.message || "Error al guardar la información");
       }
 
       return response.json();
@@ -103,7 +107,7 @@ export function AdoptionForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/adoptions"] });
 
       const nextStage = currentStage === "cuestionario" ? "entrevista" : 
-                       currentStage === "entrevista" ? "adopcion" : null;
+                      currentStage === "entrevista" ? "adopcion" : null;
 
       if (nextStage) {
         setCurrentStage(nextStage);
@@ -121,16 +125,20 @@ export function AdoptionForm() {
         navigate("/dashboard/adopciones");
       }
     },
-    onError: () => {
+    onError: (error: Error) => {
+      console.error("Error in mutation:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "No se pudo guardar la información",
+        description: error.message || "No se pudo guardar la información",
       });
     },
   });
 
   const onSubmit = async (data: AdoptionFormData, action?: 'aprobar' | 'rechazar') => {
+    console.log("Form submitted with data:", data);
+    console.log("Current stage:", currentStage);
+
     // Solo validar los campos necesarios según la etapa actual
     let fieldsToValidate: (keyof AdoptionFormData)[] = [];
 
@@ -148,17 +156,24 @@ export function AdoptionForm() {
       ];
     }
 
-    const isValid = await form.trigger(fieldsToValidate);
-    if (!isValid) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Por favor completa todos los campos requeridos",
-      });
-      return;
-    }
+    try {
+      const isValid = await form.trigger(fieldsToValidate);
+      console.log("Form validation result:", isValid);
+      console.log("Form errors:", form.formState.errors);
 
-    await createAdoptionMutation.mutateAsync({ ...data, action });
+      if (!isValid) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Por favor completa todos los campos requeridos",
+        });
+        return;
+      }
+
+      await createAdoptionMutation.mutateAsync({ ...data, action });
+    } catch (error) {
+      console.error("Error in form submission:", error);
+    }
   };
 
   return (
@@ -166,16 +181,32 @@ export function AdoptionForm() {
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl">
-            Cuestionario Inicial de Adopción
+            {currentStage === "cuestionario" 
+              ? "Cuestionario Inicial de Adopción"
+              : currentStage === "entrevista"
+              ? "Entrevista de Adopción"
+              : "Decisión Final"}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="mb-8">
             <div className="flex justify-between items-center">
               <div className="flex space-x-2">
-                <div className="w-3 h-3 rounded-full bg-[#FF5C7F]" />
-                <div className="w-3 h-3 rounded-full bg-gray-200" />
-                <div className="w-3 h-3 rounded-full bg-gray-200" />
+                <div 
+                  className={`w-3 h-3 rounded-full ${
+                    currentStage === "cuestionario" ? "bg-[#FF5C7F]" : "bg-gray-200"
+                  }`} 
+                />
+                <div 
+                  className={`w-3 h-3 rounded-full ${
+                    currentStage === "entrevista" ? "bg-[#FF5C7F]" : "bg-gray-200"
+                  }`} 
+                />
+                <div 
+                  className={`w-3 h-3 rounded-full ${
+                    currentStage === "adopcion" ? "bg-[#FF5C7F]" : "bg-gray-200"
+                  }`} 
+                />
               </div>
               <div className="text-sm text-gray-500">
                 Paso {currentStage === "cuestionario" ? "1" : currentStage === "entrevista" ? "2" : "3"} de 3
@@ -465,7 +496,10 @@ export function AdoptionForm() {
                       </Button>
                     </>
                   ) : (
-                    <Button type="submit" className="bg-[#FF5C7F] hover:bg-[#FF5C7F]/90">
+                    <Button 
+                      type="submit"
+                      className="bg-[#FF5C7F] hover:bg-[#FF5C7F]/90"
+                    >
                       Guardar y Continuar
                     </Button>
                   )}
