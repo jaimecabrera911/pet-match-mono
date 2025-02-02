@@ -48,13 +48,27 @@ export function AdoptionDetailsDialog({ adoptionId, isOpen, onClose }: AdoptionD
   const { data: adoption, isLoading, error } = useQuery<Adoption>({
     queryKey: ["/api/adoptions", adoptionId],
     queryFn: async () => {
-      const response = await fetch(`/api/adoptions/${adoptionId}`, {
-        credentials: 'include'
-      });
-      if (!response.ok) {
-        throw new Error(`Error al obtener los detalles de la adopción: ${response.statusText}`);
+      try {
+        const response = await fetch(`/api/adoptions/${adoptionId}`, {
+          credentials: 'include',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('API Error Response:', errorText);
+          throw new Error(`Error al obtener los detalles de la adopción: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error('Error fetching adoption details:', error);
+        throw error;
       }
-      return response.json();
     },
     enabled: isOpen && !!adoptionId,
   });
