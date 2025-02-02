@@ -37,27 +37,33 @@ export function setupAuth(app: Express) {
   app.use(passport.session());
 
   passport.use(
-    new LocalStrategy(async (username, password, done) => {
-      try {
-        const [user] = await db
-          .select()
-          .from(users)
-          .where(eq(users.correo, username))
-          .limit(1);
+    new LocalStrategy(
+      {
+        usernameField: 'correo',
+        passwordField: 'password',
+      },
+      async (correo, password, done) => {
+        try {
+          const [user] = await db
+            .select()
+            .from(users)
+            .where(eq(users.correo, correo))
+            .limit(1);
 
-        if (!user) {
-          return done(null, false, { message: "Usuario incorrecto." });
+          if (!user) {
+            return done(null, false, { message: "Usuario incorrecto." });
+          }
+
+          if (password !== user.password) {
+            return done(null, false, { message: "Contraseña incorrecta." });
+          }
+
+          return done(null, user);
+        } catch (err) {
+          return done(err);
         }
-
-        if (password !== user.password) {
-          return done(null, false, { message: "Contraseña incorrecta." });
-        }
-
-        return done(null, user);
-      } catch (err) {
-        return done(err);
       }
-    }),
+    ),
   );
 
   passport.serializeUser((user, done) => {
@@ -83,10 +89,10 @@ export function setupAuth(app: Express) {
       if (!result.success) {
         return res
           .status(400)
-          .send(
-            "Entrada inválida: " +
-              result.error.issues.map((i) => i.message).join(", "),
-          );
+          .json({
+            error: "Datos inválidos",
+            details: result.error.issues.map((i) => i.message)
+          });
       }
 
       const [existingUser] = await db
@@ -96,19 +102,27 @@ export function setupAuth(app: Express) {
         .limit(1);
 
       if (existingUser) {
-        return res.status(400).send("El correo electrónico ya está registrado");
+        return res.status(400).json({ error: "El correo electrónico ya está registrado" });
       }
+
+      // Add default values for required fields if not provided
+      const userData = {
+        ...result.data,
+        genero: result.data.genero || "M",
+        fechaNacimiento: result.data.fechaNacimiento || new Date(),
+        rolNombre: result.data.rolNombre || "USER"
+      };
 
       const [newUser] = await db
         .insert(users)
-        .values(result.data)
+        .values([userData])  // Wrap in array as insert expects array of values
         .returning();
 
       req.login(newUser, (err) => {
         if (err) {
           return next(err);
         }
-        return res.json({
+        return res.status(201).json({
           message: "Registro exitoso",
           user: { 
             id: newUser.id, 
@@ -119,6 +133,7 @@ export function setupAuth(app: Express) {
         });
       });
     } catch (error) {
+      console.error("Error en registro:", error);
       next(error);
     }
   });
@@ -134,7 +149,7 @@ export function setupAuth(app: Express) {
         if (!user) {
           return res
             .status(400)
-            .send(info.message ?? "Error al iniciar sesión");
+            .json({ error: info.message ?? "Error al iniciar sesión" });
         }
 
         req.logIn(user, (err) => {
@@ -159,9 +174,8 @@ export function setupAuth(app: Express) {
   app.post("/api/logout", (req, res) => {
     req.logout((err) => {
       if (err) {
-        return res.status(500).send("Error al cerrar sesión");
+        return res.status(500).json({ error: "Error al cerrar sesión" });
       }
-
       res.json({ message: "Sesión cerrada exitosamente" });
     });
   });
@@ -170,7 +184,6 @@ export function setupAuth(app: Express) {
     if (req.isAuthenticated()) {
       return res.json(req.user);
     }
-
-    res.status(401).send("No ha iniciado sesión");
+    res.status(401).json({ error: "No ha iniciado sesión" });
   });
 }
