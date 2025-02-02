@@ -17,6 +17,8 @@ export function setupAuth(app: Express) {
   // JSON middleware should be first
   app.use('/api', (req, res, next) => {
     res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
     next();
   });
 
@@ -111,6 +113,15 @@ export function setupAuth(app: Express) {
     }
   });
 
+  // Authentication check middleware
+  const requireAuth = (req: any, res: any, next: any) => {
+    console.log("[Auth] Checking authentication:", req.isAuthenticated());
+    if (req.isAuthenticated()) {
+      return next();
+    }
+    res.status(401).json({ error: "No ha iniciado sesión" });
+  };
+
   // Auth routes
   app.post("/api/login", (req, res, next) => {
     console.log("[Auth] Recibida solicitud de login:", req.body);
@@ -176,23 +187,6 @@ export function setupAuth(app: Express) {
     res.status(401).json({ error: "No ha iniciado sesión" });
   });
 
-  // Catch-all for unmatched API routes
-  app.use('/api/*', (req, res) => {
-    res.status(404).json({ error: "Ruta no encontrada" });
-  });
-
-  // Error handler that ensures JSON responses
-  app.use((err: any, req: any, res: any, next: any) => {
-    console.error("[Auth] Error middleware:", err);
-
-    // Only handle /api routes
-    if (!req.path.startsWith('/api')) {
-      return next(err);
-    }
-
-    res.status(500).json({ 
-      error: err.message || "Error interno del servidor",
-      status: 500
-    });
-  });
+  // Export the middleware for use in other routes
+  return { requireAuth };
 }

@@ -42,14 +42,7 @@ export function useUser() {
           throw new Error(`Error HTTP: ${response.status}`);
         }
 
-        // Try to parse JSON response
-        let data;
-        try {
-          data = await response.json();
-        } catch (e) {
-          console.error("[Auth Client] Error parsing JSON response");
-          return null;
-        }
+        const data = await response.json();
 
         if (!data) {
           console.log("[Auth Client] No hay datos de usuario");
