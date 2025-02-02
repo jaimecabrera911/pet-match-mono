@@ -158,6 +158,7 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/user", (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
     console.log("[Auth] Verificando usuario actual:", req.isAuthenticated() ? "autenticado" : "no autenticado");
     if (req.isAuthenticated() && req.user) {
       return res.json({

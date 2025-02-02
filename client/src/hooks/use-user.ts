@@ -28,11 +28,17 @@ export function useUser() {
           credentials: "include",
         });
 
+        if (response.status === 401) {
+          return null;
+        }
+
         if (!response.ok) {
-          if (response.status === 401) {
-            return null;
-          }
-          throw new Error("Error al obtener datos del usuario");
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Server response was not JSON");
         }
 
         const data = await response.json();
