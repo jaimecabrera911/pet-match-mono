@@ -101,20 +101,23 @@ export function AdoptionForm() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/adoptions"] });
-      toast({
-        title: "Éxito",
-        description: variables.action ? 
-          `Adopción ${variables.action === 'aprobar' ? 'aprobada' : 'rechazada'} correctamente` :
-          `${currentStage === "cuestionario" ? "Solicitud guardada" : 
-            currentStage === "entrevista" ? "Entrevista guardada" : 
-            "Adopción guardada"} correctamente`
-      });
 
-      if (currentStage === "cuestionario") {
-        setCurrentStage("entrevista");
-      } else if (currentStage === "entrevista") {
-        setCurrentStage("adopcion");
+      const nextStage = currentStage === "cuestionario" ? "entrevista" : 
+                       currentStage === "entrevista" ? "adopcion" : null;
+
+      if (nextStage) {
+        setCurrentStage(nextStage);
+        toast({
+          title: "Éxito",
+          description: `Información guardada. Continuando a la siguiente etapa.`,
+        });
       } else {
+        toast({
+          title: "Éxito",
+          description: variables.action ? 
+            `Adopción ${variables.action === 'aprobar' ? 'aprobada' : 'rechazada'} correctamente` :
+            "Adopción guardada correctamente"
+        });
         navigate("/dashboard/adopciones");
       }
     },
@@ -128,6 +131,33 @@ export function AdoptionForm() {
   });
 
   const onSubmit = async (data: AdoptionFormData, action?: 'aprobar' | 'rechazar') => {
+    // Solo validar los campos necesarios según la etapa actual
+    let fieldsToValidate: (keyof AdoptionFormData)[] = [];
+
+    if (currentStage === "cuestionario") {
+      fieldsToValidate = ["petId", "userId"];
+    } else if (currentStage === "entrevista") {
+      fieldsToValidate = [
+        "experienciaPreviaDetalles",
+        "tipoVivienda",
+        "tieneEspacioExterior",
+        "horasAtencionDiaria",
+        "tieneOtrasMascotas",
+        "razonAdopcion",
+        "compromisosVeterinarios"
+      ];
+    }
+
+    const isValid = await form.trigger(fieldsToValidate);
+    if (!isValid) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Por favor completa todos los campos requeridos",
+      });
+      return;
+    }
+
     await createAdoptionMutation.mutateAsync({ ...data, action });
   };
 
@@ -436,7 +466,7 @@ export function AdoptionForm() {
                     </>
                   ) : (
                     <Button type="submit" className="bg-[#FF5C7F] hover:bg-[#FF5C7F]/90">
-                      Guardar {currentStage === "cuestionario" ? "y Continuar" : "Entrevista"}
+                      Guardar y Continuar
                     </Button>
                   )}
                 </div>
