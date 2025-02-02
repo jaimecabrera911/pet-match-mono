@@ -63,16 +63,16 @@ export default function AuthPage() {
         });
         return;
       }
+
       toast({
         title: "¡Éxito!",
         description: isLogin ? "Sesión iniciada correctamente" : "Registro exitoso",
       });
-      if (result.ok) {
-        if (result.user?.rolNombre === "ADMIN") {
-          navigate("/dashboard");
-        } else {
-          navigate("/user/adopciones");
-        }
+
+      if (result.user?.rolNombre === "ADMIN") {
+        navigate("/dashboard");
+      } else {
+        navigate("/user/adopciones");
       }
     } catch (error) {
       toast({

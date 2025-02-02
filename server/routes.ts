@@ -112,6 +112,41 @@ export function registerRoutes(app: Express): Server {
       res.status(500).json({ error: "Error al obtener las mascotas" });
     }
   });
+  
+  app.get("/api/user/adoptions", async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ error: "No ha iniciado sesión" });
+      }
+  
+      const query = db
+        .select({
+          id: adoptions.id,
+          status: adoptions.status,
+          applicationDate: adoptions.applicationDate,
+          notes: adoptions.notes,
+          pet: {
+            id: pets.id,
+            name: pets.name,
+            breed: pets.breed,
+            imageUrl: pets.imageUrl
+          }
+        })
+        .from(adoptions)
+        .innerJoin(pets, eq(pets.id, adoptions.petId));
+  
+      // Si el usuario no es admin, solo mostrar sus adopciones
+      if (req.user.rolNombre !== "ADMIN") {
+        query.where(eq(adoptions.userId, req.user.id));
+      }
+  
+      const userAdoptions = await query;
+      res.json(userAdoptions);
+    } catch (error) {
+      console.error("Error fetching user adoptions:", error);
+      res.status(500).json({ error: "Error al obtener las adopciones" });
+    }
+  });
 
   // Rutas para adopciones
   app.get("/api/adoptions", async (_req, res) => {

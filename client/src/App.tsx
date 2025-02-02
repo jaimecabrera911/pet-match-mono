@@ -14,9 +14,33 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { DesktopHeader } from "@/components/DesktopHeader";
 import { MobileNav } from "@/components/MobileNav";
 import Home from "@/pages/Home";
+import UserAdoptions from "@/pages/user-adoptions";
 import RegistroAdoptante from "@/pages/registro-adoptante";
 import AuthPage from "./pages/auth-page";
 import { AdoptionInterview } from "@/components/AdoptionInterview";
+import { useUser } from "@/hooks/use-user";
+
+function ProtectedRoute({ 
+  children, 
+  allowedRoles = ["USER", "ADMIN"]
+}: { 
+  children: React.ReactNode;
+  allowedRoles?: Array<"USER" | "ADMIN">;
+}) {
+  const { user } = useUser();
+
+  if (!user) {
+    window.location.href = "/auth/login";
+    return null;
+  }
+
+  if (!allowedRoles.includes(user.rolNombre)) {
+    window.location.href = user.rolNombre === "ADMIN" ? "/dashboard" : "/user/adopciones";
+    return null;
+  }
+
+  return <>{children}</>;
+}
 
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -41,22 +65,46 @@ function DashboardRouter() {
   return (
     <Switch>
       <Route path="/dashboard/panel-de-control">
-        {() => <Dashboard />}
+        {() => (
+          <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <Dashboard />
+          </ProtectedRoute>
+        )}
       </Route>
       <Route path="/dashboard/mascotas">
-        {() => <ManagePets />}
+        {() => (
+          <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <ManagePets />
+          </ProtectedRoute>
+        )}
       </Route>
       <Route path="/dashboard/adopciones">
-        {() => <ManageAdoptions />}
+        {() => (
+          <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <ManageAdoptions />
+          </ProtectedRoute>
+        )}
       </Route>
       <Route path="/dashboard/adopciones/crear">
-        {() => <AdoptionForm />}
+        {() => (
+          <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <AdoptionForm />
+          </ProtectedRoute>
+        )}
       </Route>
       <Route path="/dashboard/adopciones/entrevista">
-        {() => <AdoptionInterview />}
+        {() => (
+          <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <AdoptionInterview />
+          </ProtectedRoute>
+        )}
       </Route>
       <Route path="/dashboard/usuarios">
-        {() => <ManageUsers />}
+        {() => (
+          <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <ManageUsers />
+          </ProtectedRoute>
+        )}
       </Route>
       <Route path="/dashboard">
         {() => {
@@ -78,12 +126,20 @@ function Router() {
       <Route path="/auth/registro-adoptante" component={RegistroAdoptante} />
       <Route path="/auth/login" component={AuthPage} />
       <Route path="/cuestionario-adopcion" component={CuestionarioAdopcion} />
-      <Route path="/user/adopciones" component={UserAdoptions} />
+      <Route path="/user/adopciones">
+        {() => (
+          <ProtectedRoute allowedRoles={["USER"]}>
+            <UserAdoptions />
+          </ProtectedRoute>
+        )}
+      </Route>
       <Route path="/dashboard/*">
         {(params) => (
-          <DashboardLayout>
-            <DashboardRouter />
-          </DashboardLayout>
+          <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <DashboardLayout>
+              <DashboardRouter />
+            </DashboardLayout>
+          </ProtectedRoute>
         )}
       </Route>
       <Route component={NotFound} />
