@@ -9,6 +9,32 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Loader2 } from "lucide-react";
 
+interface Adoption {
+  id: number;
+  status: "creada" | "en_entrevista" | "aceptada" | "rechazada";
+  applicationDate: string;
+  aprobada: boolean | null;
+  estadoDecision: string | null;
+  experienciaPreviaDetalles: string | null;
+  tipoVivienda: string | null;
+  tieneEspacioExterior: string | null;
+  tieneOtrasMascotas: string | null;
+  otrasMascotasDetalles: string | null;
+  notes: string | null;
+  pet: {
+    id: number;
+    name: string;
+    breed: string;
+    imageUrl: string;
+  };
+  user: {
+    id: number;
+    nombres: string;
+    apellidos: string;
+    correo: string;
+  };
+}
+
 interface AdoptionDetailsProps {
   adoptionId: number;
   isOpen: boolean;
@@ -16,9 +42,9 @@ interface AdoptionDetailsProps {
 }
 
 export function AdoptionDetailsDialog({ adoptionId, isOpen, onClose }: AdoptionDetailsProps) {
-  const { data: adoption, isLoading } = useQuery({
+  const { data: adoption, isLoading } = useQuery<Adoption>({
     queryKey: [`/api/adoptions/${adoptionId}`],
-    enabled: isOpen,
+    enabled: isOpen && !!adoptionId,
   });
 
   const getStatusLabel = (status: string) => {
