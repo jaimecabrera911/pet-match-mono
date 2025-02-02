@@ -65,7 +65,7 @@ export default function ManageAdoptions() {
   });
 
   const handleCreateAdoption = () => {
-    navigate("/adopciones/crear");
+    navigate("/dashboard/adopciones/crear");
   };
 
   const handleUpdateStatus = async (adoptionId: number, status: "approved" | "rejected") => {

@@ -48,7 +48,7 @@ function DashboardRouter() {
       <Route path="/dashboard/adopciones">
         {() => <ManageAdoptions />}
       </Route>
-      <Route path="/adopciones/crear">
+      <Route path="/dashboard/adopciones/crear">
         {() => <AdoptionForm />}
       </Route>
       <Route path="/dashboard/usuarios">
