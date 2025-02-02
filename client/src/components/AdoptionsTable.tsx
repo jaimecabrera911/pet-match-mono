@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Table,
@@ -12,7 +13,7 @@ import { Eye, Check, X } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
-import { useLocation } from "wouter";
+import { AdoptionDetailsDialog } from "./AdoptionDetailsDialog";
 
 interface Adoption {
   id: number;
@@ -38,7 +39,8 @@ interface Adoption {
 export function AdoptionsTable() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [, navigate] = useLocation();
+  const [selectedAdoptionId, setSelectedAdoptionId] = useState<number | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   const { data: adoptions = [], isLoading } = useQuery<Adoption[]>({
     queryKey: ["/api/adoptions"],
@@ -88,6 +90,11 @@ export function AdoptionsTable() {
       aprobada,
       estadoDecision: newStatus
     });
+  };
+
+  const handleViewDetails = (adoptionId: number) => {
+    setSelectedAdoptionId(adoptionId);
+    setIsDetailsOpen(true);
   };
 
   if (isLoading) {
@@ -141,94 +148,106 @@ export function AdoptionsTable() {
   };
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Mascota</TableHead>
-            <TableHead>Solicitante</TableHead>
-            <TableHead>Fecha</TableHead>
-            <TableHead>Estado</TableHead>
-            <TableHead>Aprobación</TableHead>
-            <TableHead>Acciones</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {adoptions.map((adoption) => (
-            <TableRow key={adoption.id}>
-              <TableCell>
-                <div className="flex items-center space-x-3">
-                  <img
-                    src={adoption.pet.imageUrl}
-                    alt={adoption.pet.name}
-                    className="h-10 w-10 rounded-full object-cover"
-                  />
-                  <div>
-                    <div className="font-medium">{adoption.pet.name}</div>
-                    <div className="text-sm text-gray-500">
-                      {adoption.pet.breed}
+    <>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Mascota</TableHead>
+              <TableHead>Solicitante</TableHead>
+              <TableHead>Fecha</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead>Aprobación</TableHead>
+              <TableHead>Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {adoptions.map((adoption) => (
+              <TableRow key={adoption.id}>
+                <TableCell>
+                  <div className="flex items-center space-x-3">
+                    <img
+                      src={adoption.pet.imageUrl}
+                      alt={adoption.pet.name}
+                      className="h-10 w-10 rounded-full object-cover"
+                    />
+                    <div>
+                      <div className="font-medium">{adoption.pet.name}</div>
+                      <div className="text-sm text-gray-500">
+                        {adoption.pet.breed}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div>
-                  <div className="font-medium">
-                    {adoption.user.nombres} {adoption.user.apellidos}
+                </TableCell>
+                <TableCell>
+                  <div>
+                    <div className="font-medium">
+                      {adoption.user.nombres} {adoption.user.apellidos}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {adoption.user.correo}
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-500">
-                    {adoption.user.correo}
+                </TableCell>
+                <TableCell>
+                  {format(new Date(adoption.applicationDate), "PPP", {
+                    locale: es,
+                  })}
+                </TableCell>
+                <TableCell>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor(adoption.status)}`}>
+                    {getStatusLabel(adoption.status)}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getAprobadaBadgeColor(adoption.aprobada)}`}>
+                    {getAprobadaLabel(adoption.aprobada, adoption.estadoDecision)}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleViewDetails(adoption.id)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    {adoption.status !== "aceptada" && adoption.status !== "rechazada" && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleStatusChange(adoption.id, "aceptada", true)}
+                        >
+                          <Check className="h-4 w-4 text-green-500" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleStatusChange(adoption.id, "rechazada", false)}
+                        >
+                          <X className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </>
+                    )}
                   </div>
-                </div>
-              </TableCell>
-              <TableCell>
-                {format(new Date(adoption.applicationDate), "PPP", {
-                  locale: es,
-                })}
-              </TableCell>
-              <TableCell>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor(adoption.status)}`}>
-                  {getStatusLabel(adoption.status)}
-                </span>
-              </TableCell>
-              <TableCell>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getAprobadaBadgeColor(adoption.aprobada)}`}>
-                  {getAprobadaLabel(adoption.aprobada, adoption.estadoDecision)}
-                </span>
-              </TableCell>
-              <TableCell>
-                <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => navigate(`/dashboard/adopciones/${adoption.id}`)}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  {adoption.status !== "aceptada" && adoption.status !== "rechazada" && (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleStatusChange(adoption.id, "aceptada", true)}
-                      >
-                        <Check className="h-4 w-4 text-green-500" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleStatusChange(adoption.id, "rechazada", false)}
-                      >
-                        <X className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+      {selectedAdoptionId && (
+        <AdoptionDetailsDialog
+          adoptionId={selectedAdoptionId}
+          isOpen={isDetailsOpen}
+          onClose={() => {
+            setIsDetailsOpen(false);
+            setSelectedAdoptionId(null);
+          }}
+        />
+      )}
+    </>
   );
 }
