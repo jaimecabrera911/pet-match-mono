@@ -42,13 +42,38 @@ export function registerRoutes(app: Express): Server {
           id: user.id,
           correo: user.correo,
           nombres: user.nombres,
-          apellidos: user.apellidos
+          apellidos: user.apellidos,
+          role: user.rolNombre.toLowerCase() // Convertimos ADMIN/USER a admin/user
         }
       });
     } catch (error) {
       console.error("Error en login:", error);
       res.status(500).json({ error: "Error al iniciar sesión" });
     }
+  });
+
+  // Ruta para obtener el usuario actual
+  app.get("/api/user", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "No autenticado" });
+    }
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, req.user.id))
+      .limit(1);
+
+    if (!user) {
+      return res.status(401).json({ error: "Usuario no encontrado" });
+    }
+
+    res.json({
+      id: user.id,
+      correo: user.correo,
+      nombres: user.nombres,
+      apellidos: user.apellidos,
+      role: user.rolNombre.toLowerCase() // Convertimos ADMIN/USER a admin/user
+    });
   });
 
   app.post("/api/register", async (req, res) => {
@@ -225,7 +250,7 @@ export function registerRoutes(app: Express): Server {
       res.status(500).json({ error: "Error al actualizar la solicitud de adopción" });
     }
   });
-
+  
   // Serve static files from the uploads directory
   app.use('/uploads', express.static('uploads'));
 

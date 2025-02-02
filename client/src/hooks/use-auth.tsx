@@ -7,7 +7,7 @@ type User = {
   id: number;
   nombres: string;
   apellidos: string;
-  role: 'adoptante' | 'admin' | 'shelter';
+  role: string; // Será 'admin' o 'user' en minúsculas
   correo: string;
 };
 
