@@ -19,6 +19,7 @@ interface Adoption {
   status: "creada" | "en_entrevista" | "aceptada" | "rechazada";
   applicationDate: string;
   aprobada: boolean | null;
+  estadoDecision: string | null;
   notes: string | null;
   pet: {
     id: number;
@@ -50,7 +51,11 @@ export function AdoptionsTable() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ status, aprobada }),
+        body: JSON.stringify({ 
+          status, 
+          aprobada,
+          estadoDecision: status
+        }),
         credentials: 'include',
       });
 
@@ -118,9 +123,9 @@ export function AdoptionsTable() {
     }
   };
 
-  const getAprobadaLabel = (aprobada: boolean | null) => {
-    if (aprobada === true) return "Aprobada";
-    if (aprobada === false) return "No Aprobada";
+  const getAprobadaLabel = (aprobada: boolean | null, estadoDecision: string | null) => {
+    if (aprobada === true) return `Aprobada en ${getStatusLabel(estadoDecision || '')}`;
+    if (aprobada === false) return `Rechazada en ${getStatusLabel(estadoDecision || '')}`;
     return "Pendiente";
   };
 
@@ -183,7 +188,7 @@ export function AdoptionsTable() {
               </TableCell>
               <TableCell>
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getAprobadaBadgeColor(adoption.aprobada)}`}>
-                  {getAprobadaLabel(adoption.aprobada)}
+                  {getAprobadaLabel(adoption.aprobada, adoption.estadoDecision)}
                 </span>
               </TableCell>
               <TableCell>
