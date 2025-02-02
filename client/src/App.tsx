@@ -2,7 +2,7 @@ import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import { Sidebar } from "@/components/Sidebar";
+import { DashboardNav } from "@/components/DashboardNav";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import ManagePets from "@/pages/manage-pets";
@@ -17,17 +17,14 @@ import { MobileNav } from "@/components/MobileNav";
 import Home from "@/pages/Home";
 import RegistroAdoptante from "@/pages/registro-adoptante";
 import AuthPage from "./pages/auth-page";
-import { AdoptionInterview } from "@/components/AdoptionInterview";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar para desktop */}
-      <div className="hidden md:block w-64 fixed inset-y-0 z-50">
-        <Sidebar />
-      </div>
+      {/* Panel de navegación */}
+      <DashboardNav />
 
       {/* Navegación móvil */}
       <MobileNav />
@@ -48,13 +45,11 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
 function DashboardRouter() {
   return (
     <Switch>
-      <Route path="/dashboard/panel-de-control">
-        {() => <Dashboard />}
-      </Route>
+      <Route path="/dashboard/panel-de-control" component={Dashboard} />
       <ProtectedRoute 
         path="/dashboard/mascotas"
         requiredRole={["admin", "shelter"]}
-        component={ManagePets} 
+        component={ManagePets}
       />
       <ProtectedRoute
         path="/dashboard/adopciones"
@@ -72,9 +67,7 @@ function DashboardRouter() {
           return null;
         }}
       </Route>
-      <Route>
-        {() => <NotFound />}
-      </Route>
+      <Route component={NotFound} />
     </Switch>
   );
 }
