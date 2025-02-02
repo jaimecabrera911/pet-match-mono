@@ -62,17 +62,6 @@ function DashboardRouter() {
         component={ManageAdoptions}
       />
       <ProtectedRoute
-        path="/dashboard/mis-adopciones"
-        requiredRole={["adoptante"]}
-        component={UserAdoptions}
-      />
-      <Route path="/dashboard/adopciones/crear">
-        {() => <AdoptionForm />}
-      </Route>
-      <Route path="/dashboard/adopciones/entrevista">
-        {() => <AdoptionInterview />}
-      </Route>
-      <ProtectedRoute
         path="/dashboard/usuarios"
         requiredRole={["admin"]}
         component={ManageUsers}

@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/card";
 import { PlusCircle, PawPrint, Heart, Users, MapPin, User, LogOut } from "lucide-react";
 import type { SelectPet } from "@db/schema";
-import { DashboardNav } from "@/components/DashboardNav";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function Dashboard() {
@@ -59,7 +58,6 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardNav />
       <main className="p-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col mb-8">
@@ -93,52 +91,26 @@ export default function Dashboard() {
             </p>
           </div>
 
-          <div className="flex justify-end mb-8">
-            <Button 
-              variant="default" 
-              className="bg-[#FF5C7F] hover:bg-[#FF5C7F]/90"
-              onClick={() => window.location.href = '/mascotas'}
-            >
-              <PlusCircle className="h-5 w-5 mr-2" />
-              Agregar Mascota
-            </Button>
-          </div>
-
           {/* Statistics Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {isLoading ? (
-              // Skeleton loading state for statistics
-              Array(4).fill(null).map((_, i) => (
-                <Card key={i} className="animate-pulse">
-                  <CardHeader className="space-y-2">
-                    <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-                    <div className="h-8 bg-gray-200 rounded w-1/2"></div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              stats.map((stat, i) => (
-                <Card key={i} className="transition-all duration-300 hover:shadow-lg">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-sm font-medium text-gray-500">
-                        {stat.title}
-                      </CardTitle>
-                      <stat.icon className={`h-5 w-5 ${stat.color}`} />
-                    </div>
-                    <span className="text-2xl font-bold text-gray-900">
-                      {stat.value}
-                    </span>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-500">{stat.description}</p>
-                  </CardContent>
-                </Card>
-              ))
-            )}
+            {stats.map((stat, i) => (
+              <Card key={i} className="transition-all duration-300 hover:shadow-lg">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm font-medium text-gray-500">
+                      {stat.title}
+                    </CardTitle>
+                    <stat.icon className={`h-5 w-5 ${stat.color}`} />
+                  </div>
+                  <span className="text-2xl font-bold text-gray-900">
+                    {stat.value}
+                  </span>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-500">{stat.description}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
 
           {/* Recent Pets Section */}
