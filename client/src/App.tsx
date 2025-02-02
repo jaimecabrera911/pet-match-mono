@@ -67,7 +67,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-<Route path="/registro" component={RegistroAdoptante} />
+<Route path="/registro-adoptante" component={RegistroAdoptante} />
       <Route path="/auth/login" component={AuthPage} />
       <Route path="/cuestionario-adopcion" component={CuestionarioAdopcion} />
       <Route path="/dashboard/*">
