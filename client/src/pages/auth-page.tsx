@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,11 +9,26 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const authSchema = z.object({
-  username: z.string().min(1, "El nombre de usuario es requerido"),
-  password: z.string().min(1, "La contraseña es requerida"),
-  roleId: z.number().optional()
+  tipoDocumento: z.enum(["CEDULA DE CIUDADANIA", "PASAPORTE", "CEDULA DE EXTRANJERIA", "TARJETA DE IDENTIDAD"]),
+  numeroDocumento: z.string().min(1, "El número de documento es requerido"),
+  nombres: z.string().min(1, "El nombre es requerido"),
+  apellidos: z.string().min(1, "Los apellidos son requeridos"),
+  telefono: z.string().min(1, "El teléfono es requerido"),
+  correo: z.string().email("Correo electrónico inválido"),
+  direccion: z.string().min(1, "La dirección es requerida"),
+  ciudad: z.string().min(1, "La ciudad es requerida"),
+  departamento: z.string().min(1, "El departamento es requerido"),
+  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
+  roleId: z.number().default(2), // 2 for normal users
 });
 
 type AuthFormData = z.infer<typeof authSchema>;
@@ -22,18 +37,19 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const { toast } = useToast();
   const { login, register } = useUser();
+  const [, navigate] = useLocation();
 
   const form = useForm<AuthFormData>({
     resolver: zodResolver(authSchema),
     defaultValues: {
-      username: "",
-      password: "",
+      roleId: 2,
+      tipoDocumento: "CEDULA DE CIUDADANIA",
     },
   });
 
   const onSubmit = async (data: AuthFormData) => {
     try {
-      const result = await (isLogin ? login(data) : register({ ...data, roleId: 2 }));
+      const result = await (isLogin ? login(data) : register(data));
       if (!result.ok) {
         toast({
           variant: "destructive",
@@ -46,6 +62,9 @@ export default function AuthPage() {
         title: "¡Éxito!",
         description: isLogin ? "Sesión iniciada correctamente" : "Registro exitoso",
       });
+      if (result.ok) {
+        navigate("/dashboard");
+      }
     } catch (error) {
       toast({
         variant: "destructive",
@@ -64,19 +83,162 @@ export default function AuthPage() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nombre de usuario</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {!isLogin && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="tipoDocumento"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tipo de Documento</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccione tipo de documento" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="CEDULA DE CIUDADANIA">Cédula de Ciudadanía</SelectItem>
+                            <SelectItem value="PASAPORTE">Pasaporte</SelectItem>
+                            <SelectItem value="CEDULA DE EXTRANJERIA">Cédula de Extranjería</SelectItem>
+                            <SelectItem value="TARJETA DE IDENTIDAD">Tarjeta de Identidad</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="numeroDocumento"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Número de Documento</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="nombres"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nombres</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="apellidos"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Apellidos</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="telefono"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Teléfono</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="tel" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="correo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Correo Electrónico</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="email" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="direccion"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Dirección</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="ciudad"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ciudad</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="departamento"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Departamento</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
+
+              {isLogin && (
+                <FormField
+                  control={form.control}
+                  name="correo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Correo Electrónico</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="email" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
               <FormField
                 control={form.control}
                 name="password"
@@ -90,11 +252,13 @@ export default function AuthPage() {
                   </FormItem>
                 )}
               />
+
               <Button type="submit" className="w-full">
                 {isLogin ? "Iniciar Sesión" : "Registrarse"}
               </Button>
             </form>
           </Form>
+
           {isLogin && (
             <div className="mt-4 text-center">
               <span className="text-sm text-gray-600">¿No tienes una cuenta? </span>
@@ -103,6 +267,7 @@ export default function AuthPage() {
               </Link>
             </div>
           )}
+
           <Button
             variant="link"
             className="w-full mt-2"
