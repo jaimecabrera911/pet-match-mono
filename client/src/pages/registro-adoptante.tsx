@@ -62,9 +62,7 @@ export default function RegistroAdoptante() {
   };
 
   return (
-    <>
-      <Navigation />
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="bg-white rounded-lg shadow p-6 w-full max-w-2xl mx-4">
           <h1 className="text-2xl font-bold mb-6">Registro de Adoptante</h1>
           
@@ -274,6 +272,5 @@ export default function RegistroAdoptante() {
           </Form>
         </div>
       </div>
-    </>
   );
 }

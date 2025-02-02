@@ -98,7 +98,7 @@ export default function AuthPage() {
           {isLogin && (
             <div className="mt-4 text-center">
               <span className="text-sm text-gray-600">¿No tienes una cuenta? </span>
-              <Link href="/registro-adoptante">
+              <Link href="/auth/registro-adoptante">
                 <a className="text-sm text-primary hover:underline">Regístrate como adoptante</a>
               </Link>
             </div>
