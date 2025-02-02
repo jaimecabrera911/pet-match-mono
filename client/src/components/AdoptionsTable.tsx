@@ -45,16 +45,16 @@ export function AdoptionsTable() {
   });
 
   const updateAdoptionMutation = useMutation({
-    mutationFn: async ({ id, status, aprobada }: { id: number; status?: string; aprobada?: boolean }) => {
+    mutationFn: async ({ id, status, aprobada, estadoDecision }: { id: number; status?: string; aprobada?: boolean, estadoDecision?: string }) => {
       const response = await fetch(`/api/adoptions/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ 
-          status, 
+        body: JSON.stringify({
+          status,
           aprobada,
-          estadoDecision: status
+          estadoDecision
         }),
         credentials: 'include',
       });
@@ -82,7 +82,12 @@ export function AdoptionsTable() {
   });
 
   const handleStatusChange = async (adoptionId: number, newStatus: string, aprobada: boolean) => {
-    await updateAdoptionMutation.mutateAsync({ id: adoptionId, status: newStatus, aprobada });
+    await updateAdoptionMutation.mutateAsync({
+      id: adoptionId,
+      status: newStatus,
+      aprobada,
+      estadoDecision: newStatus
+    });
   };
 
   if (isLoading) {
