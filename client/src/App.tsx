@@ -13,6 +13,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { DesktopHeader } from "@/components/DesktopHeader";
 import { MobileNav } from "@/components/MobileNav";
 import Home from "@/pages/Home";
+import RegistroAdoptante from "@/pages/registro-adoptante";
 import AuthPage from "./pages/auth-page";
 
 function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -66,6 +67,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+<Route path="/registro" component={RegistroAdoptante} />
       <Route path="/auth/login" component={AuthPage} />
       <Route path="/cuestionario-adopcion" component={CuestionarioAdopcion} />
       <Route path="/dashboard/*">
