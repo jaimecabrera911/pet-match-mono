@@ -91,6 +91,17 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Ruta para obtener usuarios
+  app.get("/api/users", async (_req, res) => {
+    try {
+      const allUsers = await db.select().from(users);
+      res.json(allUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ error: "Error al obtener los usuarios" });
+    }
+  });
+
   // Rutas existentes
   app.get("/api/pets", async (_req, res) => {
     try {
