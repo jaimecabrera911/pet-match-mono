@@ -19,7 +19,11 @@ export function setupAuth(app: Express) {
     secret: process.env.REPL_ID || "mascota-adoption-secret",
     resave: false,
     saveUninitialized: false,
-    cookie: {},
+    cookie: {
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      secure: false, // Set to true only if using HTTPS
+      httpOnly: true,
+    },
     store: new MemoryStore({
       checkPeriod: 86400000,
     }),
@@ -28,6 +32,7 @@ export function setupAuth(app: Express) {
   if (app.get("env") === "production") {
     app.set("trust proxy", 1);
     sessionSettings.cookie = {
+      ...sessionSettings.cookie,
       secure: true,
     };
   }
@@ -69,7 +74,7 @@ export function setupAuth(app: Express) {
           return done(err);
         }
       }
-    ),
+    )
   );
 
   passport.serializeUser((user, done) => {
@@ -85,6 +90,12 @@ export function setupAuth(app: Express) {
         .from(users)
         .where(eq(users.id, id))
         .limit(1);
+
+      if (!user) {
+        console.log("Usuario no encontrado en deserialización:", id);
+        return done(null, false);
+      }
+
       done(null, user);
     } catch (err) {
       console.error("Error en deserialización:", err);
@@ -92,7 +103,6 @@ export function setupAuth(app: Express) {
     }
   });
 
-  // Esta ruta ya no es necesaria ya que estamos usando passport.authenticate
   app.post("/api/login", (req, res, next) => {
     console.log("Recibida solicitud de login:", req.body);
 
@@ -147,8 +157,14 @@ export function setupAuth(app: Express) {
 
   app.get("/api/user", (req, res) => {
     console.log("Verificando usuario actual:", req.isAuthenticated() ? "autenticado" : "no autenticado");
-    if (req.isAuthenticated()) {
-      return res.json(req.user);
+    if (req.isAuthenticated() && req.user) {
+      return res.json({
+        id: req.user.id,
+        correo: req.user.correo,
+        nombres: req.user.nombres,
+        apellidos: req.user.apellidos,
+        rolNombre: req.user.rolNombre
+      });
     }
     res.status(401).json({ error: "No ha iniciado sesión" });
   });

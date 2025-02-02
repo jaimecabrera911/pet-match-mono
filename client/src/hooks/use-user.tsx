@@ -20,6 +20,8 @@ export function useUser() {
   const { data: user, isLoading } = useQuery<AuthResponse["user"]>({
     queryKey: ["/api/user"],
     retry: false,
+    staleTime: Infinity,
+    credentials: 'include',
   });
 
   const login = async (credentials: Pick<InsertUser, "correo" | "password">) => {
@@ -39,7 +41,8 @@ export function useUser() {
         throw new Error(data.error || "Error al iniciar sesión");
       }
 
-      await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      // Inmediatamente actualizar el caché con los datos del usuario
+      queryClient.setQueryData(["/api/user"], data.user);
 
       return {
         ok: true as const,
@@ -71,7 +74,8 @@ export function useUser() {
         throw new Error(data.error || "Error al registrar usuario");
       }
 
-      await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      // Inmediatamente actualizar el caché con los datos del usuario
+      queryClient.setQueryData(["/api/user"], data.user);
 
       return {
         ok: true as const,
@@ -97,7 +101,8 @@ export function useUser() {
         throw new Error("Error al cerrar sesión");
       }
 
-      await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      // Limpiar el caché del usuario al cerrar sesión
+      queryClient.setQueryData(["/api/user"], null);
 
       return { ok: true as const };
     } catch (error) {
