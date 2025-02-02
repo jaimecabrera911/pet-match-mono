@@ -22,6 +22,7 @@ import { es } from "date-fns/locale";
 interface Adoption {
   id: number;
   status: "pending" | "approved" | "rejected";
+  etapa: "cuestionario" | "entrevista" | "adopcion";
   applicationDate: string;
   notes: string | null;
   pet: {
@@ -80,6 +81,7 @@ export function AdoptionsTable() {
             <TableHead>Mascota</TableHead>
             <TableHead>Solicitante</TableHead>
             <TableHead>Fecha</TableHead>
+            <TableHead>Etapa</TableHead>
             <TableHead>Estado</TableHead>
             <TableHead>Acciones</TableHead>
           </TableRow>
@@ -116,6 +118,25 @@ export function AdoptionsTable() {
                 {format(new Date(adoption.applicationDate), "PPP", {
                   locale: es,
                 })}
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center">
+                  {adoption.etapa === "cuestionario" && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      Cuestionario
+                    </span>
+                  )}
+                  {adoption.etapa === "entrevista" && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                      Entrevista
+                    </span>
+                  )}
+                  {adoption.etapa === "adopcion" && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      Adopción
+                    </span>
+                  )}
+                </div>
               </TableCell>
               <TableCell>
                 <Select

@@ -34,8 +34,9 @@ const adoptionFormSchema = z.object({
     required_error: "Por favor selecciona un usuario",
   }),
   status: z.enum(["pending", "approved", "rejected"]).default("pending"),
+  etapa: z.enum(["cuestionario", "entrevista", "adopcion"]).default("cuestionario"),
   notes: z.string().optional(),
-  // Campos de la entrevista
+  // Campos del cuestionario inicial
   experienciaPreviaDetalles: z.string().min(1, "Este campo es requerido"),
   tipoVivienda: z.enum(["casa", "apartamento", "otro"], {
     required_error: "Por favor seleccione un tipo de vivienda",
@@ -43,11 +44,13 @@ const adoptionFormSchema = z.object({
   tieneEspacioExterior: z.enum(["si", "no"], {
     required_error: "Por favor indique si tiene espacio exterior",
   }),
+  // Campos de la entrevista
   horasAtencionDiaria: z.string().min(1, "Este campo es requerido"),
   tieneOtrasMascotas: z.enum(["si", "no"], {
     required_error: "Por favor indique si tiene otras mascotas",
   }),
   otrasMascotasDetalles: z.string().optional(),
+  // Campos de la fase de adopción
   razonAdopcion: z.string().min(1, "Este campo es requerido"),
   compromisosVeterinarios: z.string().min(1, "Este campo es requerido"),
 });
@@ -55,6 +58,7 @@ const adoptionFormSchema = z.object({
 type AdoptionFormData = z.infer<typeof adoptionFormSchema>;
 
 export function AdoptionForm() {
+  const [currentStage, setCurrentStage] = useState<"cuestionario" | "entrevista" | "adopcion">("cuestionario");
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -73,6 +77,7 @@ export function AdoptionForm() {
     resolver: zodResolver(adoptionFormSchema),
     defaultValues: {
       status: "pending",
+      etapa: "cuestionario",
       tieneOtrasMascotas: "no",
       otrasMascotasDetalles: "",
     },
@@ -85,7 +90,7 @@ export function AdoptionForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, etapa: currentStage }),
       });
 
       if (!response.ok) {
@@ -111,7 +116,35 @@ export function AdoptionForm() {
     },
   });
 
+  const nextStage = () => {
+    const stages: ("cuestionario" | "entrevista" | "adopcion")[] = [
+      "cuestionario",
+      "entrevista",
+      "adopcion",
+    ];
+    const currentIndex = stages.indexOf(currentStage);
+    if (currentIndex < stages.length - 1) {
+      setCurrentStage(stages[currentIndex + 1]);
+    }
+  };
+
+  const previousStage = () => {
+    const stages: ("cuestionario" | "entrevista" | "adopcion")[] = [
+      "cuestionario",
+      "entrevista",
+      "adopcion",
+    ];
+    const currentIndex = stages.indexOf(currentStage);
+    if (currentIndex > 0) {
+      setCurrentStage(stages[currentIndex - 1]);
+    }
+  };
+
   const onSubmit = async (data: AdoptionFormData) => {
+    if (currentStage !== "adopcion") {
+      nextStage();
+      return;
+    }
     await createAdoptionMutation.mutateAsync(data);
   };
 
@@ -119,212 +152,93 @@ export function AdoptionForm() {
     <div className="container mx-auto py-8">
       <Card>
         <CardHeader>
-          <CardTitle>Nueva Solicitud de Adopción</CardTitle>
+          <CardTitle>
+            {currentStage === "cuestionario" && "Cuestionario Inicial de Adopción"}
+            {currentStage === "entrevista" && "Entrevista de Adopción"}
+            {currentStage === "adopcion" && "Fase Final de Adopción"}
+          </CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="mb-8">
+            <div className="flex justify-between items-center">
+              <div className="flex space-x-2">
+                <div className={`w-3 h-3 rounded-full ${currentStage === "cuestionario" ? "bg-primary" : "bg-gray-200"}`} />
+                <div className={`w-3 h-3 rounded-full ${currentStage === "entrevista" ? "bg-primary" : "bg-gray-200"}`} />
+                <div className={`w-3 h-3 rounded-full ${currentStage === "adopcion" ? "bg-primary" : "bg-gray-200"}`} />
+              </div>
+              <div className="text-sm text-gray-500">
+                Paso {currentStage === "cuestionario" ? "1" : currentStage === "entrevista" ? "2" : "3"} de 3
+              </div>
+            </div>
+          </div>
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="space-y-6">
-                <h3 className="text-lg font-medium">Información Básica</h3>
-                <FormField
-                  control={form.control}
-                  name="petId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mascota</FormLabel>
-                      <Select
-                        onValueChange={(value) => field.onChange(parseInt(value))}
-                        defaultValue={field.value?.toString()}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona una mascota" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {availablePets.map((pet) => (
-                            <SelectItem key={pet.id} value={pet.id.toString()}>
-                              {pet.name} - {pet.breed}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="userId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Adoptante</FormLabel>
-                      <Select
-                        onValueChange={(value) => field.onChange(parseInt(value))}
-                        defaultValue={field.value?.toString()}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona un adoptante" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {users.map((user) => (
-                            <SelectItem key={user.id} value={user.id.toString()}>
-                              {user.nombres} {user.apellidos}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="space-y-6">
-                <h3 className="text-lg font-medium">Entrevista de Adopción</h3>
-
-                <FormField
-                  control={form.control}
-                  name="experienciaPreviaDetalles"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>¿Tienes experiencia previa cuidando mascotas? Cuéntanos sobre ello</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="tipoVivienda"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>¿En qué tipo de vivienda resides?</FormLabel>
-                      <FormControl>
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          className="flex flex-col space-y-1"
-                        >
-                          <FormItem className="flex items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="casa" />
-                            </FormControl>
-                            <FormLabel className="font-normal">Casa</FormLabel>
-                          </FormItem>
-                          <FormItem className="flex items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="apartamento" />
-                            </FormControl>
-                            <FormLabel className="font-normal">Apartamento</FormLabel>
-                          </FormItem>
-                          <FormItem className="flex items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="otro" />
-                            </FormControl>
-                            <FormLabel className="font-normal">Otro</FormLabel>
-                          </FormItem>
-                        </RadioGroup>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="tieneEspacioExterior"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>¿Tienes espacio exterior (patio, jardín, terraza)?</FormLabel>
-                      <FormControl>
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          className="flex space-x-4"
-                        >
-                          <FormItem className="flex items-center space-x-2">
-                            <FormControl>
-                              <RadioGroupItem value="si" />
-                            </FormControl>
-                            <FormLabel className="font-normal">Sí</FormLabel>
-                          </FormItem>
-                          <FormItem className="flex items-center space-x-2">
-                            <FormControl>
-                              <RadioGroupItem value="no" />
-                            </FormControl>
-                            <FormLabel className="font-normal">No</FormLabel>
-                          </FormItem>
-                        </RadioGroup>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="horasAtencionDiaria"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>¿Cuántas horas al día podrás dedicarle a tu mascota?</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="tieneOtrasMascotas"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>¿Tienes otras mascotas actualmente?</FormLabel>
-                      <FormControl>
-                        <RadioGroup
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            if (value === "no") {
-                              form.setValue("otrasMascotasDetalles", "");
-                            }
-                          }}
-                          defaultValue={field.value}
-                          className="flex space-x-4"
-                        >
-                          <FormItem className="flex items-center space-x-2">
-                            <FormControl>
-                              <RadioGroupItem value="si" />
-                            </FormControl>
-                            <FormLabel className="font-normal">Sí</FormLabel>
-                          </FormItem>
-                          <FormItem className="flex items-center space-x-2">
-                            <FormControl>
-                              <RadioGroupItem value="no" />
-                            </FormControl>
-                            <FormLabel className="font-normal">No</FormLabel>
-                          </FormItem>
-                        </RadioGroup>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {form.watch("tieneOtrasMascotas") === "si" && (
+              {currentStage === "cuestionario" && (
+                <div className="space-y-6">
+                  <h3 className="text-lg font-medium">Información Básica</h3>
                   <FormField
                     control={form.control}
-                    name="otrasMascotasDetalles"
+                    name="petId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Cuéntanos sobre tus mascotas actuales</FormLabel>
+                        <FormLabel>Mascota</FormLabel>
+                        <Select
+                          onValueChange={(value) => field.onChange(parseInt(value))}
+                          defaultValue={field.value?.toString()}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecciona una mascota" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {availablePets.map((pet) => (
+                              <SelectItem key={pet.id} value={pet.id.toString()}>
+                                {pet.name} - {pet.breed}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="userId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Adoptante</FormLabel>
+                        <Select
+                          onValueChange={(value) => field.onChange(parseInt(value))}
+                          defaultValue={field.value?.toString()}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecciona un adoptante" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {users.map((user) => (
+                              <SelectItem key={user.id} value={user.id.toString()}>
+                                {user.nombres} {user.apellidos}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="experienciaPreviaDetalles"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>¿Tienes experiencia previa cuidando mascotas?</FormLabel>
                         <FormControl>
                           <Textarea {...field} />
                         </FormControl>
@@ -332,47 +246,199 @@ export function AdoptionForm() {
                       </FormItem>
                     )}
                   />
-                )}
 
-                <FormField
-                  control={form.control}
-                  name="razonAdopcion"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>¿Por qué deseas adoptar una mascota?</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                  <FormField
+                    control={form.control}
+                    name="tipoVivienda"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>¿En qué tipo de vivienda resides?</FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            className="flex flex-col space-y-1"
+                          >
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="casa" />
+                              </FormControl>
+                              <FormLabel className="font-normal">Casa</FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="apartamento" />
+                              </FormControl>
+                              <FormLabel className="font-normal">Apartamento</FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="otro" />
+                              </FormControl>
+                              <FormLabel className="font-normal">Otro</FormLabel>
+                            </FormItem>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="tieneEspacioExterior"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>¿Tienes espacio exterior (patio, jardín, terraza)?</FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            className="flex space-x-4"
+                          >
+                            <FormItem className="flex items-center space-x-2">
+                              <FormControl>
+                                <RadioGroupItem value="si" />
+                              </FormControl>
+                              <FormLabel className="font-normal">Sí</FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-2">
+                              <FormControl>
+                                <RadioGroupItem value="no" />
+                              </FormControl>
+                              <FormLabel className="font-normal">No</FormLabel>
+                            </FormItem>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+
+              {currentStage === "entrevista" && (
+                <div className="space-y-6">
+                  <h3 className="text-lg font-medium">Entrevista Detallada</h3>
+
+                  <FormField
+                    control={form.control}
+                    name="horasAtencionDiaria"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>¿Cuántas horas al día podrás dedicarle a tu mascota?</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="tieneOtrasMascotas"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>¿Tienes otras mascotas actualmente?</FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              if (value === "no") {
+                                form.setValue("otrasMascotasDetalles", "");
+                              }
+                            }}
+                            defaultValue={field.value}
+                            className="flex space-x-4"
+                          >
+                            <FormItem className="flex items-center space-x-2">
+                              <FormControl>
+                                <RadioGroupItem value="si" />
+                              </FormControl>
+                              <FormLabel className="font-normal">Sí</FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-2">
+                              <FormControl>
+                                <RadioGroupItem value="no" />
+                              </FormControl>
+                              <FormLabel className="font-normal">No</FormLabel>
+                            </FormItem>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {form.watch("tieneOtrasMascotas") === "si" && (
+                    <FormField
+                      control={form.control}
+                      name="otrasMascotasDetalles"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Cuéntanos sobre tus mascotas actuales</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   )}
-                />
+                </div>
+              )}
 
-                <FormField
-                  control={form.control}
-                  name="compromisosVeterinarios"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>¿Cómo planeas manejar los compromisos veterinarios y de salud de tu mascota?</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              {currentStage === "adopcion" && (
+                <div className="space-y-6">
+                  <h3 className="text-lg font-medium">Fase Final de Adopción</h3>
 
-              <div className="flex justify-end space-x-4">
+                  <FormField
+                    control={form.control}
+                    name="razonAdopcion"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>¿Por qué deseas adoptar una mascota?</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="compromisosVeterinarios"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>¿Cómo planeas manejar los compromisos veterinarios y de salud de tu mascota?</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+
+              <div className="flex justify-between space-x-4">
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate("/dashboard/adopciones")}
+                  onClick={() => {
+                    if (currentStage === "cuestionario") {
+                      navigate("/dashboard/adopciones");
+                    } else {
+                      previousStage();
+                    }
+                  }}
                 >
-                  Cancelar
+                  {currentStage === "cuestionario" ? "Cancelar" : "Anterior"}
                 </Button>
                 <Button type="submit" className="bg-[#FF5C7F] hover:bg-[#FF5C7F]/90">
-                  Crear Adopción
+                  {currentStage === "adopcion" ? "Finalizar Adopción" : "Siguiente"}
                 </Button>
               </div>
             </form>
