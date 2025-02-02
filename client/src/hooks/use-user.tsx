@@ -31,13 +31,11 @@ export function useUser() {
           },
         });
 
-        // Handle 401 specifically and return null (not authenticated)
         if (response.status === 401) {
           console.log("[Auth Client] Usuario no autenticado");
           return null;
         }
 
-        // For other non-200 responses, throw an error
         if (!response.ok) {
           throw new Error(`Error HTTP: ${response.status}`);
         }
@@ -53,12 +51,21 @@ export function useUser() {
         return data;
       } catch (error) {
         console.error("[Auth Client] Error al verificar sesión:", error);
-        return null; // Return null on error to avoid retries
+        return null;
       }
     },
     retry: false,
-    staleTime: Infinity,
+    staleTime: 1000 * 60 * 30, // Cache for 30 minutes
+    cacheTime: 1000 * 60 * 60, // Keep in cache for 1 hour
   });
+
+  const navigateByRole = (user: AuthResponse["user"]) => {
+    if (user.rolNombre === "ADMIN") {
+      setLocation("/dashboard/panel-de-control");
+    } else {
+      setLocation("/user/adopciones");
+    }
+  };
 
   const login = async (credentials: Pick<InsertUser, "correo" | "password">) => {
     try {
@@ -73,12 +80,7 @@ export function useUser() {
         credentials: "include",
       });
 
-      let data;
-      try {
-        data = await response.json();
-      } catch (e) {
-        throw new Error("Error al procesar respuesta del servidor");
-      }
+      const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data?.error || "Error al iniciar sesión");
@@ -86,8 +88,11 @@ export function useUser() {
 
       console.log("[Auth Client] Login exitoso:", data);
 
-      // Actualizar el caché de React Query con los datos del usuario
+      // Update cache immediately
       queryClient.setQueryData(["/api/user"], data.user);
+
+      // Navigate based on role
+      navigateByRole(data.user);
 
       return {
         ok: true as const,
@@ -116,19 +121,19 @@ export function useUser() {
         credentials: "include",
       });
 
-      let data;
-      try {
-        data = await response.json();
-      } catch (e) {
-        throw new Error("Error al procesar respuesta del servidor");
-      }
+      const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data?.error || "Error al registrar usuario");
       }
 
       console.log("[Auth Client] Registro exitoso:", data);
+
+      // Update cache immediately
       queryClient.setQueryData(["/api/user"], data.user);
+
+      // Navigate based on role
+      navigateByRole(data.user);
 
       return {
         ok: true as const,
@@ -155,20 +160,20 @@ export function useUser() {
         },
       });
 
-      let data;
-      try {
-        data = await response.json();
-      } catch (e) {
-        throw new Error("Error al procesar respuesta del servidor");
-      }
+      const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data?.error || "Error al cerrar sesión");
       }
 
       console.log("[Auth Client] Logout exitoso");
+
+      // Clear user data from cache
       queryClient.setQueryData(["/api/user"], null);
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+
       setLocation("/auth/login");
+
       return { 
         ok: true as const,
         message: data.message || "Sesión cerrada exitosamente"
