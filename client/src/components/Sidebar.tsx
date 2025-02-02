@@ -1,9 +1,11 @@
 import { Link, useLocation } from "wouter";
 import { Home, PawPrint, Heart, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
 
 export function Sidebar() {
   const [location] = useLocation();
+  const { user } = useAuth();
 
   const navItems = [
     {
@@ -11,26 +13,35 @@ export function Sidebar() {
       label: "Panel de Control",
       href: "/dashboard/panel-de-control",
       description: "Vista general del sistema",
+      roles: ["admin", "shelter", "adoptante"]
     },
     {
       icon: PawPrint,
       label: "Mascotas",
       href: "/dashboard/mascotas",
       description: "Gestionar mascotas disponibles",
+      roles: ["admin", "shelter"]
     },
     {
       icon: Heart,
       label: "Adopciones",
       href: "/dashboard/adopciones",
       description: "Solicitudes de adopción",
+      roles: ["admin", "shelter"]
     },
     {
       icon: Users,
       label: "Usuarios",
       href: "/dashboard/usuarios",
       description: "Gestión de usuarios",
+      roles: ["admin"]
     },
   ];
+
+  // Filtrar elementos de navegación según el rol del usuario
+  const filteredNavItems = navItems.filter(
+    item => user && item.roles.includes(user.role)
+  );
 
   return (
     <aside
@@ -52,7 +63,7 @@ export function Sidebar() {
 
         <nav className="flex-1 px-4 pb-4">
           <div className="space-y-1">
-            {navItems.map((item) => (
+            {filteredNavItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -98,9 +109,9 @@ export function Sidebar() {
               <Users className="w-4 h-4 text-gray-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900">Admin</p>
+              <p className="text-sm font-medium text-gray-900">{user?.nombres}</p>
               <p className="text-xs text-gray-500 truncate">
-                admin@petadopt.es
+                {user?.correo}
               </p>
             </div>
           </div>
