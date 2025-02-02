@@ -68,7 +68,11 @@ export default function AuthPage() {
         description: isLogin ? "Sesión iniciada correctamente" : "Registro exitoso",
       });
       if (result.ok) {
-        navigate("/dashboard");
+        if (result.user?.rolNombre === "ADMIN") {
+          navigate("/dashboard");
+        } else {
+          navigate("/user/adopciones");
+        }
       }
     } catch (error) {
       toast({

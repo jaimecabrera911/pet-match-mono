@@ -78,6 +78,7 @@ function Router() {
       <Route path="/auth/registro-adoptante" component={RegistroAdoptante} />
       <Route path="/auth/login" component={AuthPage} />
       <Route path="/cuestionario-adopcion" component={CuestionarioAdopcion} />
+      <Route path="/user/adopciones" component={UserAdoptions} />
       <Route path="/dashboard/*">
         {(params) => (
           <DashboardLayout>
