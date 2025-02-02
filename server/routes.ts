@@ -42,7 +42,8 @@ export function registerRoutes(app: Express): Server {
           id: user.id,
           correo: user.correo,
           nombres: user.nombres,
-          apellidos: user.apellidos
+          apellidos: user.apellidos,
+          rolNombre: user.rolNombre
         }
       });
     } catch (error) {
