@@ -109,7 +109,14 @@ export function AdoptionForm() {
             currentStage === "entrevista" ? "Entrevista guardada" : 
             "Adopción guardada"} correctamente`
       });
-      navigate("/dashboard/adopciones");
+
+      if (currentStage === "cuestionario") {
+        setCurrentStage("entrevista");
+      } else if (currentStage === "entrevista") {
+        setCurrentStage("adopcion");
+      } else {
+        navigate("/dashboard/adopciones");
+      }
     },
     onError: () => {
       toast({
