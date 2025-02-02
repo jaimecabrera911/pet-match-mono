@@ -3,16 +3,9 @@ import { IVerifyOptions, Strategy as LocalStrategy } from "passport-local";
 import { type Express } from "express";
 import session from "express-session";
 import createMemoryStore from "memorystore";
-import { createHash } from "crypto";
 import { users, insertUserSchema, type SelectUser } from "@db/schema";
 import { db } from "@db";
 import { eq } from "drizzle-orm";
-
-const crypto = {
-  hash: (password: string) => {
-    return createHash("sha256").update(password).digest("hex");
-  },
-};
 
 declare global {
   namespace Express {
@@ -49,15 +42,14 @@ export function setupAuth(app: Express) {
         const [user] = await db
           .select()
           .from(users)
-          .where(eq(users.username, username))
+          .where(eq(users.correo, username))
           .limit(1);
 
         if (!user) {
           return done(null, false, { message: "Usuario incorrecto." });
         }
 
-        const hashedPassword = crypto.hash(password);
-        if (hashedPassword !== user.password) {
+        if (password !== user.password) {
           return done(null, false, { message: "Contraseña incorrecta." });
         }
 
@@ -88,7 +80,6 @@ export function setupAuth(app: Express) {
   app.post("/api/register", async (req, res, next) => {
     try {
       const result = insertUserSchema.safeParse(req.body);
-      console.log(result);
       if (!result.success) {
         return res
           .status(400)
@@ -98,26 +89,19 @@ export function setupAuth(app: Express) {
           );
       }
 
-      const { username, password } = result.data;
-
       const [existingUser] = await db
         .select()
         .from(users)
-        .where(eq(users.username, username))
+        .where(eq(users.correo, result.data.correo))
         .limit(1);
 
       if (existingUser) {
-        return res.status(400).send("El nombre de usuario ya existe");
+        return res.status(400).send("El correo electrónico ya está registrado");
       }
-
-      const hashedPassword = crypto.hash(password);
 
       const [newUser] = await db
         .insert(users)
-        .values({
-          ...result.data,
-          password: hashedPassword,
-        })
+        .values(result.data)
         .returning();
 
       req.login(newUser, (err) => {
@@ -126,7 +110,12 @@ export function setupAuth(app: Express) {
         }
         return res.json({
           message: "Registro exitoso",
-          user: { id: newUser.id, username: newUser.username },
+          user: { 
+            id: newUser.id, 
+            correo: newUser.correo,
+            nombres: newUser.nombres,
+            apellidos: newUser.apellidos
+          },
         });
       });
     } catch (error) {
@@ -135,16 +124,6 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req, res, next) => {
-    const result = insertUserSchema.safeParse(req.body);
-    if (!result.success) {
-      return res
-        .status(400)
-        .send(
-          "Entrada inválida: " +
-            result.error.issues.map((i) => i.message).join(", "),
-        );
-    }
-
     passport.authenticate(
       "local",
       (err: any, user: Express.User | false, info: IVerifyOptions) => {
@@ -165,7 +144,12 @@ export function setupAuth(app: Express) {
 
           return res.json({
             message: "Inicio de sesión exitoso",
-            user: { id: user.id, username: user.username },
+            user: { 
+              id: user.id, 
+              correo: user.correo,
+              nombres: user.nombres,
+              apellidos: user.apellidos
+            },
           });
         });
       },

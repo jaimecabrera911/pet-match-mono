@@ -5,6 +5,7 @@ import { AdoptionSteps } from "@/components/AdoptionSteps";
 import { VideoGallery } from "@/components/VideoGallery";
 import { SuccessStories } from "@/components/SuccessStories";
 import { Heart, Instagram, Facebook, MessageCircle } from "lucide-react";
+import { Link } from "wouter";
 
 export default function Home() {
   return (
@@ -34,9 +35,16 @@ export default function Home() {
             <p className="text-sm text-gray-200 mb-6 max-w-xl mx-auto">
               Dale una segunda oportunidad a un amigo peludo.
             </p>
-            <Button size="sm" className="rounded-full px-6 bg-primary hover:bg-primary/90">
-              Conocer más
-            </Button>
+            <div className="flex justify-center gap-4">
+              <Button size="sm" className="rounded-full px-6 bg-primary hover:bg-primary/90">
+                Conocer más
+              </Button>
+              <Link href="/auth">
+                <Button size="sm" className="rounded-full px-6 bg-white text-primary hover:bg-gray-100">
+                  Iniciar Sesión
+                </Button>
+              </Link>
+            </div>
           </div>
         </section>
 
