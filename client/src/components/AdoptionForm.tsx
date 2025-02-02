@@ -81,7 +81,6 @@ export function AdoptionForm() {
       tieneOtrasMascotas: "no",
       otrasMascotasDetalles: "",
     },
-    mode: "onChange",
   });
 
   const createAdoptionMutation = useMutation({
@@ -104,7 +103,11 @@ export function AdoptionForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/adoptions"] });
       toast({
         title: "Éxito",
-        description: "Solicitud de adopción creada correctamente",
+        description: `${currentStage === "cuestionario" 
+          ? "Solicitud de adopción creada correctamente" 
+          : currentStage === "entrevista"
+          ? "Entrevista guardada correctamente"
+          : "Adopción finalizada correctamente"}`
       });
       navigate("/dashboard/adopciones");
     },
@@ -112,59 +115,17 @@ export function AdoptionForm() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "No se pudo crear la solicitud de adopción",
+        description: "No se pudo guardar la información",
       });
     },
   });
 
-  const nextStage = async () => {
-    const stages: ("cuestionario" | "entrevista" | "adopcion")[] = [
-      "cuestionario",
-      "entrevista",
-      "adopcion",
-    ];
-    const currentIndex = stages.indexOf(currentStage);
-
-    // Validar solo los campos de la etapa actual
-    let isValid = true;
-    if (currentStage === "cuestionario") {
-      isValid = await form.trigger(["petId", "userId", "experienciaPreviaDetalles", "tipoVivienda", "tieneEspacioExterior"]);
-    } else if (currentStage === "entrevista") {
-      isValid = await form.trigger(["horasAtencionDiaria", "tieneOtrasMascotas", "otrasMascotasDetalles"]);
-    }
-
-    if (!isValid) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Por favor completa todos los campos requeridos",
-      });
-      return;
-    }
-
-    if (currentIndex < stages.length - 1) {
-      setCurrentStage(stages[currentIndex + 1]);
-    }
-  };
-
-  const previousStage = () => {
-    const stages: ("cuestionario" | "entrevista" | "adopcion")[] = [
-      "cuestionario",
-      "entrevista",
-      "adopcion",
-    ];
-    const currentIndex = stages.indexOf(currentStage);
-    if (currentIndex > 0) {
-      setCurrentStage(stages[currentIndex - 1]);
-    }
+  const saveCurrentStage = async (data: AdoptionFormData) => {
+    await createAdoptionMutation.mutateAsync(data);
   };
 
   const onSubmit = async (data: AdoptionFormData) => {
-    if (currentStage === "adopcion") {
-      await createAdoptionMutation.mutateAsync(data);
-    } else {
-      nextStage();
-    }
+    await saveCurrentStage(data);
   };
 
   return (
@@ -442,32 +403,16 @@ export function AdoptionForm() {
                 </div>
               )}
 
-              <div className="flex justify-between space-x-4">
+              <div className="flex justify-end space-x-4">
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => {
-                    if (currentStage === "cuestionario") {
-                      navigate("/dashboard/adopciones");
-                    } else {
-                      previousStage();
-                    }
-                  }}
+                  onClick={() => navigate("/dashboard/adopciones")}
                 >
-                  {currentStage === "cuestionario" ? "Cancelar" : "Anterior"}
+                  Cancelar
                 </Button>
-                <Button 
-                  type="button" 
-                  className="bg-[#FF5C7F] hover:bg-[#FF5C7F]/90"
-                  onClick={() => {
-                    if (currentStage === "adopcion") {
-                      form.handleSubmit(onSubmit)();
-                    } else {
-                      nextStage();
-                    }
-                  }}
-                >
-                  {currentStage === "adopcion" ? "Finalizar Adopción" : "Siguiente"}
+                <Button type="submit" className="bg-[#FF5C7F] hover:bg-[#FF5C7F]/90">
+                  Guardar {currentStage === "cuestionario" ? "Solicitud" : currentStage === "entrevista" ? "Entrevista" : "Adopción"}
                 </Button>
               </div>
             </form>

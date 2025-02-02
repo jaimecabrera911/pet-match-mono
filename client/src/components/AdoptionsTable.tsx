@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Table,
   TableBody,
@@ -18,6 +18,8 @@ import { Button } from "@/components/ui/button";
 import { Eye, Check, X } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 
 interface Adoption {
   id: number;
@@ -40,29 +42,52 @@ interface Adoption {
 }
 
 export function AdoptionsTable() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [, navigate] = useLocation();
+
   const { data: adoptions = [], isLoading } = useQuery<Adoption[]>({
     queryKey: ["/api/adoptions"],
   });
 
-  const handleStatusChange = async (adoptionId: number, newStatus: string) => {
-    try {
-      const response = await fetch(`/api/adoptions/${adoptionId}`, {
+  const updateAdoptionMutation = useMutation({
+    mutationFn: async ({ id, status, etapa }: { id: number; status?: string; etapa?: string }) => {
+      const response = await fetch(`/api/adoptions/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status, etapa }),
       });
 
       if (!response.ok) {
-        throw new Error("Error al actualizar el estado");
+        throw new Error("Error al actualizar la adopción");
       }
 
-      // Recargar los datos
-      window.location.reload();
-    } catch (error) {
-      console.error("Error:", error);
-    }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/adoptions"] });
+      toast({
+        title: "Éxito",
+        description: "Adopción actualizada correctamente",
+      });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se pudo actualizar la adopción",
+      });
+    },
+  });
+
+  const handleStatusChange = async (adoptionId: number, newStatus: string) => {
+    await updateAdoptionMutation.mutateAsync({ id: adoptionId, status: newStatus });
+  };
+
+  const handleEtapaChange = async (adoptionId: number, newEtapa: string) => {
+    await updateAdoptionMutation.mutateAsync({ id: adoptionId, etapa: newEtapa });
   };
 
   if (isLoading) {
@@ -120,30 +145,27 @@ export function AdoptionsTable() {
                 })}
               </TableCell>
               <TableCell>
-                <div className="flex items-center">
-                  {adoption.etapa === "cuestionario" && (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      Cuestionario
-                    </span>
-                  )}
-                  {adoption.etapa === "entrevista" && (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                      Entrevista
-                    </span>
-                  )}
-                  {adoption.etapa === "adopcion" && (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Adopción
-                    </span>
-                  )}
-                </div>
+                <Select
+                  value={adoption.etapa}
+                  onValueChange={(value: "cuestionario" | "entrevista" | "adopcion") =>
+                    handleEtapaChange(adoption.id, value)
+                  }
+                >
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cuestionario">Cuestionario</SelectItem>
+                    <SelectItem value="entrevista">Entrevista</SelectItem>
+                    <SelectItem value="adopcion">Adopción</SelectItem>
+                  </SelectContent>
+                </Select>
               </TableCell>
               <TableCell>
                 <Select
-                  defaultValue={adoption.status}
-                  onValueChange={(value) =>
-                    handleStatusChange(adoption.id, value)
-                  }
+                  value={adoption.status}
+                  onValueChange={(value) => handleStatusChange(adoption.id, value)}
+                  disabled={adoption.etapa !== "adopcion"}
                 >
                   <SelectTrigger className="w-[140px]">
                     <SelectValue />
@@ -160,21 +182,28 @@ export function AdoptionsTable() {
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() =>
-                      handleStatusChange(adoption.id, "approved")
-                    }
+                    onClick={() => navigate(`/dashboard/adopciones/${adoption.id}`)}
                   >
-                    <Check className="h-4 w-4 text-green-500" />
+                    <Eye className="h-4 w-4" />
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() =>
-                      handleStatusChange(adoption.id, "rejected")
-                    }
-                  >
-                    <X className="h-4 w-4 text-red-500" />
-                  </Button>
+                  {adoption.etapa === "adopcion" && (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleStatusChange(adoption.id, "approved")}
+                      >
+                        <Check className="h-4 w-4 text-green-500" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleStatusChange(adoption.id, "rejected")}
+                      >
+                        <X className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </>
+                  )}
                 </div>
               </TableCell>
             </TableRow>
