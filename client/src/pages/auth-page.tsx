@@ -94,13 +94,21 @@ export default function AuthPage() {
               </Button>
             </form>
           </Form>
+          {isLogin && (
+            <div className="mt-4 text-center">
+              <span className="text-sm text-gray-600">¿No tienes una cuenta? </span>
+              <Link href="/registro-adoptante">
+                <a className="text-sm text-primary hover:underline">Regístrate como adoptante</a>
+              </Link>
+            </div>
+          )}
           <Button
             variant="link"
-            className="w-full mt-4"
+            className="w-full mt-2"
             onClick={() => setIsLogin(!isLogin)}
           >
             {isLogin
-              ? "¿No tienes cuenta? Regístrate"
+              ? "¿Eres administrador? Regístrate aquí"
               : "¿Ya tienes cuenta? Inicia sesión"}
           </Button>
         </CardContent>
