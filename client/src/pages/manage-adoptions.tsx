@@ -1,12 +1,31 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { AdoptionTable } from "@/components/AdoptionTable";
+import { AdoptionsTable } from "@/components/AdoptionsTable";
+
+interface Adoption {
+  id: number;
+  status: "pending" | "approved" | "rejected";
+  applicationDate: string;
+  notes: string | null;
+  pet: {
+    id: number;
+    name: string;
+    breed: string;
+    imageUrl: string;
+  };
+  user: {
+    id: number;
+    nombres: string;
+    apellidos: string;
+    correo: string;
+  };
+}
 
 export default function ManageAdoptions() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: adoptions, isLoading } = useQuery({
+  const { data: adoptions = [], isLoading } = useQuery<Adoption[]>({
     queryKey: ["/api/adoptions"],
   });
 
@@ -55,8 +74,8 @@ export default function ManageAdoptions() {
       </div>
 
       <div className="bg-white rounded-lg shadow">
-        <AdoptionTable
-          adoptions={adoptions || []}
+        <AdoptionsTable
+          adoptions={adoptions}
           onUpdateStatus={handleUpdateStatus}
           isLoading={isLoading}
         />
