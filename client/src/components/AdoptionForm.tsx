@@ -79,9 +79,9 @@ export function AdoptionForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/adoptions"] });
       toast({
         title: "Éxito",
-        description: "Solicitud de adopción creada correctamente",
+        description: "Solicitud de adopción creada correctamente. Por favor, complete la entrevista.",
       });
-      navigate("/dashboard/adopciones");
+      navigate("/dashboard/adopciones/entrevista");
     },
     onError: () => {
       toast({

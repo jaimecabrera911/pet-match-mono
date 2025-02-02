@@ -16,6 +16,7 @@ import { MobileNav } from "@/components/MobileNav";
 import Home from "@/pages/Home";
 import RegistroAdoptante from "@/pages/registro-adoptante";
 import AuthPage from "./pages/auth-page";
+import { AdoptionInterview } from "@/components/AdoptionInterview";
 
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -50,6 +51,9 @@ function DashboardRouter() {
       </Route>
       <Route path="/dashboard/adopciones/crear">
         {() => <AdoptionForm />}
+      </Route>
+      <Route path="/dashboard/adopciones/entrevista">
+        {() => <AdoptionInterview />}
       </Route>
       <Route path="/dashboard/usuarios">
         {() => <ManageUsers />}
