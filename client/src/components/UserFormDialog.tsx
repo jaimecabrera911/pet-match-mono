@@ -28,9 +28,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { insertUserSchema, type SelectUser, type InsertUser, documentTypes } from "@db/schema";
 
-// Define available roles
-const userRoles = ["USER", "ADMIN"] as const;
-
 interface UserFormDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -90,15 +87,14 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
 
   const createUserMutation = useMutation({
     mutationFn: async (data: InsertUser) => {
-      const formattedData = {
-        ...data,
-        fechaNacimiento: data.fechaNacimiento.toISOString(),
-      };
-
+      console.log("Sending data:", data); // Add logging
       const response = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formattedData),
+        body: JSON.stringify({
+          ...data,
+          fechaNacimiento: data.fechaNacimiento.toISOString(),
+        }),
         credentials: "include",
       });
 
@@ -119,6 +115,7 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
       form.reset();
     },
     onError: (error: Error) => {
+      console.error("Error creating user:", error); // Add logging
       toast({
         variant: "destructive",
         title: "Error",
@@ -128,23 +125,22 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
   });
 
   const updateUserMutation = useMutation({
-    mutationFn: async (data: InsertUser) => {
-      if (!user) return;
-
-      const formattedData = {
-        ...data,
-        fechaNacimiento: data.fechaNacimiento ? new Date(data.fechaNacimiento).toISOString() : null,
-      };
+    mutationFn: async (data: InsertUser & { id?: number }) => {
+      if (!user?.id) return;
 
       const response = await fetch(`/api/users/${user.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formattedData),
+        body: JSON.stringify({
+          ...data,
+          fechaNacimiento: data.fechaNacimiento.toISOString(),
+        }),
         credentials: "include",
       });
 
       if (!response.ok) {
-        throw new Error("Error al actualizar el usuario");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al actualizar el usuario");
       }
 
       return response.json();
@@ -157,20 +153,25 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
       });
       onClose();
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "No se pudo actualizar el usuario",
+        description: error.message,
       });
     },
   });
 
   const onSubmit = async (data: InsertUser) => {
-    if (user) {
-      await updateUserMutation.mutateAsync(data);
-    } else {
-      await createUserMutation.mutateAsync(data);
+    console.log("Form submitted with data:", data); // Add logging
+    try {
+      if (user) {
+        await updateUserMutation.mutateAsync(data);
+      } else {
+        await createUserMutation.mutateAsync(data);
+      }
+    } catch (error) {
+      console.error("Error in form submission:", error); // Add logging
     }
   };
 
@@ -289,17 +290,17 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
               <FormField
                 control={form.control}
                 name="fechaNacimiento"
-                render={({ field: { value, onChange, ...field } }) => (
+                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Fecha de Nacimiento</FormLabel>
                     <FormControl>
                       <Input
                         type="date"
                         {...field}
-                        value={value ? new Date(value).toISOString().split('T')[0] : ''}
+                        value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''}
                         onChange={(e) => {
-                          const date = e.target.value ? new Date(e.target.value) : null;
-                          onChange(date);
+                          const date = e.target.value ? new Date(e.target.value) : new Date();
+                          field.onChange(date);
                         }}
                       />
                     </FormControl>
@@ -370,27 +371,13 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
 
               <FormField
                 control={form.control}
-                name="rolNombre"
+                 name="departamento"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Rol</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccione rol" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {userRoles.map((rol) => (
-                          <SelectItem key={rol} value={rol}>
-                            {rol === "USER" ? "Usuario" : "Administrador"}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormLabel>Departamento</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

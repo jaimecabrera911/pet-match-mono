@@ -22,13 +22,17 @@ const authSchema = z.object({
   numeroDocumento: z.string().min(1, "El número de documento es requerido"),
   nombres: z.string().min(1, "El nombre es requerido"),
   apellidos: z.string().min(1, "Los apellidos son requeridos"),
+  genero: z.enum(["M", "F", "O"], {
+    required_error: "Género es requerido",
+    invalid_type_error: "Género debe ser M, F u O",
+  }).default("M"),
+  fechaNacimiento: z.coerce.date(),
   telefono: z.string().min(1, "El teléfono es requerido"),
   correo: z.string().email("Correo electrónico inválido"),
   direccion: z.string().min(1, "La dirección es requerida"),
   ciudad: z.string().min(1, "La ciudad es requerida"),
   departamento: z.string().min(1, "El departamento es requerido"),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
-  roleId: z.number().default(2), // 2 for normal users
 });
 
 type AuthFormData = z.infer<typeof authSchema>;
@@ -42,8 +46,9 @@ export default function AuthPage() {
   const form = useForm<AuthFormData>({
     resolver: zodResolver(authSchema),
     defaultValues: {
-      roleId: 2,
       tipoDocumento: "CEDULA DE CIUDADANIA",
+      genero: "M",
+      fechaNacimiento: new Date(),
     },
   });
 
@@ -145,6 +150,51 @@ export default function AuthPage() {
                         <FormLabel>Apellidos</FormLabel>
                         <FormControl>
                           <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="genero"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Género</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccione género" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="M">Masculino</SelectItem>
+                            <SelectItem value="F">Femenino</SelectItem>
+                            <SelectItem value="O">Otro</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="fechaNacimiento"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Fecha de Nacimiento</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="date"
+                            {...field}
+                            value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''}
+                            onChange={(e) => {
+                              const date = e.target.value ? new Date(e.target.value) : new Date();
+                              field.onChange(date);
+                            }}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
