@@ -65,8 +65,8 @@ export default function RegistroAdoptante() {
     <div className="min-h-screen bg-gray-50">
       <Navigation />
       
-      <div className="container max-w-2xl mx-auto py-8 px-4">
-        <div className="bg-white rounded-lg shadow p-6">
+      <div className="container max-w-2xl mx-auto py-8 px-4 flex-1 flex items-center justify-center">
+        <div className="bg-white rounded-lg shadow p-6 w-full">
           <h1 className="text-2xl font-bold mb-6">Registro de Adoptante</h1>
           
           <Form {...form}>
