@@ -18,16 +18,15 @@ export default function Home() {
           <div
             className="absolute inset-0 bg-cover bg-center z-0"
             style={{
-              backgroundImage: "url('https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&w=1920')"
+              backgroundImage:
+                "url('https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&w=1920')",
             }}
           >
             <div className="absolute inset-0 bg-black/40" />
           </div>
           <div className="max-w-screen-2xl mx-auto text-center relative z-10 px-4 w-full">
             <div className="flex justify-center mb-4">
-              <div className="w-12 h-12 text-primary">
-                🦴
-              </div>
+              <div className="w-12 h-12 text-primary">🦴</div>
             </div>
             <h1 className="text-3xl font-semibold mb-2 text-white">
               Adopta una mascota
@@ -36,11 +35,17 @@ export default function Home() {
               Dale una segunda oportunidad a un amigo peludo.
             </p>
             <div className="flex justify-center gap-4">
-              <Button size="sm" className="rounded-full px-6 bg-primary hover:bg-primary/90">
+              <Button
+                size="sm"
+                className="rounded-full px-6 bg-primary hover:bg-primary/90"
+              >
                 Conocer más
               </Button>
-              <Link href="/auth">
-                <Button size="sm" className="rounded-full px-6 bg-white text-primary hover:bg-gray-100">
+              <Link href="/auth/login">
+                <Button
+                  size="sm"
+                  className="rounded-full px-6 bg-white text-primary hover:bg-gray-100"
+                >
                   Iniciar Sesión
                 </Button>
               </Link>
@@ -87,14 +92,10 @@ export default function Home() {
                 <Heart className="h-6 w-6 text-white" />
               </div>
               <p className="text-sm text-gray-600">
-                Somos una fundación sin fines de
-                lucro dedicada a rescatar perros en
-                situación de abandono o maltrato.
-                Les brindamos una segunda
-                oportunidad, ofreciéndoles el amor
-                y cuidado que merecen y
-                ayudándoles a encontrar un hogar
-                lleno de cariño.
+                Somos una fundación sin fines de lucro dedicada a rescatar
+                perros en situación de abandono o maltrato. Les brindamos una
+                segunda oportunidad, ofreciéndoles el amor y cuidado que merecen
+                y ayudándoles a encontrar un hogar lleno de cariño.
               </p>
               <div className="flex space-x-4 mt-4">
                 <a href="#" className="text-gray-400 hover:text-gray-600">
@@ -112,7 +113,9 @@ export default function Home() {
             {/* Right column - Contact form */}
             <div className="space-y-4">
               <div>
-                <h3 className="text-[#FF5C7F] font-medium mb-2">¿Tienes inquietudes o consultas?</h3>
+                <h3 className="text-[#FF5C7F] font-medium mb-2">
+                  ¿Tienes inquietudes o consultas?
+                </h3>
                 <p className="text-sm text-gray-600 mb-4">Registra tus datos</p>
               </div>
               <form className="space-y-4">
@@ -139,7 +142,10 @@ export default function Home() {
           </div>
         </section>
 
-        <footer id="footer" className="bg-white border-t text-sm text-gray-500 py-8 px-4">
+        <footer
+          id="footer"
+          className="bg-white border-t text-sm text-gray-500 py-8 px-4"
+        >
           <div className="max-w-screen-2xl mx-auto text-center px-4 w-full">
             <p>© 2024 PetMatch. Todos los derechos reservados.</p>
           </div>
