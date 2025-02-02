@@ -19,6 +19,7 @@ import RegistroAdoptante from "@/pages/registro-adoptante";
 import AuthPage from "./pages/auth-page";
 import { AdoptionInterview } from "@/components/AdoptionInterview";
 import { useUser } from "@/hooks/use-user";
+import { useEffect } from "react";
 
 function ProtectedRoute({ 
   children, 
@@ -30,17 +31,21 @@ function ProtectedRoute({
   const { user, isLoading } = useUser();
   const [, setLocation] = useLocation();
 
+  useEffect(() => {
+    if (!isLoading) {
+      if (!user) {
+        setLocation("/auth/login");
+      } else if (!allowedRoles.includes(user.rolNombre)) {
+        setLocation(user.rolNombre === "ADMIN" ? "/dashboard" : "/user/adopciones");
+      }
+    }
+  }, [user, isLoading, allowedRoles, setLocation]);
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  if (!user) {
-    setLocation("/auth/login");
-    return null;
-  }
-
-  if (!allowedRoles.includes(user.rolNombre)) {
-    setLocation(user.rolNombre === "ADMIN" ? "/dashboard" : "/user/adopciones");
+  if (!user || !allowedRoles.includes(user.rolNombre)) {
     return null;
   }
 
