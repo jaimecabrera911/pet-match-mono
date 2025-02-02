@@ -81,6 +81,7 @@ export function AdoptionForm() {
       tieneOtrasMascotas: "no",
       otrasMascotasDetalles: "",
     },
+    mode: "onChange",
   });
 
   const createAdoptionMutation = useMutation({
@@ -116,13 +117,31 @@ export function AdoptionForm() {
     },
   });
 
-  const nextStage = () => {
+  const nextStage = async () => {
     const stages: ("cuestionario" | "entrevista" | "adopcion")[] = [
       "cuestionario",
       "entrevista",
       "adopcion",
     ];
     const currentIndex = stages.indexOf(currentStage);
+
+    // Validar solo los campos de la etapa actual
+    let isValid = true;
+    if (currentStage === "cuestionario") {
+      isValid = await form.trigger(["petId", "userId", "experienciaPreviaDetalles", "tipoVivienda", "tieneEspacioExterior"]);
+    } else if (currentStage === "entrevista") {
+      isValid = await form.trigger(["horasAtencionDiaria", "tieneOtrasMascotas", "otrasMascotasDetalles"]);
+    }
+
+    if (!isValid) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Por favor completa todos los campos requeridos",
+      });
+      return;
+    }
+
     if (currentIndex < stages.length - 1) {
       setCurrentStage(stages[currentIndex + 1]);
     }
@@ -141,11 +160,11 @@ export function AdoptionForm() {
   };
 
   const onSubmit = async (data: AdoptionFormData) => {
-    if (currentStage !== "adopcion") {
+    if (currentStage === "adopcion") {
+      await createAdoptionMutation.mutateAsync(data);
+    } else {
       nextStage();
-      return;
     }
-    await createAdoptionMutation.mutateAsync(data);
   };
 
   return (
@@ -437,7 +456,17 @@ export function AdoptionForm() {
                 >
                   {currentStage === "cuestionario" ? "Cancelar" : "Anterior"}
                 </Button>
-                <Button type="submit" className="bg-[#FF5C7F] hover:bg-[#FF5C7F]/90">
+                <Button 
+                  type="button" 
+                  className="bg-[#FF5C7F] hover:bg-[#FF5C7F]/90"
+                  onClick={() => {
+                    if (currentStage === "adopcion") {
+                      form.handleSubmit(onSubmit)();
+                    } else {
+                      nextStage();
+                    }
+                  }}
+                >
                   {currentStage === "adopcion" ? "Finalizar Adopción" : "Siguiente"}
                 </Button>
               </div>
