@@ -17,15 +17,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const authSchema = z.object({
+const loginSchema = z.object({
+  correo: z.string().email("Correo electrónico inválido"),
+  password: z.string().min(1, "La contraseña es requerida"),
+});
+
+const registerSchema = z.object({
   tipoDocumento: z.enum(["CEDULA DE CIUDADANIA", "PASAPORTE", "CEDULA DE EXTRANJERIA", "TARJETA DE IDENTIDAD"]),
   numeroDocumento: z.string().min(1, "El número de documento es requerido"),
   nombres: z.string().min(1, "El nombre es requerido"),
   apellidos: z.string().min(1, "Los apellidos son requeridos"),
-  genero: z.enum(["M", "F", "O"], {
-    required_error: "Género es requerido",
-    invalid_type_error: "Género debe ser M, F u O",
-  }).default("M"),
+  genero: z.enum(["M", "F", "O"]),
   fechaNacimiento: z.coerce.date(),
   telefono: z.string().min(1, "El teléfono es requerido"),
   correo: z.string().email("Correo electrónico inválido"),
@@ -35,7 +37,8 @@ const authSchema = z.object({
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
 });
 
-type AuthFormData = z.infer<typeof authSchema>;
+type LoginFormData = z.infer<typeof loginSchema>;
+type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -43,8 +46,16 @@ export default function AuthPage() {
   const { login, register } = useUser();
   const [, navigate] = useLocation();
 
-  const form = useForm<AuthFormData>({
-    resolver: zodResolver(authSchema),
+  const loginForm = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      correo: "",
+      password: "",
+    },
+  });
+
+  const registerForm = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       tipoDocumento: "CEDULA DE CIUDADANIA",
       numeroDocumento: "",
@@ -56,15 +67,16 @@ export default function AuthPage() {
       direccion: "",
       ciudad: "",
       departamento: "",
-      ocupacion: "",
       correo: "",
       password: "",
     },
   });
 
-  const onSubmit = async (data: AuthFormData) => {
+  const onLoginSubmit = async (data: LoginFormData) => {
     try {
-      const result = await (isLogin ? login(data) : register(data));
+      console.log("Intentando iniciar sesión con:", data);
+      const result = await login(data);
+
       if (!result.ok) {
         toast({
           variant: "destructive",
@@ -76,7 +88,40 @@ export default function AuthPage() {
 
       toast({
         title: "¡Éxito!",
-        description: isLogin ? "Sesión iniciada correctamente" : "Registro exitoso",
+        description: "Sesión iniciada correctamente",
+      });
+
+      if (result.user?.rolNombre === "ADMIN") {
+        navigate("/dashboard");
+      } else {
+        navigate("/user/adopciones");
+      }
+    } catch (error) {
+      console.error("Error en login:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Ocurrió un error inesperado",
+      });
+    }
+  };
+
+  const onRegisterSubmit = async (data: RegisterFormData) => {
+    try {
+      const result = await register(data);
+
+      if (!result.ok) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: result.message,
+        });
+        return;
+      }
+
+      toast({
+        title: "¡Éxito!",
+        description: "Registro exitoso",
       });
 
       if (result.user?.rolNombre === "ADMIN") {
@@ -100,36 +145,71 @@ export default function AuthPage() {
           <CardTitle>{isLogin ? "Iniciar Sesión" : "Registrarse"}</CardTitle>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {!isLogin && (
-                <>
-                  <FormField
-                    control={form.control}
-                    name="tipoDocumento"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tipo de Documento</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccione tipo de documento" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="CEDULA DE CIUDADANIA">Cédula de Ciudadanía</SelectItem>
-                            <SelectItem value="PASAPORTE">Pasaporte</SelectItem>
-                            <SelectItem value="CEDULA DE EXTRANJERIA">Cédula de Extranjería</SelectItem>
-                            <SelectItem value="TARJETA DE IDENTIDAD">Tarjeta de Identidad</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+          {isLogin ? (
+            <Form {...loginForm}>
+              <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+                <FormField
+                  control={loginForm.control}
+                  name="correo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Correo Electrónico</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="email" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                  <FormField
-                    control={form.control}
+                <FormField
+                  control={loginForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Contraseña</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="password" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button type="submit" className="w-full">
+                  Iniciar Sesión
+                </Button>
+              </form>
+            </Form>
+          ) : (
+            <Form {...registerForm}>
+              <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
+                {/* Registration form fields */}
+                <FormField
+                  control={registerForm.control}
+                  name="tipoDocumento"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo de Documento</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccione tipo de documento" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="CEDULA DE CIUDADANIA">Cédula de Ciudadanía</SelectItem>
+                          <SelectItem value="PASAPORTE">Pasaporte</SelectItem>
+                          <SelectItem value="CEDULA DE EXTRANJERIA">Cédula de Extranjería</SelectItem>
+                          <SelectItem value="TARJETA DE IDENTIDAD">Tarjeta de Identidad</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                    control={registerForm.control}
                     name="numeroDocumento"
                     render={({ field }) => (
                       <FormItem>
@@ -143,7 +223,7 @@ export default function AuthPage() {
                   />
 
                   <FormField
-                    control={form.control}
+                    control={registerForm.control}
                     name="nombres"
                     render={({ field }) => (
                       <FormItem>
@@ -157,7 +237,7 @@ export default function AuthPage() {
                   />
 
                   <FormField
-                    control={form.control}
+                    control={registerForm.control}
                     name="apellidos"
                     render={({ field }) => (
                       <FormItem>
@@ -171,7 +251,7 @@ export default function AuthPage() {
                   />
 
                   <FormField
-                    control={form.control}
+                    control={registerForm.control}
                     name="genero"
                     render={({ field }) => (
                       <FormItem>
@@ -194,13 +274,13 @@ export default function AuthPage() {
                   />
 
                   <FormField
-                    control={form.control}
+                    control={registerForm.control}
                     name="fechaNacimiento"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Fecha de Nacimiento</FormLabel>
                         <FormControl>
-                          <Input
+                         <Input
                             type="date"
                             value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''}
                             onChange={(e) => {
@@ -215,7 +295,7 @@ export default function AuthPage() {
                   />
 
                   <FormField
-                    control={form.control}
+                    control={registerForm.control}
                     name="telefono"
                     render={({ field }) => (
                       <FormItem>
@@ -229,7 +309,7 @@ export default function AuthPage() {
                   />
 
                   <FormField
-                    control={form.control}
+                    control={registerForm.control}
                     name="direccion"
                     render={({ field }) => (
                       <FormItem>
@@ -243,7 +323,7 @@ export default function AuthPage() {
                   />
 
                   <FormField
-                    control={form.control}
+                    control={registerForm.control}
                     name="ciudad"
                     render={({ field }) => (
                       <FormItem>
@@ -257,7 +337,7 @@ export default function AuthPage() {
                   />
 
                   <FormField
-                    control={form.control}
+                    control={registerForm.control}
                     name="departamento"
                     render={({ field }) => (
                       <FormItem>
@@ -269,42 +349,38 @@ export default function AuthPage() {
                       </FormItem>
                     )}
                   />
-                </>
-              )}
-
-              <FormField
-                control={form.control}
-                name="correo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Correo Electrónico</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="email" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Contraseña</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button type="submit" className="w-full">
-                {isLogin ? "Iniciar Sesión" : "Registrarse"}
-              </Button>
-            </form>
-          </Form>
+                  <FormField
+                    control={registerForm.control}
+                    name="correo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Correo Electrónico</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="email" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                <FormField
+                  control={registerForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Contraseña</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" className="w-full">
+                  Registrarse
+                </Button>
+              </form>
+            </Form>
+          )}
 
           {isLogin && (
             <div className="mt-4 text-center">
