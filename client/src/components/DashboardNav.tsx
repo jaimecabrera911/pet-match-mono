@@ -10,39 +10,41 @@ export function DashboardNav() {
       href: "/dashboard/panel-de-control",
       label: "Dashboard",
       icon: Home,
-      roles: ["admin", "shelter", "adoptante"]
+      roles: ["admin", "shelter", "adoptante"],
     },
     {
       href: "/dashboard/mascotas",
       label: "Mascotas",
       icon: PawPrint,
-      roles: ["admin", "shelter"]
+      roles: ["admin", "shelter"],
     },
     {
       href: "/dashboard/adopciones",
       label: "Adopciones",
       icon: Heart,
-      roles: ["admin", "shelter"]
+      roles: ["admin", "shelter"],
     },
     {
       href: "/dashboard/usuarios",
       label: "Usuarios",
       icon: Users,
-      roles: ["admin"]
-    }
+      roles: ["admin"],
+    },
   ];
 
   // Filtrar elementos de navegación según el rol del usuario
+  // Verificar la estructura del objeto 'user' para confirmar qué propiedad contiene el rol del usuario.
+  console.log("User object:", user); // Añadir un log para saber la estructura del objeto user
   const filteredNavItems = navItems.filter(
-    item => user && item.roles.includes(user.role)
+    (item) => user && item.roles.includes(user.role),
   );
 
   return (
     <nav className="fixed inset-y-0 left-0 w-64 bg-white border-r">
       <div className="flex flex-col h-full">
         <div className="p-6">
-          <Link 
-            href="/dashboard/panel-de-control" 
+          <Link
+            href="/dashboard/panel-de-control"
             className="flex items-center gap-2 text-xl font-semibold text-gray-900"
           >
             <Heart className="h-6 w-6 text-[#FF5C7F]" />

@@ -29,28 +29,32 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
 
-  const { data: user, error, isLoading } = useQuery({
-    queryKey: ['/api/user'],
+  const {
+    data: user,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ["/api/user"],
     queryFn: async () => {
       try {
-        const res = await fetch('/api/user');
+        const res = await fetch("/api/user");
         if (!res.ok) {
           if (res.status === 401) {
-            sessionStorage.removeItem('user');
+            sessionStorage.removeItem("user");
             return null;
           }
-          throw new Error('Error al obtener datos del usuario');
+          throw new Error("Error al obtener datos del usuario");
         }
         const data = await res.json();
-        sessionStorage.setItem('user', JSON.stringify(data));
+        sessionStorage.setItem("user", JSON.stringify(data));
         return data;
       } catch (error) {
-        sessionStorage.removeItem('user');
+        sessionStorage.removeItem("user");
         throw error;
       }
     },
     initialData: () => {
-      const storedUser = sessionStorage.getItem('user');
+      const storedUser = sessionStorage.getItem("user");
       return storedUser ? JSON.parse(storedUser) : null;
     },
     retry: false,
@@ -59,30 +63,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginCredentials) => {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(credentials),
-        credentials: 'include',
+        credentials: "include",
       });
 
       if (!res.ok) {
         const errorData = await res.text();
-        throw new Error(errorData || 'Credenciales inválidas');
+        throw new Error(errorData || "Credenciales inválidas");
       }
 
       return res.json();
     },
     onSuccess: (userData: User) => {
-      sessionStorage.setItem('user', JSON.stringify(userData));
-      queryClient.setQueryData(['/api/user'], userData);
+      sessionStorage.setItem("user", JSON.stringify(userData));
+      queryClient.setQueryData(["/api/user"], userData);
       toast({
         title: "¡Bienvenido!",
         description: `Has iniciado sesión como ${userData.role}`,
       });
     },
     onError: (error: Error) => {
-      sessionStorage.removeItem('user');
+      sessionStorage.removeItem("user");
       toast({
         title: "Error al iniciar sesión",
         description: error.message,
@@ -93,15 +97,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch('/api/logout', { 
-        method: 'POST',
-        credentials: 'include'
+      const res = await fetch("/api/logout", {
+        method: "POST",
+        credentials: "include",
       });
-      if (!res.ok) throw new Error('Error al cerrar sesión');
+      if (!res.ok) throw new Error("Error al cerrar sesión");
     },
     onSuccess: () => {
-      sessionStorage.removeItem('user');
-      queryClient.setQueryData(['/api/user'], null);
+      sessionStorage.removeItem("user");
+      queryClient.setQueryData(["/api/user"], null);
       toast({
         title: "Sesión cerrada",
         description: "Has cerrado sesión correctamente",
@@ -144,5 +148,5 @@ export function useAuth() {
   if (!context) {
     throw new Error("useAuth debe ser usado dentro de un AuthProvider");
   }
-  return context;
+  return context.user;
 }
