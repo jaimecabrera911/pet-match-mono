@@ -317,7 +317,9 @@ export default function AuthPage() {
             <div className="mt-4 text-center">
               <span className="text-sm text-gray-600">¿No tienes una cuenta? </span>
               <Link href="/auth/registro-adoptante">
-                <a className="text-sm text-primary hover:underline">Regístrate como adoptante</a>
+                <Button variant="link" className="p-0 h-auto font-normal">
+                  Regístrate como adoptante
+                </Button>
               </Link>
             </div>
           )}
