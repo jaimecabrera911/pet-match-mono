@@ -32,13 +32,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { data: user, error, isLoading } = useQuery({
     queryKey: ['/api/user'],
     queryFn: async () => {
-      const res = await fetch('/api/user');
-      if (!res.ok) {
-        if (res.status === 401) return null;
-        throw new Error('Error al obtener datos del usuario');
+      try {
+        const res = await fetch('/api/user');
+        if (!res.ok) {
+          if (res.status === 401) {
+            sessionStorage.removeItem('user');
+            return null;
+          }
+          throw new Error('Error al obtener datos del usuario');
+        }
+        const data = await res.json();
+        sessionStorage.setItem('user', JSON.stringify(data));
+        return data;
+      } catch (error) {
+        sessionStorage.removeItem('user');
+        throw error;
       }
-      const data = await res.json();
-      return data;
+    },
+    initialData: () => {
+      const storedUser = sessionStorage.getItem('user');
+      return storedUser ? JSON.parse(storedUser) : null;
     },
     retry: false,
     staleTime: Infinity,
@@ -61,6 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return res.json();
     },
     onSuccess: (userData: User) => {
+      sessionStorage.setItem('user', JSON.stringify(userData));
       queryClient.setQueryData(['/api/user'], userData);
       toast({
         title: "¡Bienvenido!",
@@ -68,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     },
     onError: (error: Error) => {
+      sessionStorage.removeItem('user');
       toast({
         title: "Error al iniciar sesión",
         description: error.message,
@@ -85,6 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!res.ok) throw new Error('Error al cerrar sesión');
     },
     onSuccess: () => {
+      sessionStorage.removeItem('user');
       queryClient.setQueryData(['/api/user'], null);
       toast({
         title: "Sesión cerrada",

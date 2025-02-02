@@ -10,8 +10,10 @@ import {
 import { PlusCircle, PawPrint, Heart, Users, MapPin } from "lucide-react";
 import type { SelectPet } from "@db/schema";
 import { Sidebar } from "@/components/Sidebar";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Dashboard() {
+  const { user } = useAuth();
   const { data: pets = [], isLoading } = useQuery<SelectPet[]>({
     queryKey: ["/api/pets"],
   });
@@ -52,13 +54,25 @@ export default function Dashboard() {
       <Sidebar />
       <main className="p-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Panel de Control</h1>
-              <p className="text-gray-500 mt-1">
-                Vista general del sistema de adopción
-              </p>
-            </div>
+          <div className="flex flex-col mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Panel de Control</h1>
+            {user && (
+              <div className="mt-2 text-gray-600">
+                <p>
+                  Bienvenido, {user.nombres} {user.apellidos}
+                  <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    {user.role === 'admin' ? 'Administrador' : 
+                     user.role === 'shelter' ? 'Refugio' : 'Adoptante'}
+                  </span>
+                </p>
+              </div>
+            )}
+            <p className="text-gray-500 mt-1">
+              Vista general del sistema de adopción
+            </p>
+          </div>
+
+          <div className="flex justify-end mb-8">
             <Button 
               variant="default" 
               className="bg-[#FF5C7F] hover:bg-[#FF5C7F]/90"
