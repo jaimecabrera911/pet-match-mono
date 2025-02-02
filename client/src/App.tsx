@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -27,15 +27,20 @@ function ProtectedRoute({
   children: React.ReactNode;
   allowedRoles?: Array<"USER" | "ADMIN">;
 }) {
-  const { user } = useUser();
+  const { user, isLoading } = useUser();
+  const [, setLocation] = useLocation();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   if (!user) {
-    window.location.href = "/auth/login";
+    setLocation("/auth/login");
     return null;
   }
 
   if (!allowedRoles.includes(user.rolNombre)) {
-    window.location.href = user.rolNombre === "ADMIN" ? "/dashboard" : "/user/adopciones";
+    setLocation(user.rolNombre === "ADMIN" ? "/dashboard" : "/user/adopciones");
     return null;
   }
 

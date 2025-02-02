@@ -21,7 +21,6 @@ export function useUser() {
     queryKey: ["/api/user"],
     retry: false,
     staleTime: Infinity,
-    credentials: 'include',
   });
 
   const login = async (credentials: Pick<InsertUser, "correo" | "password">) => {
@@ -35,13 +34,12 @@ export function useUser() {
         credentials: "include",
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
+        const data = await response.json();
         throw new Error(data.error || "Error al iniciar sesión");
       }
 
-      // Inmediatamente actualizar el caché con los datos del usuario
+      const data = await response.json();
       queryClient.setQueryData(["/api/user"], data.user);
 
       return {
@@ -68,13 +66,12 @@ export function useUser() {
         credentials: "include",
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
+        const data = await response.json();
         throw new Error(data.error || "Error al registrar usuario");
       }
 
-      // Inmediatamente actualizar el caché con los datos del usuario
+      const data = await response.json();
       queryClient.setQueryData(["/api/user"], data.user);
 
       return {
@@ -101,9 +98,7 @@ export function useUser() {
         throw new Error("Error al cerrar sesión");
       }
 
-      // Limpiar el caché del usuario al cerrar sesión
       queryClient.setQueryData(["/api/user"], null);
-
       return { ok: true as const };
     } catch (error) {
       console.error("Error en logout:", error);
