@@ -44,6 +44,8 @@ export function setupAuth(app: Express) {
       },
       async (correo, password, done) => {
         try {
+          console.log("Intentando autenticar usuario:", correo);
+
           const [user] = await db
             .select()
             .from(users)
@@ -51,15 +53,19 @@ export function setupAuth(app: Express) {
             .limit(1);
 
           if (!user) {
+            console.log("Usuario no encontrado:", correo);
             return done(null, false, { message: "Usuario incorrecto." });
           }
 
           if (password !== user.password) {
+            console.log("Contraseña incorrecta para usuario:", correo);
             return done(null, false, { message: "Contraseña incorrecta." });
           }
 
+          console.log("Autenticación exitosa para usuario:", correo);
           return done(null, user);
         } catch (err) {
+          console.error("Error en autenticación:", err);
           return done(err);
         }
       }
@@ -67,11 +73,13 @@ export function setupAuth(app: Express) {
   );
 
   passport.serializeUser((user, done) => {
+    console.log("Serializando usuario:", user.id);
     done(null, user.id);
   });
 
   passport.deserializeUser(async (id: number, done) => {
     try {
+      console.log("Deserializando usuario:", id);
       const [user] = await db
         .select()
         .from(users)
@@ -79,74 +87,25 @@ export function setupAuth(app: Express) {
         .limit(1);
       done(null, user);
     } catch (err) {
+      console.error("Error en deserialización:", err);
       done(err);
     }
   });
 
-  app.post("/api/register", async (req, res, next) => {
-    try {
-      const result = insertUserSchema.safeParse(req.body);
-      if (!result.success) {
-        return res
-          .status(400)
-          .json({
-            error: "Datos inválidos",
-            details: result.error.issues.map((i) => i.message)
-          });
-      }
-
-      const [existingUser] = await db
-        .select()
-        .from(users)
-        .where(eq(users.correo, result.data.correo))
-        .limit(1);
-
-      if (existingUser) {
-        return res.status(400).json({ error: "El correo electrónico ya está registrado" });
-      }
-
-      // Add default values for required fields if not provided
-      const userData = {
-        ...result.data,
-        genero: result.data.genero || "M",
-        fechaNacimiento: result.data.fechaNacimiento || new Date(),
-        rolNombre: result.data.rolNombre || "USER"
-      };
-
-      const [newUser] = await db
-        .insert(users)
-        .values([userData])  // Wrap in array as insert expects array of values
-        .returning();
-
-      req.login(newUser, (err) => {
-        if (err) {
-          return next(err);
-        }
-        return res.status(201).json({
-          message: "Registro exitoso",
-          user: { 
-            id: newUser.id, 
-            correo: newUser.correo,
-            nombres: newUser.nombres,
-            apellidos: newUser.apellidos
-          },
-        });
-      });
-    } catch (error) {
-      console.error("Error en registro:", error);
-      next(error);
-    }
-  });
-
+  // Esta ruta ya no es necesaria ya que estamos usando passport.authenticate
   app.post("/api/login", (req, res, next) => {
+    console.log("Recibida solicitud de login:", req.body);
+
     passport.authenticate(
       "local",
       (err: any, user: Express.User | false, info: IVerifyOptions) => {
         if (err) {
+          console.error("Error en autenticación:", err);
           return next(err);
         }
 
         if (!user) {
+          console.log("Autenticación fallida:", info.message);
           return res
             .status(400)
             .json({ error: info.message ?? "Error al iniciar sesión" });
@@ -154,16 +113,19 @@ export function setupAuth(app: Express) {
 
         req.logIn(user, (err) => {
           if (err) {
+            console.error("Error en login:", err);
             return next(err);
           }
 
+          console.log("Login exitoso para usuario:", user.correo);
           return res.json({
             message: "Inicio de sesión exitoso",
             user: { 
               id: user.id, 
               correo: user.correo,
               nombres: user.nombres,
-              apellidos: user.apellidos
+              apellidos: user.apellidos,
+              rolNombre: user.rolNombre
             },
           });
         });
@@ -172,15 +134,19 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/logout", (req, res) => {
+    console.log("Recibida solicitud de logout");
     req.logout((err) => {
       if (err) {
+        console.error("Error en logout:", err);
         return res.status(500).json({ error: "Error al cerrar sesión" });
       }
+      console.log("Logout exitoso");
       res.json({ message: "Sesión cerrada exitosamente" });
     });
   });
 
   app.get("/api/user", (req, res) => {
+    console.log("Verificando usuario actual:", req.isAuthenticated() ? "autenticado" : "no autenticado");
     if (req.isAuthenticated()) {
       return res.json(req.user);
     }
