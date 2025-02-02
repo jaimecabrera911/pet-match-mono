@@ -23,7 +23,7 @@ import { useLocation } from "wouter";
 
 interface Adoption {
   id: number;
-  status: "pending" | "approved" | "rejected";
+  status: "creada" | "en_entrevista" | "aceptada" | "rechazada";
   etapa: "cuestionario" | "entrevista" | "adopcion";
   applicationDate: string;
   notes: string | null;
@@ -87,7 +87,8 @@ export function AdoptionsTable() {
   };
 
   const handleEtapaChange = async (adoptionId: number, newEtapa: string) => {
-    await updateAdoptionMutation.mutateAsync({ id: adoptionId, etapa: newEtapa });
+    const newStatus = newEtapa === 'entrevista' ? 'en_entrevista' : undefined;
+    await updateAdoptionMutation.mutateAsync({ id: adoptionId, etapa: newEtapa, status: newStatus });
   };
 
   if (isLoading) {
@@ -97,6 +98,36 @@ export function AdoptionsTable() {
       </div>
     );
   }
+
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case 'creada':
+        return 'bg-blue-100 text-blue-800';
+      case 'en_entrevista':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'aceptada':
+        return 'bg-green-100 text-green-800';
+      case 'rechazada':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'creada':
+        return 'Creada';
+      case 'en_entrevista':
+        return 'En Entrevista';
+      case 'aceptada':
+        return 'Aceptada';
+      case 'rechazada':
+        return 'Rechazada';
+      default:
+        return status;
+    }
+  };
 
   return (
     <div className="rounded-md border">
@@ -162,20 +193,9 @@ export function AdoptionsTable() {
                 </Select>
               </TableCell>
               <TableCell>
-                <Select
-                  value={adoption.status}
-                  onValueChange={(value) => handleStatusChange(adoption.id, value)}
-                  disabled={adoption.etapa !== "adopcion"}
-                >
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">Pendiente</SelectItem>
-                    <SelectItem value="approved">Aprobada</SelectItem>
-                    <SelectItem value="rejected">Rechazada</SelectItem>
-                  </SelectContent>
-                </Select>
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor(adoption.status)}`}>
+                  {getStatusLabel(adoption.status)}
+                </span>
               </TableCell>
               <TableCell>
                 <div className="flex space-x-2">
@@ -186,19 +206,19 @@ export function AdoptionsTable() {
                   >
                     <Eye className="h-4 w-4" />
                   </Button>
-                  {adoption.etapa === "adopcion" && (
+                  {adoption.etapa === "adopcion" && adoption.status !== "aceptada" && adoption.status !== "rechazada" && (
                     <>
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => handleStatusChange(adoption.id, "approved")}
+                        onClick={() => handleStatusChange(adoption.id, "aceptada")}
                       >
                         <Check className="h-4 w-4 text-green-500" />
                       </Button>
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => handleStatusChange(adoption.id, "rejected")}
+                        onClick={() => handleStatusChange(adoption.id, "rechazada")}
                       >
                         <X className="h-4 w-4 text-red-500" />
                       </Button>

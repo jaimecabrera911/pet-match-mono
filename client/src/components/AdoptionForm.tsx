@@ -24,7 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { SelectPet, SelectUser } from "@db/schema";
+import { Check, X } from "lucide-react";
 
 const adoptionFormSchema = z.object({
   petId: z.number({
@@ -33,10 +33,9 @@ const adoptionFormSchema = z.object({
   userId: z.number({
     required_error: "Por favor selecciona un usuario",
   }),
-  status: z.enum(["pending", "approved", "rejected"]).default("pending"),
+  status: z.enum(["creada", "en_entrevista", "aceptada", "rechazada"]).default("creada"),
   etapa: z.enum(["cuestionario", "entrevista", "adopcion"]).default("cuestionario"),
   notes: z.string().optional(),
-  // Campos del cuestionario inicial
   experienciaPreviaDetalles: z.string().min(1, "Este campo es requerido"),
   tipoVivienda: z.enum(["casa", "apartamento", "otro"], {
     required_error: "Por favor seleccione un tipo de vivienda",
@@ -44,13 +43,11 @@ const adoptionFormSchema = z.object({
   tieneEspacioExterior: z.enum(["si", "no"], {
     required_error: "Por favor indique si tiene espacio exterior",
   }),
-  // Campos de la entrevista
   horasAtencionDiaria: z.string().min(1, "Este campo es requerido"),
   tieneOtrasMascotas: z.enum(["si", "no"], {
     required_error: "Por favor indique si tiene otras mascotas",
   }),
   otrasMascotasDetalles: z.string().optional(),
-  // Campos de la fase de adopción
   razonAdopcion: z.string().min(1, "Este campo es requerido"),
   compromisosVeterinarios: z.string().min(1, "Este campo es requerido"),
 });
@@ -76,7 +73,7 @@ export function AdoptionForm() {
   const form = useForm<AdoptionFormData>({
     resolver: zodResolver(adoptionFormSchema),
     defaultValues: {
-      status: "pending",
+      status: "creada",
       etapa: "cuestionario",
       tieneOtrasMascotas: "no",
       otrasMascotasDetalles: "",
@@ -84,30 +81,34 @@ export function AdoptionForm() {
   });
 
   const createAdoptionMutation = useMutation({
-    mutationFn: async (data: AdoptionFormData) => {
+    mutationFn: async (data: AdoptionFormData & { action?: 'aprobar' | 'rechazar' }) => {
+      const status = data.action === 'aprobar' ? 'aceptada' : 
+                     data.action === 'rechazar' ? 'rechazada' : 
+                     currentStage === 'entrevista' ? 'en_entrevista' : 'creada';
+
       const response = await fetch("/api/adoptions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ ...data, etapa: currentStage }),
+        body: JSON.stringify({ ...data, status, etapa: currentStage }),
       });
 
       if (!response.ok) {
-        throw new Error("Error al crear la adopción");
+        throw new Error("Error al guardar la información");
       }
 
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/adoptions"] });
       toast({
         title: "Éxito",
-        description: `${currentStage === "cuestionario" 
-          ? "Solicitud de adopción creada correctamente" 
-          : currentStage === "entrevista"
-          ? "Entrevista guardada correctamente"
-          : "Adopción finalizada correctamente"}`
+        description: variables.action ? 
+          `Adopción ${variables.action === 'aprobar' ? 'aprobada' : 'rechazada'} correctamente` :
+          `${currentStage === "cuestionario" ? "Solicitud guardada" : 
+            currentStage === "entrevista" ? "Entrevista guardada" : 
+            "Adopción guardada"} correctamente`
       });
       navigate("/dashboard/adopciones");
     },
@@ -120,12 +121,8 @@ export function AdoptionForm() {
     },
   });
 
-  const saveCurrentStage = async (data: AdoptionFormData) => {
-    await createAdoptionMutation.mutateAsync(data);
-  };
-
-  const onSubmit = async (data: AdoptionFormData) => {
-    await saveCurrentStage(data);
+  const onSubmit = async (data: AdoptionFormData, action?: 'aprobar' | 'rechazar') => {
+    await createAdoptionMutation.mutateAsync({ ...data, action });
   };
 
   return (
@@ -142,9 +139,9 @@ export function AdoptionForm() {
           <div className="mb-8">
             <div className="flex justify-between items-center">
               <div className="flex space-x-2">
-                <div className={`w-3 h-3 rounded-full ${currentStage === "cuestionario" ? "bg-primary" : "bg-gray-200"}`} />
-                <div className={`w-3 h-3 rounded-full ${currentStage === "entrevista" ? "bg-primary" : "bg-gray-200"}`} />
-                <div className={`w-3 h-3 rounded-full ${currentStage === "adopcion" ? "bg-primary" : "bg-gray-200"}`} />
+                <div className="w-3 h-3 rounded-full bg-primary opacity-100" />
+                <div className={`w-3 h-3 rounded-full ${currentStage === "entrevista" || currentStage === "adopcion" ? "bg-primary" : "bg-gray-200"} opacity-40`} />
+                <div className={`w-3 h-3 rounded-full ${currentStage === "adopcion" ? "bg-primary" : "bg-gray-200"} opacity-40`} />
               </div>
               <div className="text-sm text-gray-500">
                 Paso {currentStage === "cuestionario" ? "1" : currentStage === "entrevista" ? "2" : "3"} de 3
@@ -153,7 +150,7 @@ export function AdoptionForm() {
           </div>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit((data) => onSubmit(data))} className="space-y-6">
               {currentStage === "cuestionario" && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-medium">Información Básica</h3>
@@ -403,7 +400,7 @@ export function AdoptionForm() {
                 </div>
               )}
 
-              <div className="flex justify-end space-x-4">
+              <div className="flex justify-between space-x-4">
                 <Button
                   type="button"
                   variant="outline"
@@ -411,9 +408,33 @@ export function AdoptionForm() {
                 >
                   Cancelar
                 </Button>
-                <Button type="submit" className="bg-[#FF5C7F] hover:bg-[#FF5C7F]/90">
-                  Guardar {currentStage === "cuestionario" ? "Solicitud" : currentStage === "entrevista" ? "Entrevista" : "Adopción"}
-                </Button>
+                <div className="flex space-x-2">
+                  {currentStage === "adopcion" ? (
+                    <>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="border-red-500 text-red-500 hover:bg-red-50"
+                        onClick={() => form.handleSubmit((data) => onSubmit(data, 'rechazar'))()}
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Rechazar
+                      </Button>
+                      <Button
+                        type="button"
+                        className="bg-green-500 hover:bg-green-600 text-white"
+                        onClick={() => form.handleSubmit((data) => onSubmit(data, 'aprobar'))()}
+                      >
+                        <Check className="h-4 w-4 mr-2" />
+                        Aprobar
+                      </Button>
+                    </>
+                  ) : (
+                    <Button type="submit" className="bg-[#FF5C7F] hover:bg-[#FF5C7F]/90">
+                      Guardar {currentStage === "cuestionario" ? "Solicitud" : "Entrevista"}
+                    </Button>
+                  )}
+                </div>
               </div>
             </form>
           </Form>
