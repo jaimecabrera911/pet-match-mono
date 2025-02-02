@@ -14,6 +14,12 @@ declare global {
 }
 
 export function setupAuth(app: Express) {
+  // JSON middleware should be first
+  app.use('/api', (req, res, next) => {
+    res.setHeader('Content-Type', 'application/json');
+    next();
+  });
+
   const MemoryStore = createMemoryStore(session);
   const sessionSettings: session.SessionOptions = {
     secret: process.env.REPL_ID || "mascota-adoption-secret",
@@ -105,38 +111,7 @@ export function setupAuth(app: Express) {
     }
   });
 
-  // Error handler middleware to ensure JSON responses
-  const errorHandler = (err: any, req: any, res: any, next: any) => {
-    console.error("[Auth] Error middleware:", err);
-    res.status(500).json({ error: err.message || "Error interno del servidor" });
-  };
-
-  // JSON response middleware
-  const jsonMiddleware = (req: any, res: any, next: any) => {
-    res.setHeader('Content-Type', 'application/json');
-
-    // Override res.send to ensure JSON
-    const originalSend = res.send;
-    res.send = function(body: any) {
-      try {
-        // If body is not already stringified JSON, convert it
-        if (typeof body === 'string' && !body.startsWith('{') && !body.startsWith('[')) {
-          return originalSend.call(this, JSON.stringify({ message: body }));
-        }
-        return originalSend.call(this, body);
-      } catch (err) {
-        next(err);
-      }
-    };
-    next();
-  };
-
-  // Apply middlewares to auth routes
-  const authRoutes = ['/api/login', '/api/logout', '/api/user', '/api/register'];
-  authRoutes.forEach(route => {
-    app.use(route, jsonMiddleware);
-  });
-
+  // Auth routes
   app.post("/api/login", (req, res, next) => {
     console.log("[Auth] Recibida solicitud de login:", req.body);
 
@@ -145,7 +120,7 @@ export function setupAuth(app: Express) {
       (err: any, user: Express.User | false, info: IVerifyOptions) => {
         if (err) {
           console.error("[Auth] Error en autenticación:", err);
-          return next(err);
+          return res.status(500).json({ error: "Error interno del servidor" });
         }
 
         if (!user) {
@@ -156,7 +131,7 @@ export function setupAuth(app: Express) {
         req.logIn(user, (err) => {
           if (err) {
             console.error("[Auth] Error en login:", err);
-            return next(err);
+            return res.status(500).json({ error: "Error al iniciar sesión" });
           }
 
           console.log("[Auth] Login exitoso para usuario:", user.correo);
@@ -201,6 +176,23 @@ export function setupAuth(app: Express) {
     res.status(401).json({ error: "No ha iniciado sesión" });
   });
 
-  // Apply error handler
-  app.use(errorHandler);
+  // Catch-all for unmatched API routes
+  app.use('/api/*', (req, res) => {
+    res.status(404).json({ error: "Ruta no encontrada" });
+  });
+
+  // Error handler that ensures JSON responses
+  app.use((err: any, req: any, res: any, next: any) => {
+    console.error("[Auth] Error middleware:", err);
+
+    // Only handle /api routes
+    if (!req.path.startsWith('/api')) {
+      return next(err);
+    }
+
+    res.status(500).json({ 
+      error: err.message || "Error interno del servidor",
+      status: 500
+    });
+  });
 }
