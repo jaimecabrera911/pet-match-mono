@@ -1,4 +1,4 @@
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -14,45 +14,9 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { DesktopHeader } from "@/components/DesktopHeader";
 import { MobileNav } from "@/components/MobileNav";
 import Home from "@/pages/Home";
-import UserAdoptions from "@/pages/user-adoptions";
 import RegistroAdoptante from "@/pages/registro-adoptante";
 import AuthPage from "./pages/auth-page";
 import { AdoptionInterview } from "@/components/AdoptionInterview";
-import { useUser } from "@/hooks/use-user";
-import { useEffect } from "react";
-
-function ProtectedRoute({
-  children,
-  allowedRoles = ["USER", "ADMIN"],
-}: {
-  children: React.ReactNode;
-  allowedRoles?: Array<"USER" | "ADMIN">;
-}) {
-  const { user, isLoading } = useUser();
-  const [, setLocation] = useLocation();
-
-  useEffect(() => {
-    if (!isLoading && !user) {
-      setLocation("/auth/login");
-      return;
-    }
-
-    if (!isLoading && user && !allowedRoles.includes(user.rolNombre)) {
-      setLocation("/");
-      return;
-    }
-  }, [user, isLoading, allowedRoles, setLocation]);
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!user || !allowedRoles.includes(user.rolNombre)) {
-    return null;
-  }
-
-  return <>{children}</>;
-}
 
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -65,7 +29,9 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
         <header className="fixed top-0 right-0 left-0 md:left-64 z-10">
           <DesktopHeader />
         </header>
-        <main className="pt-16">{children}</main>
+        <main className="pt-16">
+          {children}
+        </main>
       </div>
     </div>
   );
@@ -75,46 +41,22 @@ function DashboardRouter() {
   return (
     <Switch>
       <Route path="/dashboard/panel-de-control">
-        {() => (
-          <ProtectedRoute allowedRoles={["ADMIN"]}>
-            <Dashboard />
-          </ProtectedRoute>
-        )}
+        {() => <Dashboard />}
       </Route>
       <Route path="/dashboard/mascotas">
-        {() => (
-          <ProtectedRoute allowedRoles={["ADMIN"]}>
-            <ManagePets />
-          </ProtectedRoute>
-        )}
+        {() => <ManagePets />}
       </Route>
       <Route path="/dashboard/adopciones">
-        {() => (
-          <ProtectedRoute allowedRoles={["ADMIN"]}>
-            <ManageAdoptions />
-          </ProtectedRoute>
-        )}
+        {() => <ManageAdoptions />}
       </Route>
       <Route path="/dashboard/adopciones/crear">
-        {() => (
-          <ProtectedRoute allowedRoles={["ADMIN"]}>
-            <AdoptionForm />
-          </ProtectedRoute>
-        )}
+        {() => <AdoptionForm />}
       </Route>
       <Route path="/dashboard/adopciones/entrevista">
-        {() => (
-          <ProtectedRoute allowedRoles={["ADMIN"]}>
-            <AdoptionInterview />
-          </ProtectedRoute>
-        )}
+        {() => <AdoptionInterview />}
       </Route>
       <Route path="/dashboard/usuarios">
-        {() => (
-          <ProtectedRoute allowedRoles={["ADMIN"]}>
-            <ManageUsers />
-          </ProtectedRoute>
-        )}
+        {() => <ManageUsers />}
       </Route>
       <Route path="/dashboard">
         {() => {
@@ -122,7 +64,9 @@ function DashboardRouter() {
           return null;
         }}
       </Route>
-      <Route>{() => <NotFound />}</Route>
+      <Route>
+        {() => <NotFound />}
+      </Route>
     </Switch>
   );
 }
@@ -134,20 +78,11 @@ function Router() {
       <Route path="/auth/registro-adoptante" component={RegistroAdoptante} />
       <Route path="/auth/login" component={AuthPage} />
       <Route path="/cuestionario-adopcion" component={CuestionarioAdopcion} />
-      <Route path="/user/adopciones">
-        {() => (
-          <ProtectedRoute allowedRoles={["USER"]}>
-            <UserAdoptions />
-          </ProtectedRoute>
-        )}
-      </Route>
       <Route path="/dashboard/*">
         {(params) => (
-          <ProtectedRoute allowedRoles={["ADMIN"]}>
-            <DashboardLayout>
-              <DashboardRouter />
-            </DashboardLayout>
-          </ProtectedRoute>
+          <DashboardLayout>
+            <DashboardRouter />
+          </DashboardLayout>
         )}
       </Route>
       <Route component={NotFound} />
