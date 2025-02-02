@@ -10,6 +10,7 @@ import ManageUsers from "@/pages/manage-users";
 import ManageAdoptions from "@/pages/manage-adoptions";
 import { AdoptionForm } from "@/components/AdoptionForm";
 import CuestionarioAdopcion from "@/pages/cuestionario-adopcion";
+import UserAdoptions from "@/pages/user-adoptions";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { DesktopHeader } from "@/components/DesktopHeader";
 import { MobileNav } from "@/components/MobileNav";
@@ -48,6 +49,9 @@ function DashboardRouter() {
       </Route>
       <Route path="/dashboard/adopciones">
         {() => <ManageAdoptions />}
+      </Route>
+      <Route path="/dashboard/mis-adopciones">
+        {() => <UserAdoptions />}
       </Route>
       <Route path="/dashboard/adopciones/crear">
         {() => <AdoptionForm />}
