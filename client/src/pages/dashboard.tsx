@@ -7,7 +7,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { PlusCircle, PawPrint, Heart, Users, MapPin } from "lucide-react";
+import { PlusCircle, PawPrint, Heart, Users, MapPin, User } from "lucide-react";
 import type { SelectPet } from "@db/schema";
 import { Sidebar } from "@/components/Sidebar";
 import { useAuth } from "@/hooks/use-auth";
@@ -58,9 +58,12 @@ export default function Dashboard() {
             <h1 className="text-3xl font-bold text-gray-900">Panel de Control</h1>
             {user && (
               <div className="mt-2 text-gray-600">
-                <p>
-                  Bienvenido, {user.nombres} {user.apellidos}
-                  <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <p className="flex items-center gap-2">
+                  <User className="h-5 w-5 text-gray-400" />
+                  <span>
+                    Bienvenido, {user.nombres} {user.apellidos}
+                  </span>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                     {user.role === 'admin' ? 'Administrador' : 
                      user.role === 'shelter' ? 'Refugio' : 'Adoptante'}
                   </span>
