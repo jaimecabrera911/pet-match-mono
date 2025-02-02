@@ -28,12 +28,22 @@ export function useUser() {
           credentials: "include",
         });
 
+        // Handle 401 specifically
+        if (response.status === 401) {
+          console.log("[Auth Client] Usuario no autenticado");
+          return null;
+        }
+
+        // Check if response is ok before trying to parse JSON
         if (!response.ok) {
-          if (response.status === 401) {
-            console.log("[Auth Client] Usuario no autenticado");
-            return null;
-          }
-          throw new Error("Error al obtener datos del usuario");
+          throw new Error(`Error HTTP: ${response.status}`);
+        }
+
+        // Verify content type
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          console.error("[Auth Client] Respuesta no es JSON:", contentType);
+          throw new Error("La respuesta del servidor no es JSON");
         }
 
         const data = await response.json();
@@ -41,11 +51,11 @@ export function useUser() {
         return data;
       } catch (error) {
         console.error("[Auth Client] Error al verificar sesión:", error);
-        return null;
+        throw error;
       }
     },
+    retry: 0,
     staleTime: Infinity,
-    retry: false,
   });
 
   const login = async (credentials: Pick<InsertUser, "correo" | "password">) => {
@@ -63,6 +73,11 @@ export function useUser() {
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.error || "Error al iniciar sesión");
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("La respuesta del servidor no es JSON");
       }
 
       const data: AuthResponse = await response.json();
@@ -111,6 +126,11 @@ export function useUser() {
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.error || "Error al registrar usuario");
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("La respuesta del servidor no es JSON");
       }
 
       const data: AuthResponse = await response.json();
