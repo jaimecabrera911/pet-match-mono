@@ -35,7 +35,7 @@ export function Sidebar() {
       href: "/dashboard/usuarios",
       description: "Gestión de usuarios",
       roles: ["admin"]
-    },
+    }
   ];
 
   // Filtrar elementos de navegación según el rol del usuario
@@ -53,22 +53,18 @@ export function Sidebar() {
   };
 
   return (
-    <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200">
+    <div className="fixed inset-y-0 left-0 w-64 bg-white border-r border-gray-100">
       <div className="flex flex-col h-full">
         {/* Logo */}
         <div className="p-6">
-          <Link href="/dashboard/panel-de-control" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#FF5C7F] rounded-xl flex items-center justify-center">
-              <Heart className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-xl font-semibold text-gray-900">
-              PetMatch
-            </span>
+          <Link href="/dashboard/panel-de-control" className="flex items-center gap-2">
+            <Heart className="h-6 w-6 text-[#FF5C7F]" />
+            <span className="text-xl font-semibold">PetMatch</span>
           </Link>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 pb-4 overflow-y-auto">
+        <nav className="flex-1 px-3">
           <div className="space-y-1">
             {filteredNavItems.map((item) => (
               <Link
@@ -76,42 +72,35 @@ export function Sidebar() {
                 href={item.href}
                 className={cn(
                   "flex flex-col p-3 rounded-lg transition-colors",
-                  "hover:bg-gray-50 group",
+                  "hover:bg-gray-50",
                   location === item.href
-                    ? "bg-gray-50 shadow-sm"
-                    : "text-gray-700"
+                    ? "bg-gray-50"
+                    : "text-gray-600"
                 )}
               >
-                <div className="flex items-center">
-                  <item.icon
+                <div className="flex items-center gap-3">
+                  <item.icon 
                     className={cn(
-                      "w-5 h-5 transition-colors",
-                      location === item.href
-                        ? "text-[#FF5C7F]"
-                        : "text-gray-400 group-hover:text-gray-600"
-                    )}
+                      "h-5 w-5",
+                      location === item.href 
+                        ? "text-[#FF5C7F]" 
+                        : "text-gray-400"
+                    )} 
                   />
-                  <span
-                    className={cn(
-                      "ml-3 font-medium",
-                      location === item.href
-                        ? "text-gray-900"
-                        : "text-gray-600 group-hover:text-gray-900"
-                    )}
-                  >
+                  <span className="font-medium text-gray-900">
                     {item.label}
                   </span>
                 </div>
-                <span className="mt-0.5 ml-8 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-500 ml-8">
                   {item.description}
-                </span>
+                </p>
               </Link>
             ))}
           </div>
         </nav>
 
-        {/* User Profile & Logout */}
-        <div className="p-4 mt-auto border-t">
+         {/* User Profile & Logout */}
+         <div className="p-4 mt-auto border-t">
           <div className="flex items-center gap-3 px-2">
             <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
               <Users className="w-4 h-4 text-gray-600" />
