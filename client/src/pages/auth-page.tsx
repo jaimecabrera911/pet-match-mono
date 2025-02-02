@@ -47,8 +47,18 @@ export default function AuthPage() {
     resolver: zodResolver(authSchema),
     defaultValues: {
       tipoDocumento: "CEDULA DE CIUDADANIA",
+      numeroDocumento: "",
+      nombres: "",
+      apellidos: "",
       genero: "M",
       fechaNacimiento: new Date(),
+      telefono: "",
+      direccion: "",
+      ciudad: "",
+      departamento: "",
+      ocupacion: "",
+      correo: "",
+      password: "",
     },
   });
 
@@ -192,7 +202,6 @@ export default function AuthPage() {
                         <FormControl>
                           <Input
                             type="date"
-                            {...field}
                             value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''}
                             onChange={(e) => {
                               const date = e.target.value ? new Date(e.target.value) : new Date();
@@ -213,20 +222,6 @@ export default function AuthPage() {
                         <FormLabel>Teléfono</FormLabel>
                         <FormControl>
                           <Input {...field} type="tel" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="correo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Correo Electrónico</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="email" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -277,21 +272,19 @@ export default function AuthPage() {
                 </>
               )}
 
-              {isLogin && (
-                <FormField
-                  control={form.control}
-                  name="correo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Correo Electrónico</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="email" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
+              <FormField
+                control={form.control}
+                name="correo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Correo Electrónico</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="email" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
@@ -316,11 +309,11 @@ export default function AuthPage() {
           {isLogin && (
             <div className="mt-4 text-center">
               <span className="text-sm text-gray-600">¿No tienes una cuenta? </span>
-              <Link href="/auth/registro-adoptante">
-                <Button variant="link" className="p-0 h-auto font-normal">
+              <Button asChild variant="link" className="p-0 h-auto font-normal">
+                <Link href="/auth/registro-adoptante">
                   Regístrate como adoptante
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           )}
 
