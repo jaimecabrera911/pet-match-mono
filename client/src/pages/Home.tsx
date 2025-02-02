@@ -35,16 +35,18 @@ export default function Home() {
               Dale una segunda oportunidad a un amigo peludo.
             </p>
             <div className="flex justify-center gap-4">
-              <Button
-                size="sm"
-                className="rounded-full px-6 bg-primary hover:bg-primary/90"
-              >
-                Conocer más
-              </Button>
+              <Link href="/mascotas">
+                <Button
+                  size="lg"
+                  className="rounded-full px-8 bg-primary hover:bg-primary/90"
+                >
+                  Conocer más
+                </Button>
+              </Link>
               <Link href="/auth/login">
                 <Button
-                  size="sm"
-                  className="rounded-full px-6 bg-white text-primary hover:bg-gray-100"
+                  size="lg"
+                  className="rounded-full px-8 bg-white text-primary hover:bg-gray-100"
                 >
                   Iniciar Sesión
                 </Button>
@@ -53,37 +55,31 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Pets Section */}
         <section id="mascotas" className="py-12 px-4">
           <div className="max-w-screen-2xl mx-auto px-4 w-full">
             <h2 className="text-xl font-semibold text-center mb-2">
               Busca tu amigo
             </h2>
             <p className="text-sm text-center text-gray-500 mb-8">
-              #Encontramos a nuestro listado de mascotas en toda España
+              Encontrarás a tu compañero ideal
             </p>
             <PetGrid />
           </div>
         </section>
 
-        {/* Adoption Steps */}
         <section id="proceso" className="py-12 px-4 bg-gray-50">
           <div className="max-w-screen-2xl mx-auto px-4 w-full">
             <AdoptionSteps />
           </div>
         </section>
 
-        {/* Video Gallery Section */}
         <section id="consejos" className="py-12 px-4">
           <div className="max-w-screen-2xl mx-auto px-4 w-full">
             <VideoGallery />
           </div>
         </section>
 
-        {/* Success Stories Section */}
         <SuccessStories />
-
-        {/* Contact Section */}
         <section id="contacto" className="py-12 px-4 bg-gray-50">
           <div className="max-w-screen-2xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 px-4 w-full">
             {/* Left column - About text */}

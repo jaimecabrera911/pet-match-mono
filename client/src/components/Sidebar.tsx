@@ -6,34 +6,34 @@ export function Sidebar() {
   const [location] = useLocation();
 
   const navItems = [
-    { 
-      icon: Home, 
-      label: "Panel de Control", 
+    {
+      icon: Home,
+      label: "Panel de Control",
       href: "/dashboard/panel-de-control",
-      description: "Vista general del sistema" 
+      description: "Vista general del sistema",
     },
-    { 
-      icon: PawPrint, 
-      label: "Mascotas", 
+    {
+      icon: PawPrint,
+      label: "Mascotas",
       href: "/dashboard/mascotas",
-      description: "Gestionar mascotas disponibles" 
+      description: "Gestionar mascotas disponibles",
     },
-    { 
-      icon: Heart, 
-      label: "Adopciones", 
+    {
+      icon: Heart,
+      label: "Adopciones",
       href: "/dashboard/adopciones",
-      description: "Solicitudes de adopción" 
+      description: "Solicitudes de adopción",
     },
-    { 
-      icon: Users, 
-      label: "Usuarios", 
+    {
+      icon: Users,
+      label: "Usuarios",
       href: "/dashboard/usuarios",
-      description: "Gestión de usuarios" 
-    }
+      description: "Gestión de usuarios",
+    },
   ];
 
   return (
-    <aside 
+    <aside
       className="fixed left-0 top-0 z-40 h-screen w-64 bg-white border-r border-gray-200 shadow-sm"
       role="navigation"
       aria-label="Menú principal"
@@ -45,7 +45,7 @@ export function Sidebar() {
               <Heart className="h-5 w-5 text-white" />
             </div>
             <span className="text-xl font-semibold text-gray-900">
-              PetAdopt
+              PetMatch
             </span>
           </Link>
         </div>
@@ -53,32 +53,32 @@ export function Sidebar() {
         <nav className="flex-1 px-4 pb-4">
           <div className="space-y-1">
             {navItems.map((item) => (
-              <Link 
+              <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
                   "flex flex-col p-3 rounded-lg transition-colors",
                   "hover:bg-gray-50 group",
-                  location === item.href 
-                    ? "bg-gray-50 shadow-sm" 
-                    : "text-gray-700"
+                  location === item.href
+                    ? "bg-gray-50 shadow-sm"
+                    : "text-gray-700",
                 )}
               >
                 <div className="flex items-center">
-                  <item.icon 
+                  <item.icon
                     className={cn(
                       "w-5 h-5 transition-colors",
-                      location === item.href 
-                        ? "text-[#FF5C7F]" 
-                        : "text-gray-400 group-hover:text-gray-600"
+                      location === item.href
+                        ? "text-[#FF5C7F]"
+                        : "text-gray-400 group-hover:text-gray-600",
                     )}
                   />
-                  <span 
+                  <span
                     className={cn(
                       "ml-3 font-medium",
-                      location === item.href 
-                        ? "text-gray-900" 
-                        : "text-gray-600 group-hover:text-gray-900"
+                      location === item.href
+                        ? "text-gray-900"
+                        : "text-gray-600 group-hover:text-gray-900",
                     )}
                   >
                     {item.label}
@@ -99,7 +99,9 @@ export function Sidebar() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900">Admin</p>
-              <p className="text-xs text-gray-500 truncate">admin@petadopt.es</p>
+              <p className="text-xs text-gray-500 truncate">
+                admin@petadopt.es
+              </p>
             </div>
           </div>
         </div>
