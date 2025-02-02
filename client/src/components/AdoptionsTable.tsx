@@ -51,6 +51,7 @@ export function AdoptionsTable() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ status, aprobada }),
+        credentials: 'include',
       });
 
       if (!response.ok) {
