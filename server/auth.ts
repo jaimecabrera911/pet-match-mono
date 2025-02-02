@@ -17,12 +17,13 @@ export function setupAuth(app: Express) {
   const MemoryStore = createMemoryStore(session);
   const sessionSettings: session.SessionOptions = {
     secret: process.env.REPL_ID || "mascota-adoption-secret",
-    resave: false,
-    saveUninitialized: false,
+    resave: true,
+    saveUninitialized: true,
     cookie: {
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
       secure: false, // Set to true only if using HTTPS
       httpOnly: true,
+      sameSite: 'lax'
     },
     store: new MemoryStore({
       checkPeriod: 86400000,
@@ -49,7 +50,7 @@ export function setupAuth(app: Express) {
       },
       async (correo, password, done) => {
         try {
-          console.log("Intentando autenticar usuario:", correo);
+          console.log("[Auth] Intentando autenticar usuario:", correo);
 
           const [user] = await db
             .select()
@@ -58,19 +59,19 @@ export function setupAuth(app: Express) {
             .limit(1);
 
           if (!user) {
-            console.log("Usuario no encontrado:", correo);
+            console.log("[Auth] Usuario no encontrado:", correo);
             return done(null, false, { message: "Usuario incorrecto." });
           }
 
           if (password !== user.password) {
-            console.log("Contraseña incorrecta para usuario:", correo);
+            console.log("[Auth] Contraseña incorrecta para usuario:", correo);
             return done(null, false, { message: "Contraseña incorrecta." });
           }
 
-          console.log("Autenticación exitosa para usuario:", correo);
+          console.log("[Auth] Autenticación exitosa para usuario:", correo);
           return done(null, user);
         } catch (err) {
-          console.error("Error en autenticación:", err);
+          console.error("[Auth] Error en autenticación:", err);
           return done(err);
         }
       }
@@ -78,13 +79,13 @@ export function setupAuth(app: Express) {
   );
 
   passport.serializeUser((user, done) => {
-    console.log("Serializando usuario:", user.id);
+    console.log("[Auth] Serializando usuario:", user.id);
     done(null, user.id);
   });
 
   passport.deserializeUser(async (id: number, done) => {
     try {
-      console.log("Deserializando usuario:", id);
+      console.log("[Auth] Deserializando usuario:", id);
       const [user] = await db
         .select()
         .from(users)
@@ -92,30 +93,31 @@ export function setupAuth(app: Express) {
         .limit(1);
 
       if (!user) {
-        console.log("Usuario no encontrado en deserialización:", id);
+        console.log("[Auth] Usuario no encontrado en deserialización:", id);
         return done(null, false);
       }
 
+      console.log("[Auth] Usuario deserializado exitosamente:", user.id);
       done(null, user);
     } catch (err) {
-      console.error("Error en deserialización:", err);
+      console.error("[Auth] Error en deserialización:", err);
       done(err);
     }
   });
 
   app.post("/api/login", (req, res, next) => {
-    console.log("Recibida solicitud de login:", req.body);
+    console.log("[Auth] Recibida solicitud de login:", req.body);
 
     passport.authenticate(
       "local",
       (err: any, user: Express.User | false, info: IVerifyOptions) => {
         if (err) {
-          console.error("Error en autenticación:", err);
+          console.error("[Auth] Error en autenticación:", err);
           return next(err);
         }
 
         if (!user) {
-          console.log("Autenticación fallida:", info.message);
+          console.log("[Auth] Autenticación fallida:", info.message);
           return res
             .status(400)
             .json({ error: info.message ?? "Error al iniciar sesión" });
@@ -123,11 +125,11 @@ export function setupAuth(app: Express) {
 
         req.logIn(user, (err) => {
           if (err) {
-            console.error("Error en login:", err);
+            console.error("[Auth] Error en login:", err);
             return next(err);
           }
 
-          console.log("Login exitoso para usuario:", user.correo);
+          console.log("[Auth] Login exitoso para usuario:", user.correo);
           return res.json({
             message: "Inicio de sesión exitoso",
             user: { 
@@ -144,19 +146,19 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/logout", (req, res) => {
-    console.log("Recibida solicitud de logout");
+    console.log("[Auth] Recibida solicitud de logout");
     req.logout((err) => {
       if (err) {
-        console.error("Error en logout:", err);
+        console.error("[Auth] Error en logout:", err);
         return res.status(500).json({ error: "Error al cerrar sesión" });
       }
-      console.log("Logout exitoso");
+      console.log("[Auth] Logout exitoso");
       res.json({ message: "Sesión cerrada exitosamente" });
     });
   });
 
   app.get("/api/user", (req, res) => {
-    console.log("Verificando usuario actual:", req.isAuthenticated() ? "autenticado" : "no autenticado");
+    console.log("[Auth] Verificando usuario actual:", req.isAuthenticated() ? "autenticado" : "no autenticado");
     if (req.isAuthenticated() && req.user) {
       return res.json({
         id: req.user.id,

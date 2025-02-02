@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import type { InsertUser } from "@db/schema";
+import { useLocation } from "wouter";
 
 interface AuthResponse {
   message: string;
@@ -16,21 +17,32 @@ interface AuthResponse {
 export function useUser() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   const { data: user, isLoading } = useQuery<AuthResponse["user"]>({
     queryKey: ["/api/user"],
     queryFn: async () => {
-      const response = await fetch("/api/user", {
-        credentials: "include",
-      });
-      if (!response.ok) {
-        if (response.status === 401) {
-          return null;
+      try {
+        console.log("[Auth Client] Verificando sesión de usuario");
+        const response = await fetch("/api/user", {
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            console.log("[Auth Client] Usuario no autenticado");
+            return null;
+          }
+          throw new Error("Error al obtener datos del usuario");
         }
-        throw new Error("Error al obtener datos del usuario");
+
+        const data = await response.json();
+        console.log("[Auth Client] Usuario autenticado:", data);
+        return data;
+      } catch (error) {
+        console.error("[Auth Client] Error al verificar sesión:", error);
+        return null;
       }
-      const data = await response.json();
-      return data;
     },
     staleTime: Infinity,
     retry: false,
@@ -38,6 +50,7 @@ export function useUser() {
 
   const login = async (credentials: Pick<InsertUser, "correo" | "password">) => {
     try {
+      console.log("[Auth Client] Intentando iniciar sesión");
       const response = await fetch("/api/login", {
         method: "POST",
         headers: {
@@ -53,15 +66,29 @@ export function useUser() {
       }
 
       const data: AuthResponse = await response.json();
+      console.log("[Auth Client] Login exitoso:", data);
+
       // Actualizar el caché de React Query con los datos del usuario
       queryClient.setQueryData(["/api/user"], data.user);
+
+      // Redirigir según el rol
+      if (data.user.rolNombre === "ADMIN") {
+        setLocation("/dashboard");
+      } else {
+        setLocation("/user/adopciones");
+      }
 
       return {
         ok: true as const,
         user: data.user,
       };
     } catch (error) {
-      console.error("Error en login:", error);
+      console.error("[Auth Client] Error en login:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Error desconocido",
+        variant: "destructive",
+      });
       return {
         ok: false as const,
         message: error instanceof Error ? error.message : "Error desconocido",
@@ -71,6 +98,7 @@ export function useUser() {
 
   const register = async (userData: InsertUser) => {
     try {
+      console.log("[Auth Client] Intentando registrar usuario");
       const response = await fetch("/api/register", {
         method: "POST",
         headers: {
@@ -86,6 +114,7 @@ export function useUser() {
       }
 
       const data: AuthResponse = await response.json();
+      console.log("[Auth Client] Registro exitoso:", data);
       queryClient.setQueryData(["/api/user"], data.user);
 
       return {
@@ -93,7 +122,7 @@ export function useUser() {
         user: data.user,
       };
     } catch (error) {
-      console.error("Error en registro:", error);
+      console.error("[Auth Client] Error en registro:", error);
       return {
         ok: false as const,
         message: error instanceof Error ? error.message : "Error desconocido",
@@ -103,6 +132,7 @@ export function useUser() {
 
   const logout = async () => {
     try {
+      console.log("[Auth Client] Intentando cerrar sesión");
       const response = await fetch("/api/logout", {
         method: "POST",
         credentials: "include",
@@ -112,10 +142,12 @@ export function useUser() {
         throw new Error("Error al cerrar sesión");
       }
 
+      console.log("[Auth Client] Logout exitoso");
       queryClient.setQueryData(["/api/user"], null);
+      setLocation("/auth/login");
       return { ok: true as const };
     } catch (error) {
-      console.error("Error en logout:", error);
+      console.error("[Auth Client] Error en logout:", error);
       return {
         ok: false as const,
         message: error instanceof Error ? error.message : "Error desconocido",
