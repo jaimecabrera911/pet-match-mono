@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 
 export function Sidebar() {
   const [location] = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logoutMutation } = useAuth();
 
   const navItems = [
     {
@@ -45,7 +45,7 @@ export function Sidebar() {
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await logoutMutation.mutateAsync();
       window.location.href = "/auth/login";
     } catch (error) {
       console.error("Error al cerrar sesión:", error);

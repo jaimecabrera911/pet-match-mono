@@ -11,14 +11,14 @@ import type { SelectPet } from "@db/schema";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function Dashboard() {
-  const { user, logout } = useAuth();
+  const { user, logoutMutation } = useAuth();
   const { data: pets = [], isLoading } = useQuery<SelectPet[]>({
     queryKey: ["/api/pets"],
   });
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await logoutMutation.mutateAsync();
       window.location.href = "/auth/login";
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
