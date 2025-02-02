@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import type { InsertUser } from "@db/schema";
 
@@ -17,15 +17,13 @@ export function useUser() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: user } = useQuery<AuthResponse["user"]>({
+  const { data: user, isLoading } = useQuery<AuthResponse["user"]>({
     queryKey: ["/api/user"],
     retry: false,
   });
 
   const login = async (credentials: Pick<InsertUser, "correo" | "password">) => {
     try {
-      console.log("Intentando iniciar sesión con:", credentials);
-      
       const response = await fetch("/api/login", {
         method: "POST",
         headers: {
@@ -36,17 +34,16 @@ export function useUser() {
       });
 
       const data = await response.json();
-      console.log("Respuesta del servidor:", data);
 
       if (!response.ok) {
         throw new Error(data.error || "Error al iniciar sesión");
       }
 
       await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      
+
       return {
         ok: true as const,
-        user: data.user,
+        user: data.user as AuthResponse["user"],
       };
     } catch (error) {
       console.error("Error en login:", error);
@@ -75,10 +72,10 @@ export function useUser() {
       }
 
       await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      
+
       return {
         ok: true as const,
-        user: data.user,
+        user: data.user as AuthResponse["user"],
       };
     } catch (error) {
       console.error("Error en registro:", error);
@@ -101,7 +98,7 @@ export function useUser() {
       }
 
       await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      
+
       return { ok: true as const };
     } catch (error) {
       console.error("Error en logout:", error);
@@ -114,6 +111,7 @@ export function useUser() {
 
   return {
     user,
+    isLoading,
     login,
     register,
     logout,
