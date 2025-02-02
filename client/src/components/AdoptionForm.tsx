@@ -49,6 +49,7 @@ type AdoptionFormData = z.infer<typeof adoptionFormSchema>;
 
 export function AdoptionForm() {
   const [currentStage, setCurrentStage] = useState<"cuestionario" | "entrevista" | "adopcion">("cuestionario");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -82,33 +83,42 @@ export function AdoptionForm() {
 
   const createAdoptionMutation = useMutation({
     mutationFn: async (data: AdoptionFormData & { action?: 'aprobar' | 'rechazar' }) => {
-      console.log("Submitting adoption data:", data);
+      if (isSubmitting) return null;
+      setIsSubmitting(true);
 
-      const status = data.action === 'aprobar' ? 'aceptada' : 
-                    data.action === 'rechazar' ? 'rechazada' : 
-                    currentStage === 'entrevista' ? 'en_entrevista' : 'creada';
+      try {
+        console.log("Submitting adoption data:", data);
 
-      const response = await fetch("/api/adoptions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ...data, status, etapa: currentStage }),
-        credentials: 'include',
-      });
+        const status = data.action === 'aprobar' ? 'aceptada' : 
+                      data.action === 'rechazar' ? 'rechazada' : 
+                      currentStage === 'entrevista' ? 'en_entrevista' : 'creada';
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: "Error al guardar la información" }));
-        throw new Error(errorData.message || "Error al guardar la información");
+        const response = await fetch("/api/adoptions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ ...data, status, etapa: currentStage }),
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: "Error al guardar la información" }));
+          throw new Error(errorData.message || "Error al guardar la información");
+        }
+
+        return response.json();
+      } finally {
+        setIsSubmitting(false);
       }
-
-      return response.json();
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (result, variables) => {
+      if (!result) return;
+
       queryClient.invalidateQueries({ queryKey: ["/api/adoptions"] });
 
       const nextStage = currentStage === "cuestionario" ? "entrevista" : 
-                      currentStage === "entrevista" ? "adopcion" : null;
+                       currentStage === "entrevista" ? "adopcion" : null;
 
       if (nextStage) {
         setCurrentStage(nextStage);
@@ -137,6 +147,8 @@ export function AdoptionForm() {
   });
 
   const onSubmit = async (data: AdoptionFormData, action?: 'aprobar' | 'rechazar') => {
+    if (isSubmitting) return;
+
     console.log("Form submitted with data:", data);
     console.log("Current stage:", currentStage);
 
@@ -175,6 +187,7 @@ export function AdoptionForm() {
     }
   };
 
+  
   return (
     <div className="container mx-auto py-8">
       <Card className="max-w-2xl mx-auto">
@@ -480,6 +493,7 @@ export function AdoptionForm() {
                         variant="outline"
                         className="border-red-500 text-red-500 hover:bg-red-50"
                         onClick={() => form.handleSubmit((data) => onSubmit(data, 'rechazar'))()}
+                        disabled={isSubmitting}
                       >
                         <X className="h-4 w-4 mr-2" />
                         Rechazar
@@ -488,6 +502,7 @@ export function AdoptionForm() {
                         type="button"
                         className="bg-green-500 hover:bg-green-600 text-white"
                         onClick={() => form.handleSubmit((data) => onSubmit(data, 'aprobar'))()}
+                        disabled={isSubmitting}
                       >
                         <Check className="h-4 w-4 mr-2" />
                         Aprobar
@@ -497,9 +512,9 @@ export function AdoptionForm() {
                     <Button 
                       type="submit"
                       className="bg-[#FF5C7F] hover:bg-[#FF5C7F]/90"
-                      disabled={form.formState.isSubmitting}
+                      disabled={isSubmitting || !form.formState.isValid}
                     >
-                      Guardar y Continuar
+                      {isSubmitting ? "Guardando..." : "Guardar y Continuar"}
                     </Button>
                   )}
                 </div>
