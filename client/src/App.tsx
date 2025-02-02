@@ -18,6 +18,8 @@ import Home from "@/pages/Home";
 import RegistroAdoptante from "@/pages/registro-adoptante";
 import AuthPage from "./pages/auth-page";
 import { AdoptionInterview } from "@/components/AdoptionInterview";
+import { AuthProvider } from "@/hooks/use-auth";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -44,24 +46,32 @@ function DashboardRouter() {
       <Route path="/dashboard/panel-de-control">
         {() => <Dashboard />}
       </Route>
-      <Route path="/dashboard/mascotas">
-        {() => <ManagePets />}
-      </Route>
-      <Route path="/dashboard/adopciones">
-        {() => <ManageAdoptions />}
-      </Route>
-      <Route path="/dashboard/mis-adopciones">
-        {() => <UserAdoptions />}
-      </Route>
+      <ProtectedRoute 
+        path="/dashboard/mascotas"
+        requiredRole="shelter"
+        component={ManagePets} 
+      />
+      <ProtectedRoute
+        path="/dashboard/adopciones"
+        requiredRole="shelter"
+        component={ManageAdoptions}
+      />
+      <ProtectedRoute
+        path="/dashboard/mis-adopciones"
+        requiredRole="adoptante"
+        component={UserAdoptions}
+      />
       <Route path="/dashboard/adopciones/crear">
         {() => <AdoptionForm />}
       </Route>
       <Route path="/dashboard/adopciones/entrevista">
         {() => <AdoptionInterview />}
       </Route>
-      <Route path="/dashboard/usuarios">
-        {() => <ManageUsers />}
-      </Route>
+      <ProtectedRoute
+        path="/dashboard/usuarios"
+        requiredRole="admin"
+        component={ManageUsers}
+      />
       <Route path="/dashboard">
         {() => {
           window.location.href = "/dashboard/panel-de-control";
@@ -97,10 +107,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <SidebarProvider defaultOpen={true}>
-        <Router />
-        <Toaster />
-      </SidebarProvider>
+      <AuthProvider>
+        <SidebarProvider defaultOpen={true}>
+          <Router />
+          <Toaster />
+        </SidebarProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
