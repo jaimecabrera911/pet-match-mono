@@ -1,68 +1,61 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { InsertUser, SelectUser } from "@db/schema";
 
-// Mock user type
-interface User {
-  id: number;
-  username: string;
-  role: string;
+type RequestResult =
+  | {
+      ok: true;
+    }
+  | {
+      ok: false;
+      message: string;
+    };
+
+async function handleRequest(
+  url: string,
+  method: string,
+  body?: InsertUser,
+): Promise<RequestResult> {
+  try {
+    const response = await fetch(url, {
+      method,
+      headers: body ? { "Content-Type": "application/json" } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      if (response.status >= 500) {
+        return { ok: false, message: response.statusText };
+      }
+
+      const message = await response.text();
+      return { ok: false, message };
+    }
+
+    return { ok: true };
+  } catch (e: any) {
+    return { ok: false, message: e.toString() };
+  }
 }
 
-// Mock authentication data type
-interface AuthData {
-  username: string;
-  password: string;
-}
+async function fetchUser(): Promise<SelectUser | null> {
+  const response = await fetch("/api/user", {
+    credentials: "include",
+  });
 
-const STORAGE_KEY = 'pet_adoption_auth';
+  if (!response.ok) {
+    if (response.status === 401) {
+      return null;
+    }
 
-// Mock user database
-const mockUsers = [
-  { id: 1, username: 'admin', password: 'admin123', role: 'admin' },
-  { id: 2, username: 'user', password: 'user123', role: 'user' },
-];
+    if (response.status >= 500) {
+      throw new Error(`${response.status}: ${response.statusText}`);
+    }
 
-// Mock authentication functions
-async function mockAuth(data: AuthData): Promise<{ ok: boolean; message?: string; user?: User }> {
-  const user = mockUsers.find(u => u.username === data.username && u.password === data.password);
-
-  if (!user) {
-    return { ok: false, message: 'Credenciales inválidas' };
+    throw new Error(`${response.status}: ${await response.text()}`);
   }
 
-  const { password, ...userWithoutPassword } = user;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(userWithoutPassword));
-  return { ok: true, user: userWithoutPassword };
-}
-
-async function mockRegister(data: AuthData): Promise<{ ok: boolean; message?: string; user?: User }> {
-  const existingUser = mockUsers.find(u => u.username === data.username);
-
-  if (existingUser) {
-    return { ok: false, message: 'El usuario ya existe' };
-  }
-
-  const newUser = {
-    id: mockUsers.length + 1,
-    username: data.username,
-    password: data.password,
-    role: 'user'
-  };
-
-  mockUsers.push(newUser);
-  const { password, ...userWithoutPassword } = newUser;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(userWithoutPassword));
-  return { ok: true, user: userWithoutPassword };
-}
-
-async function mockLogout(): Promise<{ ok: boolean }> {
-  localStorage.removeItem(STORAGE_KEY);
-  return { ok: true };
-}
-
-async function getCurrentUser(): Promise<User | null> {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (!stored) return null;
-  return JSON.parse(stored);
+  return response.json();
 }
 
 export function useUser() {
@@ -72,29 +65,29 @@ export function useUser() {
     data: user,
     error,
     isLoading,
-  } = useQuery<User | null>({
+  } = useQuery<SelectUser | null, Error>({
     queryKey: ["user"],
-    queryFn: getCurrentUser,
+    queryFn: fetchUser,
     staleTime: Infinity,
     retry: false,
   });
 
-  const loginMutation = useMutation({
-    mutationFn: (userData: AuthData) => mockAuth(userData),
+  const loginMutation = useMutation<RequestResult, Error, InsertUser>({
+    mutationFn: (userData) => handleRequest("/api/login", "POST", userData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user"] });
     },
   });
 
-  const logoutMutation = useMutation({
-    mutationFn: mockLogout,
+  const logoutMutation = useMutation<RequestResult, Error>({
+    mutationFn: () => handleRequest("/api/logout", "POST"),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user"] });
     },
   });
 
-  const registerMutation = useMutation({
-    mutationFn: (userData: AuthData) => mockRegister(userData),
+  const registerMutation = useMutation<RequestResult, Error, InsertUser>({
+    mutationFn: (userData) => handleRequest("/api/register", "POST", userData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user"] });
     },

@@ -5,45 +5,15 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
 import { PlusCircle, PawPrint, Heart, Users, MapPin } from "lucide-react";
+import type { SelectPet } from "@db/schema";
 import { Sidebar } from "@/components/Sidebar";
 
-interface Pet {
-  id: string;
-  name: string;
-  age: string;
-  breed: string;
-  location: string;
-  imageUrl: string;
-  requirements: string[];
-  healthStatus: string[];
-  personality: string[];
-  isAdopted: boolean;
-}
-
-const fetchPets = async (): Promise<Pet[]> => {
-  const response = await fetch('https://api.thedogapi.com/v1/breeds?limit=10');
-  const data = await response.json();
-
-  return data.map((dog: any) => ({
-    id: dog.id.toString(),
-    name: dog.name,
-    age: "2", // Example age since the API doesn't provide this
-    breed: dog.name,
-    location: "España",
-    imageUrl: dog.image?.url || "https://placedog.net/500",
-    requirements: ["Hogar con espacio adecuado", "Familia responsable"],
-    healthStatus: ["Saludable", "Vacunado"],
-    personality: dog.temperament ? dog.temperament.split(', ') : ["Amigable"],
-    isAdopted: false
-  }));
-};
-
 export default function Dashboard() {
-  const { data: pets = [], isLoading } = useQuery({
-    queryKey: ["pets"],
-    queryFn: fetchPets
+  const { data: pets = [], isLoading } = useQuery<SelectPet[]>({
+    queryKey: ["/api/pets"],
   });
 
   const stats = [

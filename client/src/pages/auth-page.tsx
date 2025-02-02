@@ -11,7 +11,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 
 const authSchema = z.object({
   username: z.string().min(1, "El nombre de usuario es requerido"),
-  password: z.string().min(1, "La contraseña es requerida")
+  password: z.string().min(1, "La contraseña es requerida"),
+  roleId: z.number().optional()
 });
 
 type AuthFormData = z.infer<typeof authSchema>;
@@ -31,7 +32,7 @@ export default function AuthPage() {
 
   const onSubmit = async (data: AuthFormData) => {
     try {
-      const result = await (isLogin ? login(data) : register(data));
+      const result = await (isLogin ? login(data) : register({ ...data, roleId: 2 }));
       if (!result.ok) {
         toast({
           variant: "destructive",
@@ -44,7 +45,6 @@ export default function AuthPage() {
         title: "¡Éxito!",
         description: isLogin ? "Sesión iniciada correctamente" : "Registro exitoso",
       });
-      window.location.href = '/dashboard';
     } catch (error) {
       toast({
         variant: "destructive",
