@@ -44,15 +44,16 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
   const form = useForm<InsertUser>({
     resolver: zodResolver(insertUserSchema),
     defaultValues: {
-      tipoDocumento: "",
+      tipoDocumento: "CEDULA DE CIUDADANIA",
       numeroDocumento: "",
       nombres: "",
       apellidos: "",
       genero: "M",
-      fechaNacimiento: null,
+      fechaNacimiento: new Date(),
       telefono: "",
       direccion: "",
       ciudad: "",
+      departamento: "",
       ocupacion: "",
       correo: "",
       password: "",
@@ -64,20 +65,21 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
     if (user) {
       form.reset({
         ...user,
-        fechaNacimiento: user.fechaNacimiento ? new Date(user.fechaNacimiento) : null,
+        fechaNacimiento: user.fechaNacimiento ? new Date(user.fechaNacimiento) : new Date(),
         password: "", // Don't show password
       });
     } else {
       form.reset({
-        tipoDocumento: "",
+        tipoDocumento: "CEDULA DE CIUDADANIA",
         numeroDocumento: "",
         nombres: "",
         apellidos: "",
         genero: "M",
-        fechaNacimiento: null,
+        fechaNacimiento: new Date(),
         telefono: "",
         direccion: "",
         ciudad: "",
+        departamento: "",
         ocupacion: "",
         correo: "",
         password: "",
@@ -90,10 +92,10 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
     mutationFn: async (data: InsertUser) => {
       const formattedData = {
         ...data,
-        fechaNacimiento: data.fechaNacimiento ? new Date(data.fechaNacimiento).toISOString() : null,
+        fechaNacimiento: data.fechaNacimiento.toISOString(),
       };
 
-      const response = await fetch("/api/users", {
+      const response = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formattedData),
@@ -101,7 +103,8 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
       });
 
       if (!response.ok) {
-        throw new Error("Error al crear el usuario");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al crear el usuario");
       }
 
       return response.json();
@@ -113,12 +116,13 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
         description: "Usuario creado correctamente",
       });
       onClose();
+      form.reset();
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "No se pudo crear el usuario",
+        description: error.message,
       });
     },
   });
