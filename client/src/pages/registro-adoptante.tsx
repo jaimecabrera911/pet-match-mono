@@ -19,7 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Navigation } from "@/components/Navigation";
 
 export default function RegistroAdoptante() {
   const { toast } = useToast();
@@ -33,18 +32,23 @@ export default function RegistroAdoptante() {
   });
 
   const onSubmit = async (data: InsertUser) => {
+    console.log("Datos del formulario:", data);
     try {
       const response = await fetch("/api/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({
           ...data,
           rolNombre: "adoptante"
         }),
-        credentials: "include",
       });
 
+      console.log("Respuesta del servidor:", response.status);
+
       const responseData = await response.json();
+      console.log("Datos de respuesta:", responseData);
 
       if (!response.ok) {
         throw new Error(responseData.error || "Error al registrar usuario");
@@ -59,6 +63,7 @@ export default function RegistroAdoptante() {
         window.location.href = "/auth/login";
       }, 2000);
     } catch (error) {
+      console.error("Error en el registro:", error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -187,7 +192,11 @@ export default function RegistroAdoptante() {
                   <FormItem>
                     <FormLabel>Fecha de Nacimiento</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input 
+                        type="date" 
+                        {...field}
+                        value={field.value || ''} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -261,7 +270,7 @@ export default function RegistroAdoptante() {
                   <FormItem>
                     <FormLabel>Ocupación</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} value={field.value || ''} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
