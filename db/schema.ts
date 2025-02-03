@@ -63,6 +63,7 @@ export const pets = pgTable("pets", {
   location: text("location").notNull(),
   imageUrl: text("image_url").notNull(),
   isAdopted: boolean("is_adopted").default(false).notNull(),
+  gender: text("gender", { enum: ["macho", "hembra"] }).notNull(),
   requirements: text("requirements").array().notNull(),
   healthStatus: text("health_status").array().notNull(),
   personality: text("personality").array().notNull(),
@@ -73,6 +74,10 @@ export const insertPetSchema = createInsertSchema(pets, {
   requirements: z.array(z.string()).min(1, "Debe especificar al menos un requisito"),
   healthStatus: z.array(z.string()).min(1, "Debe especificar al menos un estado de salud"),
   personality: z.array(z.string()).min(1, "Debe especificar al menos un rasgo de personalidad"),
+    gender: z.enum(["macho", "hembra"], {
+    required_error: "El género es requerido",
+    invalid_type_error: "El género debe ser macho o hembra"
+  }),
 });
 
 export const selectPetSchema = createSelectSchema(pets);

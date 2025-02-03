@@ -2,6 +2,7 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface FiltersSectionProps {
   ageRange: [number, number];
@@ -9,6 +10,8 @@ interface FiltersSectionProps {
   selectedBreed: string;
   onBreedChange: (breed: string) => void;
   availableBreeds: string[];
+  selectedGender: string;
+  onGenderChange: (gender: string) => void;
 }
 
 export function FiltersSection({
@@ -17,6 +20,8 @@ export function FiltersSection({
   selectedBreed,
   onBreedChange,
   availableBreeds,
+  selectedGender,
+  onGenderChange,
 }: FiltersSectionProps) {
   return (
     <div className="space-y-6 p-6">
@@ -48,6 +53,28 @@ export function FiltersSection({
                 </Card>
               </motion.div>
             </div>
+          </div>
+
+          <div className="space-y-4">
+            <Label className="text-sm font-medium">Género</Label>
+            <RadioGroup
+              value={selectedGender}
+              onValueChange={onGenderChange}
+              className="flex flex-col space-y-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="" id="all" />
+                <Label htmlFor="all">Todos</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="macho" id="male" />
+                <Label htmlFor="male">Macho</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="hembra" id="female" />
+                <Label htmlFor="female">Hembra</Label>
+              </div>
+            </RadioGroup>
           </div>
 
           <div className="space-y-4">

@@ -13,6 +13,13 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { SelectPet } from "@db/schema";
 import { X } from "lucide-react";
@@ -22,6 +29,9 @@ const petSchema = z.object({
   age: z.string().min(1, "La edad es requerida"),
   breed: z.string().min(1, "La raza es requerida"),
   location: z.string().min(1, "La ubicación es requerida"),
+  gender: z.enum(["macho", "hembra"], {
+    required_error: "El género es requerido",
+  }),
   imageFile: z.any(),
   requirements: z.array(z.string()).min(1, "Debe especificar al menos un requisito"),
   healthStatus: z.array(z.string()).min(1, "Debe especificar al menos un estado de salud"),
@@ -50,13 +60,13 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
       age: "",
       breed: "",
       location: "",
+      gender: "macho",
       requirements: [],
       healthStatus: [],
       personality: [],
     },
   });
 
-  // Update form when pet changes
   useEffect(() => {
     if (pet) {
       form.reset({
@@ -64,6 +74,7 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
         age: pet.age,
         breed: pet.breed,
         location: pet.location,
+        gender: pet.gender,
         requirements: pet.requirements,
         healthStatus: pet.healthStatus,
         personality: pet.personality,
@@ -74,6 +85,7 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
         age: "",
         breed: "",
         location: "",
+        gender: "macho",
         requirements: [],
         healthStatus: [],
         personality: [],
@@ -88,6 +100,7 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
       formData.append("age", data.age);
       formData.append("breed", data.breed);
       formData.append("location", data.location);
+       formData.append("gender", data.gender);
       formData.append("requirements", JSON.stringify(data.requirements));
       formData.append("healthStatus", JSON.stringify(data.healthStatus));
       formData.append("personality", JSON.stringify(data.personality));
@@ -134,6 +147,7 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
       formData.append("age", data.age);
       formData.append("breed", data.breed);
       formData.append("location", data.location);
+       formData.append("gender", data.gender);
       formData.append("requirements", JSON.stringify(data.requirements));
       formData.append("healthStatus", JSON.stringify(data.healthStatus));
       formData.append("personality", JSON.stringify(data.personality));
@@ -235,7 +249,31 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
                 </FormItem>
               )}
             />
-            <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="gender"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Género</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccione el género" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="macho">Macho</SelectItem>
+                        <SelectItem value="hembra">Hembra</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="age"
@@ -249,20 +287,20 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="breed"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Raza</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
+            <FormField
+              control={form.control}
+              name="breed"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Raza</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="location"
