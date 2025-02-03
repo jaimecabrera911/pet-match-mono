@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,9 +14,16 @@ import { useAuth } from "@/hooks/use-auth";
 
 export default function Dashboard() {
   const { user, logoutMutation } = useAuth();
+  const [, setLocation] = useLocation();
   const { data: pets = [], isLoading } = useQuery<SelectPet[]>({
     queryKey: ["/api/pets"],
   });
+
+  useEffect(() => {
+    if (user?.role === "adoptante") {
+      setLocation("/dashboard/user-adoptions");
+    }
+  }, [user, setLocation]);
 
   const handleLogout = async () => {
     try {
@@ -24,6 +33,11 @@ export default function Dashboard() {
       console.error("Error al cerrar sesión:", error);
     }
   };
+
+  // Si el usuario es adoptante, no renderizamos nada ya que será redirigido
+  if (user?.role === "adoptante") {
+    return null;
+  }
 
   const stats = [
     {
@@ -86,9 +100,6 @@ export default function Dashboard() {
                 </p>
               </div>
             )}
-            <p className="text-gray-500 mt-1">
-              Vista general del sistema de adopción
-            </p>
           </div>
 
           {/* Statistics Grid */}
