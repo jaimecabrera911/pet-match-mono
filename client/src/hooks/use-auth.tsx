@@ -39,14 +39,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryFn: async () => {
       try {
         const res = await fetch("/api/user", {
-          credentials: 'include'
+          credentials: 'include',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
         });
 
         if (!res.ok) {
           if (res.status === 401) {
             return null;
           }
-          throw new Error("Error al obtener datos del usuario");
+          const errorData = await res.json();
+          throw new Error(errorData.error || "Error al obtener datos del usuario");
         }
 
         const data = await res.json();
@@ -64,7 +69,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     mutationFn: async (credentials: LoginCredentials) => {
       const res = await fetch("/api/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify(credentials),
         credentials: "include",
       });
@@ -97,8 +105,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await fetch("/api/logout", {
         method: "POST",
         credentials: "include",
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
       });
-      if (!res.ok) throw new Error("Error al cerrar sesión");
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Error al cerrar sesión");
+      }
     },
     onSuccess: () => {
       queryClient.setQueryData(["/api/user"], null);
