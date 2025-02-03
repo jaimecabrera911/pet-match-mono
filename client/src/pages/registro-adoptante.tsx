@@ -28,6 +28,16 @@ export default function RegistroAdoptante() {
       tipoDocumento: "CEDULA DE CIUDADANIA",
       rolNombre: "adoptante",
       genero: "M",
+      nombres: "",
+      apellidos: "",
+      numeroDocumento: "",
+      fechaNacimiento: "",
+      telefono: "",
+      correo: "",
+      direccion: "",
+      ciudad: "",
+      ocupacion: "",
+      password: "",
     },
   });
 
@@ -192,11 +202,7 @@ export default function RegistroAdoptante() {
                   <FormItem>
                     <FormLabel>Fecha de Nacimiento</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="date" 
-                        {...field}
-                        value={field.value || ''} 
-                      />
+                      <Input type="date" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -270,7 +276,7 @@ export default function RegistroAdoptante() {
                   <FormItem>
                     <FormLabel>Ocupación</FormLabel>
                     <FormControl>
-                      <Input {...field} value={field.value || ''} />
+                      <Input {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
