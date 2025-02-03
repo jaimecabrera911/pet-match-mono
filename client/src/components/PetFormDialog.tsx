@@ -74,7 +74,7 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
         age: pet.age,
         breed: pet.breed,
         location: pet.location,
-        gender: pet.gender,
+        gender: pet.gender || "macho",
         requirements: pet.requirements,
         healthStatus: pet.healthStatus,
         personality: pet.personality,
