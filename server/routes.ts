@@ -7,8 +7,7 @@ import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import express from 'express';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const storage = multer.diskStorage({
   destination: './uploads/',
@@ -294,19 +293,27 @@ export function registerRoutes(app: Express): Server {
     }
   });
   
-    // Serve static files
+  // Serve static files
   app.use('/uploads', express.static('uploads'));
 
-  // In development, let Vite handle all non-API routes
+  // In development, proxy all non-API requests to Vite dev server
   if (process.env.NODE_ENV !== 'production') {
-    app.use((req, res, next) => {
-      if (req.url.startsWith('/api/')) {
-        next();
-      } else {
-        // Forward to Vite dev server
-        res.redirect(`http://localhost:5173${req.url}`);
-      }
-    });
+    app.use(
+      '/',
+      createProxyMiddleware({
+        target: 'http://0.0.0.0:5173',
+        changeOrigin: true,
+        ws: true,
+        onError: (err, req, res) => {
+          console.error('Proxy error:', err);
+          res.writeHead(500, {
+            'Content-Type': 'text/plain',
+          });
+          res.end('Proxy error - Vite server may not be running');
+        },
+        pathFilter: (path) => !path.startsWith('/api/'),
+      })
+    );
   } else {
     // In production, serve from dist folder
     app.use(express.static('dist'));
