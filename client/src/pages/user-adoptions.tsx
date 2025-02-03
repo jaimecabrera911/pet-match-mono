@@ -30,34 +30,43 @@ export default function UserAdoptions() {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const { data: adoptions = [], isLoading } = useQuery({
+  const { data: adoptions = [], isLoading, error } = useQuery({
     queryKey: ['/api/adoptions/user'],
     queryFn: async () => {
+      if (!user) {
+        throw new Error('Debes iniciar sesión para ver tus adopciones');
+      }
+
       const res = await fetch('/api/adoptions/user', {
         headers: {
           'Content-Type': 'application/json'
         },
-        credentials: 'include' // Importante: incluir credenciales para la autenticación
+        credentials: 'include'
       });
 
       if (!res.ok) {
-        throw new Error('Error al cargar las adopciones');
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Error al cargar las adopciones');
       }
       return res.json();
     },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
+    enabled: !!user
   });
 
   if (isLoading) {
-    return <div className="flex items-center justify-center min-h-screen">
-      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-    </div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    toast({
+      title: "Error",
+      description: error.message,
+      variant: "destructive"
+    });
   }
 
   return (
@@ -85,54 +94,65 @@ export default function UserAdoptions() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Mascota</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Fecha de Solicitud</TableHead>
-                <TableHead>Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {adoptions.map((adoption) => (
-                <TableRow key={adoption.id}>
-                  <TableCell>
-                    <div className="flex items-center space-x-3">
-                      <img
-                        src={adoption.pet.imageUrl}
-                        alt={adoption.pet.name}
-                        className="h-10 w-10 rounded-full object-cover"
-                      />
-                      <div>
-                        <div className="font-medium">{adoption.pet.name}</div>
-                        <div className="text-sm text-gray-500">
-                          {adoption.pet.breed}
+          {adoptions.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No tienes solicitudes de adopción activas.
+              <div className="mt-2">
+                <Link href="/dashboard/available-pets">
+                  <Button variant="outline">Ver mascotas disponibles</Button>
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Mascota</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Fecha de Solicitud</TableHead>
+                  <TableHead>Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {adoptions.map((adoption: any) => (
+                  <TableRow key={adoption.id}>
+                    <TableCell>
+                      <div className="flex items-center space-x-3">
+                        <img
+                          src={adoption.pet.imageUrl}
+                          alt={adoption.pet.name}
+                          className="h-10 w-10 rounded-full object-cover"
+                        />
+                        <div>
+                          <div className="font-medium">{adoption.pet.name}</div>
+                          <div className="text-sm text-gray-500">
+                            {adoption.pet.breed}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={getStatusBadgeVariant(adoption.status)}>
-                      {statusMap[adoption.status as keyof typeof statusMap]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(adoption.applicationDate).toLocaleDateString('es-ES', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="outline" size="icon">
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getStatusBadgeVariant(adoption.status)}>
+                        {statusMap[adoption.status as keyof typeof statusMap]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {new Date(adoption.applicationDate).toLocaleDateString('es-ES', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="outline" size="icon">
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 
