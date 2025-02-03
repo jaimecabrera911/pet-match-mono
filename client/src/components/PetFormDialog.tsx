@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -46,18 +46,18 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
   const form = useForm<PetFormData>({
     resolver: zodResolver(petSchema),
     defaultValues: {
-      name: pet?.name || "",
-      age: pet?.age || "",
-      breed: pet?.breed || "",
-      location: pet?.location || "",
-      requirements: pet?.requirements || [],
-      healthStatus: pet?.healthStatus || [],
-      personality: pet?.personality || [],
+      name: "",
+      age: "",
+      breed: "",
+      location: "",
+      requirements: [],
+      healthStatus: [],
+      personality: [],
     },
   });
 
-  // Reset form values when pet changes
-  useState(() => {
+  // Update form when pet changes
+  useEffect(() => {
     if (pet) {
       form.reset({
         name: pet.name,
@@ -68,8 +68,18 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
         healthStatus: pet.healthStatus,
         personality: pet.personality,
       });
+    } else {
+      form.reset({
+        name: "",
+        age: "",
+        breed: "",
+        location: "",
+        requirements: [],
+        healthStatus: [],
+        personality: [],
+      });
     }
-  }, [pet, form.reset]);
+  }, [pet, form]);
 
   const createPetMutation = useMutation({
     mutationFn: async (data: PetFormData) => {
