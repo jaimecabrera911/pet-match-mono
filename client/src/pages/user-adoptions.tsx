@@ -37,21 +37,30 @@ export default function UserAdoptions() {
         throw new Error('Debes iniciar sesión para ver tus adopciones');
       }
 
+      console.log('Haciendo petición a /api/adoptions/user con usuario:', user.id);
+
       const res = await fetch('/api/adoptions/user', {
+        method: 'GET',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         credentials: 'include'
       });
 
       if (!res.ok) {
         const errorData = await res.json();
+        console.error('Error al obtener adopciones:', errorData);
         throw new Error(errorData.error || 'Error al cargar las adopciones');
       }
-      return res.json();
+
+      const data = await res.json();
+      console.log('Adopciones recibidas:', data);
+      return data;
     },
     enabled: !!user,
     onError: (error: Error) => {
+      console.error('Error en la consulta de adopciones:', error);
       toast({
         title: "Error",
         description: error.message,
