@@ -4,30 +4,43 @@ import { AdoptionSteps } from "@/components/AdoptionSteps";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
+import { Eye, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "wouter";
 
 const statusMap = {
-  pendiente: "Pendiente",
-  en_revision: "En Revisión",
+  creada: "Creada",
   en_entrevista: "En Entrevista",
-  aprobada: "Aprobada",
+  aceptada: "Aceptada",
   rechazada: "Rechazada"
+};
+
+const getStatusBadgeVariant = (status: string) => {
+  switch (status) {
+    case 'aceptada':
+      return 'default bg-green-100 text-green-800';
+    case 'rechazada':
+      return 'default bg-red-100 text-red-800';
+    case 'en_entrevista':
+      return 'default bg-yellow-100 text-yellow-800';
+    default:
+      return 'default bg-blue-100 text-blue-800';
+  }
 };
 
 export default function UserAdoptions() {
   const { toast } = useToast();
-  
-  const { data: adoptions, isLoading } = useQuery({
-    queryKey: ['/api/user/adoptions'],
+
+  const { data: adoptions = [], isLoading } = useQuery({
+    queryKey: ['/api/adoptions/user'],
     queryFn: async () => {
-      const res = await fetch('/api/user/adoptions');
+      const res = await fetch('/api/adoptions/user');
       if (!res.ok) {
         throw new Error('Error al cargar las adopciones');
       }
       return res.json();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message,
@@ -44,11 +57,26 @@ export default function UserAdoptions() {
 
   return (
     <div className="container mx-auto py-8">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold">Mis Adopciones</h1>
+          <p className="text-muted-foreground">
+            Gestiona tus procesos de adopción y sigue su estado
+          </p>
+        </div>
+        <Link href="/dashboard/cuestionario-adopcion">
+          <Button className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Contestar Cuestionario
+          </Button>
+        </Link>
+      </div>
+
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle>Mis Adopciones</CardTitle>
+          <CardTitle>Solicitudes de Adopción</CardTitle>
           <CardDescription>
-            Gestiona tus procesos de adopción y sigue su estado
+            Aquí puedes ver el estado de tus solicitudes de adopción
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -64,14 +92,32 @@ export default function UserAdoptions() {
             <TableBody>
               {adoptions?.map((adoption) => (
                 <TableRow key={adoption.id}>
-                  <TableCell>{adoption.pet.name}</TableCell>
                   <TableCell>
-                    <Badge variant={adoption.status === 'aprobada' ? 'success' : 'secondary'}>
-                      {statusMap[adoption.status]}
+                    <div className="flex items-center space-x-3">
+                      <img
+                        src={adoption.pet.imageUrl}
+                        alt={adoption.pet.name}
+                        className="h-10 w-10 rounded-full object-cover"
+                      />
+                      <div>
+                        <div className="font-medium">{adoption.pet.name}</div>
+                        <div className="text-sm text-gray-500">
+                          {adoption.pet.breed}
+                        </div>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={getStatusBadgeVariant(adoption.status)}>
+                      {statusMap[adoption.status as keyof typeof statusMap]}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {new Date(adoption.createdAt).toLocaleDateString('es-ES')}
+                    {new Date(adoption.applicationDate).toLocaleDateString('es-ES', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
                   </TableCell>
                   <TableCell>
                     <Button variant="outline" size="icon">

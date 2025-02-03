@@ -138,6 +138,45 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  app.get("/api/adoptions/user", async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ error: "No autenticado" });
+      }
+
+      const userAdoptions = await db
+        .select({
+          id: adoptions.id,
+          status: adoptions.status,
+          applicationDate: adoptions.applicationDate,
+          notes: adoptions.notes,
+          aprobada: adoptions.aprobada,
+          estadoDecision: adoptions.estadoDecision,
+          pet: {
+            id: pets.id,
+            name: pets.name,
+            breed: pets.breed,
+            imageUrl: pets.imageUrl
+          },
+          user: {
+            id: users.id,
+            nombres: users.nombres,
+            apellidos: users.apellidos,
+            correo: users.correo
+          },
+        })
+        .from(adoptions)
+        .where(eq(adoptions.userId, req.user.id))
+        .innerJoin(pets, eq(pets.id, adoptions.petId))
+        .innerJoin(users, eq(users.id, adoptions.userId));
+
+      res.json(userAdoptions);
+    } catch (error) {
+      console.error("Error fetching user adoptions:", error);
+      res.status(500).json({ error: "Error al obtener las adopciones del usuario" });
+    }
+  });
+
   // Rutas para adopciones
   app.get("/api/adoptions", async (_req, res) => {
     try {
