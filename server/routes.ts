@@ -78,7 +78,12 @@ export function registerRoutes(app: Express): Server {
 
   app.post("/api/register", async (req, res) => {
     try {
-      const result = insertUserSchema.safeParse(req.body);
+      const userData = {
+        ...req.body,
+        rolNombre: "adoptante" // Forzar el rol a ser adoptante
+      };
+
+      const result = insertUserSchema.safeParse(userData);
       if (!result.success) {
         return res.status(400).json({ 
           error: "Datos de usuario inválidos",
@@ -98,7 +103,7 @@ export function registerRoutes(app: Express): Server {
 
       const [newUser] = await db
         .insert(users)
-        .values(result.data)
+        .values([result.data])
         .returning();
 
       res.status(201).json({
@@ -107,7 +112,8 @@ export function registerRoutes(app: Express): Server {
           id: newUser.id,
           correo: newUser.correo,
           nombres: newUser.nombres,
-          apellidos: newUser.apellidos
+          apellidos: newUser.apellidos,
+          role: newUser.rolNombre.toLowerCase()
         }
       });
     } catch (error) {

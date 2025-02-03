@@ -27,35 +27,42 @@ export default function RegistroAdoptante() {
     resolver: zodResolver(insertUserSchema),
     defaultValues: {
       tipoDocumento: "CEDULA DE CIUDADANIA",
-      rolNombre: "USER",
+      rolNombre: "adoptante",
       genero: "M",
     },
   });
 
   const onSubmit = async (data: InsertUser) => {
     try {
-      const response = await fetch("/api/users", {
+      const response = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          rolNombre: "adoptante"
+        }),
         credentials: "include",
       });
 
+      const responseData = await response.json();
+
       if (!response.ok) {
-        throw new Error("Error al registrar usuario");
+        throw new Error(responseData.error || "Error al registrar usuario");
       }
 
       toast({
         title: "¡Registro exitoso!",
-        description: "Tu cuenta ha sido creada correctamente",
+        description: "Tu cuenta ha sido creada correctamente. Serás redirigido al inicio de sesión.",
       });
 
-      window.location.href = "/auth/login";
+      setTimeout(() => {
+        window.location.href = "/auth/login";
+      }, 2000);
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "No se pudo completar el registro",
+        description: error instanceof Error ? error.message : "No se pudo completar el registro",
       });
     }
   };
