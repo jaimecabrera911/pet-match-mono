@@ -35,20 +35,12 @@ export default function Home() {
               Dale una segunda oportunidad a un amigo peludo.
             </p>
             <div className="flex justify-center gap-4">
-              <Link href="/mascotas">
-                <Button
-                  size="lg"
-                  className="rounded-full px-8 bg-primary hover:bg-primary/90"
-                >
-                  Conocer más
-                </Button>
-              </Link>
-              <Link href="/auth/login">
+              <Link href="/auth/registro-adoptante">
                 <Button
                   size="lg"
                   className="rounded-full px-8 bg-white text-primary hover:bg-gray-100"
                 >
-                  Iniciar Sesión
+                  Regístrate
                 </Button>
               </Link>
             </div>
