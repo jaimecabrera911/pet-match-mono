@@ -7,22 +7,20 @@ import { Button } from "@/components/ui/button";
 import { Eye, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
+import { useAuth } from "@/hooks/use-auth";
 
 const statusMap = {
-  creada: "Creada",
-  en_entrevista: "En Entrevista",
-  aceptada: "Aceptada",
-  rechazada: "Rechazada"
+  pending: "Pendiente",
+  approved: "Aprobada",
+  rejected: "Rechazada"
 };
 
 const getStatusBadgeVariant = (status: string) => {
   switch (status) {
-    case 'aceptada':
+    case 'approved':
       return 'default bg-green-100 text-green-800';
-    case 'rechazada':
+    case 'rejected':
       return 'default bg-red-100 text-red-800';
-    case 'en_entrevista':
-      return 'default bg-yellow-100 text-yellow-800';
     default:
       return 'default bg-blue-100 text-blue-800';
   }
@@ -30,11 +28,18 @@ const getStatusBadgeVariant = (status: string) => {
 
 export default function UserAdoptions() {
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const { data: adoptions = [], isLoading } = useQuery({
     queryKey: ['/api/adoptions/user'],
     queryFn: async () => {
-      const res = await fetch('/api/adoptions/user');
+      const res = await fetch('/api/adoptions/user', {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include' // Importante: incluir credenciales para la autenticación
+      });
+
       if (!res.ok) {
         throw new Error('Error al cargar las adopciones');
       }
@@ -64,7 +69,7 @@ export default function UserAdoptions() {
             Gestiona tus procesos de adopción y sigue su estado
           </p>
         </div>
-        <Link href="/dashboard/cuestionario-adopcion">
+        <Link href="/cuestionario-adopcion">
           <Button className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             Contestar Cuestionario
@@ -90,7 +95,7 @@ export default function UserAdoptions() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {adoptions?.map((adoption) => (
+              {adoptions.map((adoption) => (
                 <TableRow key={adoption.id}>
                   <TableCell>
                     <div className="flex items-center space-x-3">
