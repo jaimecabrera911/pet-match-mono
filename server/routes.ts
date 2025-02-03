@@ -290,6 +290,87 @@ export function registerRoutes(app: Express): Server {
     }
   });
   
+  app.post("/api/pets", upload.single('image'), async (req, res) => {
+    try {
+      const petData = {
+        name: req.body.name,
+        age: req.body.age,
+        breed: req.body.breed,
+        location: req.body.location,
+        requirements: JSON.parse(req.body.requirements),
+        healthStatus: JSON.parse(req.body.healthStatus),
+        personality: JSON.parse(req.body.personality),
+        imageUrl: req.file ? `/uploads/${req.file.filename}` : null,
+        isAdopted: false
+      };
+
+      const [newPet] = await db
+        .insert(pets)
+        .values(petData)
+        .returning();
+
+      res.json(newPet);
+    } catch (error) {
+      console.error("Error creating pet:", error);
+      res.status(500).json({ error: "Error al crear la mascota" });
+    }
+  });
+
+  // Add PUT endpoint for updating pets
+  app.put("/api/pets/:id", upload.single('image'), async (req, res) => {
+    try {
+      const petId = parseInt(req.params.id);
+      const updateData: any = {
+        name: req.body.name,
+        age: req.body.age,
+        breed: req.body.breed,
+        location: req.body.location,
+        requirements: JSON.parse(req.body.requirements),
+        healthStatus: JSON.parse(req.body.healthStatus),
+        personality: JSON.parse(req.body.personality),
+      };
+
+      if (req.file) {
+        updateData.imageUrl = `/uploads/${req.file.filename}`;
+      }
+
+      const [updatedPet] = await db
+        .update(pets)
+        .set(updateData)
+        .where(eq(pets.id, petId))
+        .returning();
+
+      if (!updatedPet) {
+        return res.status(404).json({ error: "Mascota no encontrada" });
+      }
+
+      res.json(updatedPet);
+    } catch (error) {
+      console.error("Error updating pet:", error);
+      res.status(500).json({ error: "Error al actualizar la mascota" });
+    }
+  });
+
+  // Add DELETE endpoint for removing pets
+  app.delete("/api/pets/:id", async (req, res) => {
+    try {
+      const petId = parseInt(req.params.id);
+      const [deletedPet] = await db
+        .delete(pets)
+        .where(eq(pets.id, petId))
+        .returning();
+
+      if (!deletedPet) {
+        return res.status(404).json({ error: "Mascota no encontrada" });
+      }
+
+      res.json({ message: "Mascota eliminada correctamente" });
+    } catch (error) {
+      console.error("Error deleting pet:", error);
+      res.status(500).json({ error: "Error al eliminar la mascota" });
+    }
+  });
+
   // Serve static files from the uploads directory
   app.use('/uploads', express.static('uploads'));
 
