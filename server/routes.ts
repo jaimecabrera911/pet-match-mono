@@ -320,7 +320,19 @@ export function registerRoutes(app: Express): Server {
   app.put("/api/pets/:id", upload.single('image'), async (req, res) => {
     try {
       const petId = parseInt(req.params.id);
-      const updateData: any = {
+
+      // Verificar si la mascota existe
+      const [existingPet] = await db
+        .select()
+        .from(pets)
+        .where(eq(pets.id, petId))
+        .limit(1);
+
+      if (!existingPet) {
+        return res.status(404).json({ error: "Mascota no encontrada" });
+      }
+
+      const updateData = {
         name: req.body.name,
         age: req.body.age,
         breed: req.body.breed,
@@ -328,11 +340,9 @@ export function registerRoutes(app: Express): Server {
         requirements: JSON.parse(req.body.requirements),
         healthStatus: JSON.parse(req.body.healthStatus),
         personality: JSON.parse(req.body.personality),
+        // Mantener la imagen existente si no se proporciona una nueva
+        imageUrl: req.file ? `/uploads/${req.file.filename}` : existingPet.imageUrl
       };
-
-      if (req.file) {
-        updateData.imageUrl = `/uploads/${req.file.filename}`;
-      }
 
       const [updatedPet] = await db
         .update(pets)
@@ -340,13 +350,12 @@ export function registerRoutes(app: Express): Server {
         .where(eq(pets.id, petId))
         .returning();
 
-      if (!updatedPet) {
-        return res.status(404).json({ error: "Mascota no encontrada" });
-      }
-
       res.json(updatedPet);
     } catch (error) {
       console.error("Error updating pet:", error);
+      if (error instanceof SyntaxError) {
+        return res.status(400).json({ error: "Error en el formato de los datos" });
+      }
       res.status(500).json({ error: "Error al actualizar la mascota" });
     }
   });
