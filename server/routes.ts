@@ -141,9 +141,12 @@ export function registerRoutes(app: Express): Server {
   app.get("/api/adoptions/user", async (req, res) => {
     try {
       if (!req.user) {
+        console.log('Usuario no autenticado intentando acceder a /api/adoptions/user');
         return res.status(401).json({ error: "No autenticado" });
       }
-
+  
+      console.log('Obteniendo adopciones para el usuario:', req.user.id);
+  
       const userAdoptions = await db
         .select({
           id: adoptions.id,
@@ -169,7 +172,8 @@ export function registerRoutes(app: Express): Server {
         .where(eq(adoptions.userId, req.user.id))
         .innerJoin(pets, eq(pets.id, adoptions.petId))
         .innerJoin(users, eq(users.id, adoptions.userId));
-
+  
+      console.log('Adopciones encontradas:', userAdoptions);
       res.json(userAdoptions);
     } catch (error) {
       console.error("Error fetching user adoptions:", error);
