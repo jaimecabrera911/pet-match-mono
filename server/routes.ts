@@ -7,6 +7,8 @@ import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import express from 'express';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 const storage = multer.diskStorage({
   destination: './uploads/',
@@ -18,7 +20,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 export function registerRoutes(app: Express): Server {
-  // Rutas de autenticación básica
+  // API Routes
   app.post("/api/login", async (req, res) => {
     try {
       const { correo, password } = req.body;
@@ -43,7 +45,7 @@ export function registerRoutes(app: Express): Server {
           correo: user.correo,
           nombres: user.nombres,
           apellidos: user.apellidos,
-          role: user.rolNombre.toLowerCase() // Convertimos ADMIN/USER a admin/user
+          role: user.rolNombre.toLowerCase()
         }
       });
     } catch (error) {
@@ -72,7 +74,7 @@ export function registerRoutes(app: Express): Server {
       correo: user.correo,
       nombres: user.nombres,
       apellidos: user.apellidos,
-      role: user.rolNombre.toLowerCase() // Convertimos ADMIN/USER a admin/user
+      role: user.rolNombre.toLowerCase()
     });
   });
 
@@ -127,7 +129,6 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Rutas existentes
   app.get("/api/pets", async (_req, res) => {
     try {
       const allPets = await db.select().from(pets);
@@ -181,7 +182,6 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Rutas para adopciones
   app.get("/api/adoptions", async (_req, res) => {
     try {
       const allAdoptions = await db
@@ -294,8 +294,29 @@ export function registerRoutes(app: Express): Server {
     }
   });
   
-  // Serve static files from the uploads directory
+    // Serve static files
   app.use('/uploads', express.static('uploads'));
+
+  // In development, let Vite handle all non-API routes
+  if (process.env.NODE_ENV !== 'production') {
+    app.use((req, res, next) => {
+      if (req.url.startsWith('/api/')) {
+        next();
+      } else {
+        // Forward to Vite dev server
+        res.redirect(`http://localhost:5173${req.url}`);
+      }
+    });
+  } else {
+    // In production, serve from dist folder
+    app.use(express.static('dist'));
+    app.get('*', (req, res, next) => {
+      if (req.path.startsWith('/api/')) {
+        return next();
+      }
+      res.sendFile(path.resolve('./dist/index.html'));
+    });
+  }
 
   const httpServer = createServer(app);
   return httpServer;

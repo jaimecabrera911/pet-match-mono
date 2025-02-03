@@ -38,6 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryKey: ["/api/user"],
     queryFn: async () => {
       try {
+        console.log("Fetching user data...");
         const res = await fetch("/api/user", {
           method: 'GET',
           credentials: 'include',
@@ -49,13 +50,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (!res.ok) {
           if (res.status === 401) {
+            console.log("User not authenticated");
             return null;
           }
           const errorData = await res.json();
           throw new Error(errorData.error || "Error al obtener datos del usuario");
         }
 
-        return await res.json();
+        const data = await res.json();
+        console.log("User data received:", data);
+        return data;
       } catch (error) {
         console.error("Error fetching user:", error);
         return null;
@@ -67,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginCredentials) => {
+      console.log("Attempting login...");
       const res = await fetch("/api/login", {
         method: "POST",
         headers: {
@@ -85,13 +90,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return await res.json();
     },
     onSuccess: async (data) => {
-      await refetch(); // Refetch user data after successful login
+      console.log("Login successful, refetching user data");
+      await refetch();
       toast({
         title: "¡Bienvenido!",
         description: `Has iniciado sesión como ${data.user.role}`,
       });
     },
     onError: (error: Error) => {
+      console.error("Login error:", error);
       toast({
         title: "Error al iniciar sesión",
         description: error.message,
@@ -102,6 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
+      console.log("Attempting logout...");
       const res = await fetch("/api/logout", {
         method: "POST",
         credentials: "include",
@@ -115,8 +123,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const errorData = await res.json();
         throw new Error(errorData.error || "Error al cerrar sesión");
       }
+
+      const data = await res.json();
+      console.log("Logout response:", data);
     },
     onSuccess: () => {
+      console.log("Logout successful, clearing user data");
       queryClient.setQueryData(["/api/user"], null);
       toast({
         title: "Sesión cerrada",
@@ -124,6 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     },
     onError: (error: Error) => {
+      console.error("Logout error:", error);
       toast({
         title: "Error al cerrar sesión",
         description: error.message,
