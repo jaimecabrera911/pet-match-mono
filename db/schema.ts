@@ -11,6 +11,7 @@ export const documentTypes = [
 ] as const;
 
 export const userRoles = ["USER", "ADMIN"] as const;
+export const petSizes = ["pequeño", "mediano", "grande"] as const;
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -64,6 +65,7 @@ export const pets = pgTable("pets", {
   imageUrl: text("image_url").notNull(),
   isAdopted: boolean("is_adopted").default(false).notNull(),
   gender: text("gender", { enum: ["macho", "hembra"] }).notNull(),
+  size: text("size", { enum: petSizes }).notNull().default("mediano"),
   requirements: text("requirements").array().notNull(),
   healthStatus: text("health_status").array().notNull(),
   personality: text("personality").array().notNull(),
@@ -74,10 +76,14 @@ export const insertPetSchema = createInsertSchema(pets, {
   requirements: z.array(z.string()).min(1, "Debe especificar al menos un requisito"),
   healthStatus: z.array(z.string()).min(1, "Debe especificar al menos un estado de salud"),
   personality: z.array(z.string()).min(1, "Debe especificar al menos un rasgo de personalidad"),
-    gender: z.enum(["macho", "hembra"], {
+  gender: z.enum(["macho", "hembra"], {
     required_error: "El género es requerido",
     invalid_type_error: "El género debe ser macho o hembra"
   }),
+  size: z.enum(petSizes, {
+    required_error: "El tamaño es requerido",
+    invalid_type_error: "El tamaño debe ser pequeño, mediano o grande"
+  }).default("mediano"),
 });
 
 export const selectPetSchema = createSelectSchema(pets);

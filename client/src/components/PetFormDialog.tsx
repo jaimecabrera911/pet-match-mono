@@ -32,6 +32,9 @@ const petSchema = z.object({
   gender: z.enum(["macho", "hembra"], {
     required_error: "El género es requerido",
   }),
+  size: z.enum(["pequeño", "mediano", "grande"], {
+    required_error: "El tamaño es requerido",
+  }),
   imageFile: z.any(),
   requirements: z.array(z.string()).min(1, "Debe especificar al menos un requisito"),
   healthStatus: z.array(z.string()).min(1, "Debe especificar al menos un estado de salud"),
@@ -61,6 +64,7 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
       breed: "",
       location: "",
       gender: "macho",
+      size: "mediano",
       requirements: [],
       healthStatus: [],
       personality: [],
@@ -75,6 +79,7 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
         breed: pet.breed,
         location: pet.location,
         gender: pet.gender || "macho",
+        size: pet.size || "mediano",
         requirements: pet.requirements,
         healthStatus: pet.healthStatus,
         personality: pet.personality,
@@ -86,6 +91,7 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
         breed: "",
         location: "",
         gender: "macho",
+        size: "mediano",
         requirements: [],
         healthStatus: [],
         personality: [],
@@ -100,7 +106,8 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
       formData.append("age", data.age);
       formData.append("breed", data.breed);
       formData.append("location", data.location);
-       formData.append("gender", data.gender);
+      formData.append("gender", data.gender);
+      formData.append("size", data.size);
       formData.append("requirements", JSON.stringify(data.requirements));
       formData.append("healthStatus", JSON.stringify(data.healthStatus));
       formData.append("personality", JSON.stringify(data.personality));
@@ -147,7 +154,8 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
       formData.append("age", data.age);
       formData.append("breed", data.breed);
       formData.append("location", data.location);
-       formData.append("gender", data.gender);
+      formData.append("gender", data.gender);
+      formData.append("size", data.size);
       formData.append("requirements", JSON.stringify(data.requirements));
       formData.append("healthStatus", JSON.stringify(data.healthStatus));
       formData.append("personality", JSON.stringify(data.personality));
@@ -249,7 +257,7 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
                 </FormItem>
               )}
             />
-              <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="gender"
@@ -276,18 +284,43 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
               />
               <FormField
                 control={form.control}
-                name="age"
+                name="size"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Edad</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
+                    <FormLabel>Tamaño</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccione el tamaño" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="pequeño">Pequeño</SelectItem>
+                        <SelectItem value="mediano">Mediano</SelectItem>
+                        <SelectItem value="grande">Grande</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
+            <FormField
+              control={form.control}
+              name="age"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Edad</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="breed"

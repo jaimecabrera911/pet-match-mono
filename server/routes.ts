@@ -298,60 +298,62 @@ export function registerRoutes(app: Express): Server {
         breed: req.body.breed,
         location: req.body.location,
         gender: req.body.gender,
+        size: req.body.size || "mediano",
         requirements: JSON.parse(req.body.requirements),
         healthStatus: JSON.parse(req.body.healthStatus),
         personality: JSON.parse(req.body.personality),
         imageUrl: req.file ? `/uploads/${req.file.filename}` : null,
         isAdopted: false
       };
-
+  
       const [newPet] = await db
         .insert(pets)
         .values(petData)
         .returning();
-
+  
       res.json(newPet);
     } catch (error) {
       console.error("Error creating pet:", error);
       res.status(500).json({ error: "Error al crear la mascota" });
     }
   });
-
+  
   // Add PUT endpoint for updating pets
   app.put("/api/pets/:id", upload.single('image'), async (req, res) => {
     try {
       const petId = parseInt(req.params.id);
-
+  
       // Verificar si la mascota existe
       const [existingPet] = await db
         .select()
         .from(pets)
         .where(eq(pets.id, petId))
         .limit(1);
-
+  
       if (!existingPet) {
         return res.status(404).json({ error: "Mascota no encontrada" });
       }
-
+  
       const updateData = {
         name: req.body.name,
         age: req.body.age,
         breed: req.body.breed,
         location: req.body.location,
         gender: req.body.gender,
+        size: req.body.size || existingPet.size,
         requirements: JSON.parse(req.body.requirements),
         healthStatus: JSON.parse(req.body.healthStatus),
         personality: JSON.parse(req.body.personality),
         // Mantener la imagen existente si no se proporciona una nueva
         imageUrl: req.file ? `/uploads/${req.file.filename}` : existingPet.imageUrl
       };
-
+  
       const [updatedPet] = await db
         .update(pets)
         .set(updateData)
         .where(eq(pets.id, petId))
         .returning();
-
+  
       res.json(updatedPet);
     } catch (error) {
       console.error("Error updating pet:", error);

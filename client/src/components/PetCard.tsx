@@ -10,6 +10,7 @@ interface PetCardProps {
   breed: string;
   location: string;
   imageUrl: string;
+  size: string;
   requirements: string[];
   healthStatus: string[];
   personality: string[];
@@ -21,7 +22,8 @@ export function PetCard({
   age, 
   breed, 
   location, 
-  imageUrl, 
+  imageUrl,
+  size,
   requirements,
   healthStatus,
   personality,
@@ -67,6 +69,7 @@ export function PetCard({
                   <div className="mt-2 space-y-2 text-base text-gray-700">
                     <p aria-label={`Edad: ${age}`}>Edad: {age}</p>
                     <p aria-label={`Raza: ${breed}`}>Raza: {breed}</p>
+                    <p aria-label={`Tamaño: ${size}`} className="capitalize">Tamaño: {size}</p>
                     <p aria-label={`Ubicación: ${location}`}>Ubicación: {location}</p>
                   </div>
                 </div>
