@@ -7,7 +7,6 @@ import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import express from 'express';
-import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const storage = multer.diskStorage({
   destination: './uploads/',
@@ -19,7 +18,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 export function registerRoutes(app: Express): Server {
-  // API Routes
+  // Rutas de autenticación básica
   app.post("/api/login", async (req, res) => {
     try {
       const { correo, password } = req.body;
@@ -44,7 +43,7 @@ export function registerRoutes(app: Express): Server {
           correo: user.correo,
           nombres: user.nombres,
           apellidos: user.apellidos,
-          role: user.rolNombre.toLowerCase()
+          role: user.rolNombre.toLowerCase() // Convertimos ADMIN/USER a admin/user
         }
       });
     } catch (error) {
@@ -73,7 +72,7 @@ export function registerRoutes(app: Express): Server {
       correo: user.correo,
       nombres: user.nombres,
       apellidos: user.apellidos,
-      role: user.rolNombre.toLowerCase()
+      role: user.rolNombre.toLowerCase() // Convertimos ADMIN/USER a admin/user
     });
   });
 
@@ -128,6 +127,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Rutas existentes
   app.get("/api/pets", async (_req, res) => {
     try {
       const allPets = await db.select().from(pets);
@@ -141,12 +141,9 @@ export function registerRoutes(app: Express): Server {
   app.get("/api/adoptions/user", async (req, res) => {
     try {
       if (!req.user) {
-        console.log('Usuario no autenticado intentando acceder a /api/adoptions/user');
         return res.status(401).json({ error: "No autenticado" });
       }
-  
-      console.log('Obteniendo adopciones para el usuario:', req.user.id);
-  
+
       const userAdoptions = await db
         .select({
           id: adoptions.id,
@@ -172,8 +169,7 @@ export function registerRoutes(app: Express): Server {
         .where(eq(adoptions.userId, req.user.id))
         .innerJoin(pets, eq(pets.id, adoptions.petId))
         .innerJoin(users, eq(users.id, adoptions.userId));
-  
-      console.log('Adopciones encontradas:', userAdoptions);
+
       res.json(userAdoptions);
     } catch (error) {
       console.error("Error fetching user adoptions:", error);
@@ -181,6 +177,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Rutas para adopciones
   app.get("/api/adoptions", async (_req, res) => {
     try {
       const allAdoptions = await db
@@ -293,37 +290,8 @@ export function registerRoutes(app: Express): Server {
     }
   });
   
-  // Serve static files
+  // Serve static files from the uploads directory
   app.use('/uploads', express.static('uploads'));
-
-  // In development, proxy all non-API requests to Vite dev server
-  if (process.env.NODE_ENV !== 'production') {
-    app.use(
-      '/',
-      createProxyMiddleware({
-        target: 'http://0.0.0.0:5173',
-        changeOrigin: true,
-        ws: true,
-        onError: (err, req, res) => {
-          console.error('Proxy error:', err);
-          res.writeHead(500, {
-            'Content-Type': 'text/plain',
-          });
-          res.end('Proxy error - Vite server may not be running');
-        },
-        pathFilter: (path) => !path.startsWith('/api/'),
-      })
-    );
-  } else {
-    // In production, serve from dist folder
-    app.use(express.static('dist'));
-    app.get('*', (req, res, next) => {
-      if (req.path.startsWith('/api/')) {
-        return next();
-      }
-      res.sendFile(path.resolve('./dist/index.html'));
-    });
-  }
 
   const httpServer = createServer(app);
   return httpServer;

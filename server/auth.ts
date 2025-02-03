@@ -19,22 +19,15 @@ export function setupAuth(app: Express) {
     secret: process.env.REPL_ID || "mascota-adoption-secret",
     resave: false,
     saveUninitialized: false,
-    name: 'sid', // Nombre específico para la cookie de sesión
-    cookie: {
-      secure: false, // Set to true if using HTTPS
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      sameSite: 'lax' // Importante para las redirecciones
-    },
+    cookie: {},
     store: new MemoryStore({
-      checkPeriod: 86400000, // prune expired entries every 24h
+      checkPeriod: 86400000,
     }),
   };
 
   if (app.get("env") === "production") {
     app.set("trust proxy", 1);
     sessionSettings.cookie = {
-      ...sessionSettings.cookie,
       secure: true,
     };
   }
@@ -51,7 +44,6 @@ export function setupAuth(app: Express) {
       },
       async (correo, password, done) => {
         try {
-          console.log("Attempting login for:", correo);
           const [user] = await db
             .select()
             .from(users)
@@ -59,19 +51,15 @@ export function setupAuth(app: Express) {
             .limit(1);
 
           if (!user) {
-            console.log("User not found:", correo);
-            return done(null, false, { message: "Usuario no encontrado." });
+            return done(null, false, { message: "Usuario incorrecto." });
           }
 
           if (password !== user.password) {
-            console.log("Invalid password for user:", correo);
             return done(null, false, { message: "Contraseña incorrecta." });
           }
 
-          console.log("Login successful for:", correo);
           return done(null, user);
         } catch (err) {
-          console.error("Login error:", err);
           return done(err);
         }
       }
@@ -79,109 +67,123 @@ export function setupAuth(app: Express) {
   );
 
   passport.serializeUser((user, done) => {
-    console.log("Serializing user:", user.id);
     done(null, user.id);
   });
 
   passport.deserializeUser(async (id: number, done) => {
     try {
-      console.log("Deserializing user:", id);
       const [user] = await db
         .select()
         .from(users)
         .where(eq(users.id, id))
         .limit(1);
-
-      if (!user) {
-        console.log("User not found during deserialization:", id);
-        return done(null, false);
-      }
-
       done(null, user);
     } catch (err) {
-      console.error("Deserialize error:", err);
       done(err);
     }
   });
 
-  // Custom middleware to log session and auth state
-  app.use((req, res, next) => {
-    console.log('Session ID:', req.sessionID);
-    console.log('Session:', req.session);
-    console.log('Is Authenticated:', req.isAuthenticated());
-    if (req.user) {
-      console.log('Current User:', req.user.id);
-    }
-    next();
-  });
-
-  // Authentication routes
-  app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err: any, user: Express.User | false, info: IVerifyOptions) => {
-      if (err) {
-        console.error("Login error:", err);
-        return res.status(500).json({ error: "Error interno del servidor" });
+  app.post("/api/register", async (req, res, next) => {
+    try {
+      const result = insertUserSchema.safeParse(req.body);
+      if (!result.success) {
+        return res
+          .status(400)
+          .json({
+            error: "Datos inválidos",
+            details: result.error.issues.map((i) => i.message)
+          });
       }
 
-      if (!user) {
-        return res.status(401).json({ error: info.message || "Credenciales inválidas" });
+      const [existingUser] = await db
+        .select()
+        .from(users)
+        .where(eq(users.correo, result.data.correo))
+        .limit(1);
+
+      if (existingUser) {
+        return res.status(400).json({ error: "El correo electrónico ya está registrado" });
       }
 
-      req.logIn(user, (err) => {
+      // Add default values for required fields if not provided
+      const userData = {
+        ...result.data,
+        genero: result.data.genero || "M",
+        fechaNacimiento: result.data.fechaNacimiento || new Date(),
+        rolNombre: result.data.rolNombre || "USER"
+      };
+
+      const [newUser] = await db
+        .insert(users)
+        .values([userData])  // Wrap in array as insert expects array of values
+        .returning();
+
+      req.login(newUser, (err) => {
         if (err) {
-          console.error("Login error:", err);
-          return res.status(500).json({ error: "Error al iniciar sesión" });
+          return next(err);
         }
-
-        return res.json({
-          user: {
-            id: user.id,
-            correo: user.correo,
-            nombres: user.nombres,
-            apellidos: user.apellidos,
-            role: user.rolNombre.toLowerCase()
-          }
+        return res.status(201).json({
+          message: "Registro exitoso",
+          user: { 
+            id: newUser.id, 
+            correo: newUser.correo,
+            nombres: newUser.nombres,
+            apellidos: newUser.apellidos
+          },
         });
       });
-    })(req, res, next);
+    } catch (error) {
+      console.error("Error en registro:", error);
+      next(error);
+    }
+  });
+
+  app.post("/api/login", (req, res, next) => {
+    passport.authenticate(
+      "local",
+      (err: any, user: Express.User | false, info: IVerifyOptions) => {
+        if (err) {
+          return next(err);
+        }
+
+        if (!user) {
+          return res
+            .status(400)
+            .json({ error: info.message ?? "Error al iniciar sesión" });
+        }
+
+        req.logIn(user, (err) => {
+          if (err) {
+            return next(err);
+          }
+
+          return res.json({
+            message: "Inicio de sesión exitoso",
+            user: { 
+              id: user.id, 
+              correo: user.correo,
+              nombres: user.nombres,
+              apellidos: user.apellidos
+            },
+          });
+        });
+      },
+    )(req, res, next);
   });
 
   app.post("/api/logout", (req, res) => {
-    const wasAuthenticated = req.isAuthenticated();
     req.logout((err) => {
       if (err) {
-        console.error("Logout error:", err);
         return res.status(500).json({ error: "Error al cerrar sesión" });
       }
-      req.session.destroy((err) => {
-        if (err) {
-          console.error("Session destruction error:", err);
-          return res.status(500).json({ error: "Error al destruir la sesión" });
-        }
-        res.clearCookie('sid');
-        res.json({ 
-          message: "Sesión cerrada exitosamente",
-          wasAuthenticated 
-        });
-      });
+      res.json({ message: "Sesión cerrada exitosamente" });
     });
   });
 
   app.get("/api/user", (req, res) => {
-    console.log("GET /api/user - isAuthenticated:", req.isAuthenticated());
-    console.log("Session:", req.session);
-    console.log("User:", req.user);
-
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ error: "No autenticado" });
+    if (req.isAuthenticated()) {
+      return res.json(req.user);
     }
-
-    res.json({
-      id: req.user.id,
-      correo: req.user.correo,
-      nombres: req.user.nombres,
-      apellidos: req.user.apellidos,
-      role: req.user.rolNombre.toLowerCase()
-    });
+    res.status(401).json({ error: "No ha iniciado sesión" });
   });
 }

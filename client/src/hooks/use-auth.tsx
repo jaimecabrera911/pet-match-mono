@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useContext, useEffect } from "react";
+import { ReactNode, createContext, useContext } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
@@ -22,6 +22,8 @@ type AuthContextType = {
   error: Error | null;
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => Promise<void>;
+  loginMutation: ReturnType<typeof useMutation>;
+  logoutMutation: ReturnType<typeof useMutation>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -33,37 +35,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     data: user,
     error,
     isLoading,
-    refetch
-  } = useQuery<User | null, Error>({
+  } = useQuery({
     queryKey: ["/api/user"],
     queryFn: async () => {
       try {
-        console.log("Fetching user data...");
-        const res = await fetch("/api/user", {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          }
-        });
-
+        const res = await fetch("/api/user");
         if (!res.ok) {
           if (res.status === 401) {
-            console.log("User not authenticated");
+            sessionStorage.removeItem("user");
             return null;
           }
-          const errorData = await res.json();
-          throw new Error(errorData.error || "Error al obtener datos del usuario");
+          throw new Error("Error al obtener datos del usuario");
         }
-
         const data = await res.json();
-        console.log("User data received:", data);
+        sessionStorage.setItem("user", JSON.stringify(data));
         return data;
       } catch (error) {
-        console.error("Error fetching user:", error);
-        return null;
+        sessionStorage.removeItem("user");
+        throw error;
       }
+    },
+    initialData: () => {
+      const storedUser = sessionStorage.getItem("user");
+      return storedUser ? JSON.parse(storedUser) : null;
     },
     retry: false,
     staleTime: Infinity,
@@ -71,34 +65,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginCredentials) => {
-      console.log("Attempting login...");
       const res = await fetch("/api/login", {
         method: "POST",
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(credentials),
         credentials: "include",
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Credenciales inválidas");
+        const errorData = await res.text();
+        throw new Error(errorData || "Credenciales inválidas");
       }
 
-      return await res.json();
+      return res.json();
     },
-    onSuccess: async (data) => {
-      console.log("Login successful, refetching user data");
-      await refetch();
+    onSuccess: (data) => {
+      sessionStorage.setItem("user", JSON.stringify(data.user));
+      queryClient.setQueryData(["/api/user"], data.user);
       toast({
         title: "¡Bienvenido!",
         description: `Has iniciado sesión como ${data.user.role}`,
       });
     },
     onError: (error: Error) => {
-      console.error("Login error:", error);
+      sessionStorage.removeItem("user");
       toast({
         title: "Error al iniciar sesión",
         description: error.message,
@@ -109,26 +99,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      console.log("Attempting logout...");
       const res = await fetch("/api/logout", {
         method: "POST",
         credentials: "include",
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
       });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Error al cerrar sesión");
-      }
-
-      const data = await res.json();
-      console.log("Logout response:", data);
+      if (!res.ok) throw new Error("Error al cerrar sesión");
     },
     onSuccess: () => {
-      console.log("Logout successful, clearing user data");
+      sessionStorage.removeItem("user");
       queryClient.setQueryData(["/api/user"], null);
       toast({
         title: "Sesión cerrada",
@@ -136,7 +114,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     },
     onError: (error: Error) => {
-      console.error("Logout error:", error);
       toast({
         title: "Error al cerrar sesión",
         description: error.message,
@@ -156,11 +133,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        user,
+        user: user ?? null,
         isLoading,
         error,
         login,
         logout,
+        loginMutation,
+        logoutMutation,
       }}
     >
       {children}
