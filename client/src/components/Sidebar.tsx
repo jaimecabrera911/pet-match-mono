@@ -23,6 +23,13 @@ export function Sidebar() {
       roles: ["admin", "shelter"]
     },
     {
+      icon: PawPrint,
+      label: "Mascotas Disponibles",
+      href: "/dashboard/available-pets",
+      description: "Ver mascotas para adoptar",
+      roles: ["adoptante"]
+    },
+    {
       icon: Heart,
       label: "Adopciones",
       href: "/dashboard/adopciones",
@@ -99,8 +106,8 @@ export function Sidebar() {
           </div>
         </nav>
 
-         {/* User Profile & Logout */}
-         <div className="p-4 mt-auto border-t">
+        {/* User Profile & Logout */}
+        <div className="p-4 mt-auto border-t">
           <div className="flex items-center gap-3 px-2">
             <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
               <Users className="w-4 h-4 text-gray-600" />

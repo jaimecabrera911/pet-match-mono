@@ -19,17 +19,13 @@ import RegistroAdoptante from "@/pages/registro-adoptante";
 import AuthPage from "./pages/auth-page";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import AvailablePets from "@/pages/available-pets";
 
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Barra lateral */}
       <Sidebar />
-
-      {/* Navegación móvil */}
       <MobileNav />
-
-      {/* Contenido principal */}
       <div className="flex-1 md:pl-64">
         <header className="fixed top-0 right-0 left-0 md:left-64 z-40 bg-white border-b">
           <DesktopHeader />
@@ -47,6 +43,7 @@ function DashboardRouter() {
     <Switch>
       <Route path="/dashboard/panel-de-control" component={Dashboard} />
       <Route path="/dashboard/user-adoptions" component={UserAdoptions} />
+      <Route path="/dashboard/available-pets" component={AvailablePets} />
       <ProtectedRoute 
         path="/dashboard/mascotas"
         requiredRole={["admin", "shelter"]}
