@@ -18,16 +18,24 @@ export default function AvailablePets() {
 
   const createAdoptionMutation = useMutation({
     mutationFn: async (petId: number) => {
+      if (!user) {
+        throw new Error("Debes iniciar sesión para adoptar una mascota");
+      }
+
       const response = await fetch("/api/adoptions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ petId }),
+        body: JSON.stringify({ 
+          petId,
+          userId: user.id
+        }),
       });
 
       if (!response.ok) {
-        throw new Error("Error al crear la solicitud de adopción");
+        const error = await response.json();
+        throw new Error(error.error || "Error al crear la solicitud de adopción");
       }
 
       return response.json();
