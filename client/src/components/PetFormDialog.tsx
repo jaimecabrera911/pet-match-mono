@@ -40,15 +40,30 @@ export function PetFormDialog({ isOpen, onClose, pet }: PetFormDialogProps) {
   const form = useForm<PetFormData>({
     resolver: zodResolver(petSchema),
     defaultValues: {
-      name: pet?.name ?? "",
-      age: pet?.age ?? "",
-      breed: pet?.breed ?? "",
-      location: pet?.location ?? "",
-      requirements: pet?.requirements ?? [],
-      healthStatus: pet?.healthStatus ?? [],
-      personality: pet?.personality ?? [],
+      name: pet?.name || "",
+      age: pet?.age || "",
+      breed: pet?.breed || "",
+      location: pet?.location || "",
+      requirements: pet?.requirements || [],
+      healthStatus: pet?.healthStatus || [],
+      personality: pet?.personality || [],
     },
   });
+
+  // Reset form values when pet changes
+  useState(() => {
+    if (pet) {
+      form.reset({
+        name: pet.name,
+        age: pet.age,
+        breed: pet.breed,
+        location: pet.location,
+        requirements: pet.requirements,
+        healthStatus: pet.healthStatus,
+        personality: pet.personality,
+      });
+    }
+  }, [pet, form.reset]);
 
   const createPetMutation = useMutation({
     mutationFn: async (data: PetFormData) => {
