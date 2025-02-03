@@ -34,11 +34,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     error,
     isLoading,
     refetch
-  } = useQuery({
+  } = useQuery<User | null, Error>({
     queryKey: ["/api/user"],
     queryFn: async () => {
       try {
         const res = await fetch("/api/user", {
+          method: 'GET',
           credentials: 'include',
           headers: {
             'Accept': 'application/json',
@@ -54,8 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           throw new Error(errorData.error || "Error al obtener datos del usuario");
         }
 
-        const data = await res.json();
-        return data;
+        return await res.json();
       } catch (error) {
         console.error("Error fetching user:", error);
         return null;
@@ -82,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(errorData.error || "Credenciales inválidas");
       }
 
-      return res.json();
+      return await res.json();
     },
     onSuccess: async (data) => {
       await refetch(); // Refetch user data after successful login
