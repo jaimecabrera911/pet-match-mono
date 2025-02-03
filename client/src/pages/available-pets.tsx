@@ -1,22 +1,61 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import type { SelectPet } from "@db/schema";
 
 export default function AvailablePets() {
   const [, navigate] = useLocation();
   const { user } = useAuth();
-  
-  const { data: pets = [], isLoading } = useQuery<any[]>({
+  const { toast } = useToast();
+
+  const { data: pets = [], isLoading } = useQuery<SelectPet[]>({
     queryKey: ["/api/pets"],
+  });
+
+  const createAdoptionMutation = useMutation({
+    mutationFn: async (petId: number) => {
+      const response = await fetch("/api/adoptions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ petId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al crear la solicitud de adopción");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "¡Solicitud enviada!",
+        description: "Tu solicitud de adopción ha sido creada exitosamente.",
+      });
+      navigate("/dashboard/user-adoptions");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   const availablePets = pets.filter(pet => !pet.isAdopted);
 
-  const handleAdoptClick = (petId: number) => {
-    navigate(`/adopcion/crear/${petId}`);
+  const handleAdoptClick = async (petId: number) => {
+    try {
+      await createAdoptionMutation.mutateAsync(petId);
+    } catch (error) {
+      console.error("Error al crear la adopción:", error);
+    }
   };
 
   if (isLoading) {
@@ -67,9 +106,10 @@ export default function AvailablePets() {
               <Button
                 className="w-full bg-[#FF5C7F] hover:bg-[#FF5C7F]/90"
                 onClick={() => handleAdoptClick(pet.id)}
+                disabled={createAdoptionMutation.isPending}
               >
                 <Heart className="mr-2 h-4 w-4" />
-                Adoptar
+                {createAdoptionMutation.isPending ? "Procesando..." : "Adoptar"}
               </Button>
             </CardFooter>
           </Card>
