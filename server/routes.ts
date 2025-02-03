@@ -78,13 +78,16 @@ export function registerRoutes(app: Express): Server {
 
   app.post("/api/register", async (req, res) => {
     try {
+      console.log("Datos recibidos:", req.body);
+      
       const userData = {
         ...req.body,
-        rolNombre: "adoptante" // Forzar el rol a ser adoptante
+        rolNombre: "adoptante"
       };
 
       const result = insertUserSchema.safeParse(userData);
       if (!result.success) {
+        console.log("Error de validación:", result.error.errors);
         return res.status(400).json({ 
           error: "Datos de usuario inválidos",
           details: result.error.errors 

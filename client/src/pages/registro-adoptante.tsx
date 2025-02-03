@@ -44,22 +44,24 @@ export default function RegistroAdoptante() {
   const onSubmit = async (data: InsertUser) => {
     console.log("Datos del formulario:", data);
     try {
-      // Asegurarse de que la fecha de nacimiento sea una cadena ISO
       const formattedData = {
         ...data,
         rolNombre: "adoptante",
         fechaNacimiento: data.fechaNacimiento instanceof Date 
-          ? data.fechaNacimiento.toISOString() 
-          : new Date(data.fechaNacimiento).toISOString()
+          ? data.fechaNacimiento.toISOString().split('T')[0]
+          : new Date(data.fechaNacimiento).toISOString().split('T')[0]
       };
 
-      const response = await fetch("/api/register", {
+      console.log("Enviando datos formateados:", formattedData);
+      
+      const response = await fetch("http://localhost:5000/api/register", {
         method: "POST",
         headers: { 
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "Accept": "application/json"
         },
         body: JSON.stringify(formattedData),
-        credentials: "include" // Importante para manejar cookies de sesión
+        credentials: "include"
       });
 
       console.log("Respuesta del servidor:", response.status);
