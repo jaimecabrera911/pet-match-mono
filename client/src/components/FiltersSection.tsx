@@ -9,6 +9,8 @@ interface FiltersSectionProps {
   onAgeChange: (value: [number, number]) => void;
   selectedGender: string;
   onGenderChange: (gender: string) => void;
+  selectedSize: string;
+  onSizeChange: (size: string) => void;
 }
 
 export function FiltersSection({
@@ -16,6 +18,8 @@ export function FiltersSection({
   onAgeChange,
   selectedGender,
   onGenderChange,
+  selectedSize,
+  onSizeChange,
 }: FiltersSectionProps) {
   return (
     <div className="space-y-6 p-6">
@@ -57,8 +61,8 @@ export function FiltersSection({
               className="flex flex-col space-y-2"
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="" id="all" />
-                <Label htmlFor="all">Todos</Label>
+                <RadioGroupItem value="" id="all-gender" />
+                <Label htmlFor="all-gender">Todos</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="macho" id="male" />
@@ -67,6 +71,32 @@ export function FiltersSection({
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="hembra" id="female" />
                 <Label htmlFor="female">Hembra</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          <div className="space-y-4">
+            <Label className="text-sm font-medium">Tamaño</Label>
+            <RadioGroup
+              value={selectedSize}
+              onValueChange={onSizeChange}
+              className="flex flex-col space-y-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="" id="all-size" />
+                <Label htmlFor="all-size">Todos</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="pequeño" id="small" />
+                <Label htmlFor="small">Pequeño</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="mediano" id="medium" />
+                <Label htmlFor="medium">Mediano</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="grande" id="large" />
+                <Label htmlFor="large">Grande</Label>
               </div>
             </RadioGroup>
           </div>
