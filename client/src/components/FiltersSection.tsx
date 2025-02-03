@@ -7,9 +7,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 interface FiltersSectionProps {
   ageRange: [number, number];
   onAgeChange: (value: [number, number]) => void;
-  selectedBreed: string;
-  onBreedChange: (breed: string) => void;
-  availableBreeds: string[];
   selectedGender: string;
   onGenderChange: (gender: string) => void;
 }
@@ -17,9 +14,6 @@ interface FiltersSectionProps {
 export function FiltersSection({
   ageRange,
   onAgeChange,
-  selectedBreed,
-  onBreedChange,
-  availableBreeds,
   selectedGender,
   onGenderChange,
 }: FiltersSectionProps) {
@@ -75,22 +69,6 @@ export function FiltersSection({
                 <Label htmlFor="female">Hembra</Label>
               </div>
             </RadioGroup>
-          </div>
-
-          <div className="space-y-4">
-            <Label className="text-sm font-medium">Raza</Label>
-            <select
-              value={selectedBreed}
-              onChange={(e) => onBreedChange(e.target.value)}
-              className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5C7F]/20 focus:border-[#FF5C7F]"
-            >
-              <option value="">Todas las razas</option>
-              {availableBreeds.map((breed) => (
-                <option key={breed} value={breed}>
-                  {breed}
-                </option>
-              ))}
-            </select>
           </div>
         </div>
       </div>

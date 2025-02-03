@@ -6,20 +6,18 @@ import type { SelectPet } from "@db/schema";
 
 export function PetGrid() {
   const [ageRange, setAgeRange] = useState<[number, number]>([0, 15]);
-  const [selectedBreed, setSelectedBreed] = useState("");
+  const [selectedGender, setSelectedGender] = useState("");
 
   const { data: pets = [], isLoading } = useQuery<SelectPet[]>({
     queryKey: ["/api/pets"],
   });
 
-  const availableBreeds = Array.from(new Set(pets.map(pet => pet.breed)));
-
   const filteredPets = pets.filter(pet => {
     // Convert age string to number for comparison
     const ageNum = parseInt(pet.age);
     const ageInRange = isNaN(ageNum) || (ageNum >= ageRange[0] && ageNum <= ageRange[1]);
-    const breedMatches = !selectedBreed || pet.breed === selectedBreed;
-    return ageInRange && breedMatches && !pet.isAdopted;
+    const genderMatches = !selectedGender || pet.gender === selectedGender;
+    return ageInRange && genderMatches && !pet.isAdopted;
   });
 
   if (isLoading) {
@@ -38,9 +36,8 @@ export function PetGrid() {
           <FiltersSection
             ageRange={ageRange}
             onAgeChange={setAgeRange}
-            selectedBreed={selectedBreed}
-            onBreedChange={setSelectedBreed}
-            availableBreeds={availableBreeds}
+            selectedGender={selectedGender}
+            onGenderChange={setSelectedGender}
           />
         </div>
       </aside>
