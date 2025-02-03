@@ -30,7 +30,7 @@ export default function UserAdoptions() {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const { data: adoptions = [], isLoading, error } = useQuery({
+  const { data: adoptions = [], isLoading } = useQuery({
     queryKey: ['/api/adoptions/user'],
     queryFn: async () => {
       if (!user) {
@@ -50,7 +50,14 @@ export default function UserAdoptions() {
       }
       return res.json();
     },
-    enabled: !!user
+    enabled: !!user,
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
   });
 
   if (isLoading) {
@@ -59,14 +66,6 @@ export default function UserAdoptions() {
         <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
       </div>
     );
-  }
-
-  if (error) {
-    toast({
-      title: "Error",
-      description: error.message,
-      variant: "destructive"
-    });
   }
 
   return (
