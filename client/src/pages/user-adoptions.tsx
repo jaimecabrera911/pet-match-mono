@@ -69,6 +69,25 @@ export default function UserAdoptions() {
     }
   });
 
+  if (!user) {
+    return (
+      <div className="container mx-auto py-8">
+        <Card>
+          <CardContent className="text-center py-8">
+            <p className="text-muted-foreground">
+              Debes iniciar sesión para ver tus adopciones
+            </p>
+            <div className="mt-4">
+              <Link href="/auth">
+                <Button>Iniciar Sesión</Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">

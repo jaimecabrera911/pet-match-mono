@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useContext } from "react";
+import { ReactNode, createContext, useContext, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
@@ -22,8 +22,6 @@ type AuthContextType = {
   error: Error | null;
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => Promise<void>;
-  loginMutation: ReturnType<typeof useMutation>;
-  logoutMutation: ReturnType<typeof useMutation>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -35,29 +33,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     data: user,
     error,
     isLoading,
+    refetch
   } = useQuery({
     queryKey: ["/api/user"],
     queryFn: async () => {
       try {
-        const res = await fetch("/api/user");
+        const res = await fetch("/api/user", {
+          credentials: 'include'
+        });
+
         if (!res.ok) {
           if (res.status === 401) {
-            sessionStorage.removeItem("user");
             return null;
           }
           throw new Error("Error al obtener datos del usuario");
         }
+
         const data = await res.json();
-        sessionStorage.setItem("user", JSON.stringify(data));
         return data;
       } catch (error) {
-        sessionStorage.removeItem("user");
-        throw error;
+        console.error("Error fetching user:", error);
+        return null;
       }
-    },
-    initialData: () => {
-      const storedUser = sessionStorage.getItem("user");
-      return storedUser ? JSON.parse(storedUser) : null;
     },
     retry: false,
     staleTime: Infinity,
@@ -73,22 +70,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!res.ok) {
-        const errorData = await res.text();
-        throw new Error(errorData || "Credenciales inválidas");
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Credenciales inválidas");
       }
 
       return res.json();
     },
-    onSuccess: (data) => {
-      sessionStorage.setItem("user", JSON.stringify(data.user));
-      queryClient.setQueryData(["/api/user"], data.user);
+    onSuccess: async (data) => {
+      await refetch(); // Refetch user data after successful login
       toast({
         title: "¡Bienvenido!",
         description: `Has iniciado sesión como ${data.user.role}`,
       });
     },
     onError: (error: Error) => {
-      sessionStorage.removeItem("user");
       toast({
         title: "Error al iniciar sesión",
         description: error.message,
@@ -106,7 +101,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!res.ok) throw new Error("Error al cerrar sesión");
     },
     onSuccess: () => {
-      sessionStorage.removeItem("user");
       queryClient.setQueryData(["/api/user"], null);
       toast({
         title: "Sesión cerrada",
@@ -133,13 +127,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        user: user ?? null,
+        user,
         isLoading,
         error,
         login,
         logout,
-        loginMutation,
-        logoutMutation,
       }}
     >
       {children}
