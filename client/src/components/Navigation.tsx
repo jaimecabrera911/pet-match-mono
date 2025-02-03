@@ -1,15 +1,14 @@
 import { cn } from "@/lib/utils";
-import { Home, Heart, FileText, Phone, Calendar, Settings, HelpCircle } from "lucide-react";
+import { Home, Heart, FileText, Phone } from "lucide-react";
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
 
 export function Navigation() {
   const navItems = [
     { icon: Home, label: "Inicio", href: "#hero" },
     { icon: Heart, label: "Mascotas", href: "#mascotas" },
     { icon: FileText, label: "General", href: "#proceso" },
-    { icon: Phone, label: "Contactar", href: "#contacto" },
-    { icon: Calendar, label: "Calendario", href: "#" },
-    { icon: Settings, label: "Configurar", href: "#" },
-    { icon: HelpCircle, label: "Ayuda", href: "#" }
+    { icon: Phone, label: "Contactar", href: "#contacto" }
   ];
 
   return (
@@ -21,7 +20,7 @@ export function Navigation() {
               <Heart className="h-4 w-4 text-white" />
             </div>
           </div>
-          <div className="flex gap-4">
+          <div className="flex items-center gap-4">
             {navItems.map((item, index) => (
               <a
                 key={index}
@@ -35,6 +34,15 @@ export function Navigation() {
                 <span className="text-[9px]">{item.label}</span>
               </a>
             ))}
+            <Link href="/auth/login">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs text-[#FF5C7F] hover:text-[#FF5C7F] hover:bg-pink-50"
+              >
+                Iniciar Sesión
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
