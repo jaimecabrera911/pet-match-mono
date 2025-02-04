@@ -4,7 +4,7 @@ import { PetGrid } from "@/components/PetGrid";
 import { AdoptionSteps } from "@/components/AdoptionSteps";
 import { VideoGallery } from "@/components/VideoGallery";
 import { SuccessStories } from "@/components/SuccessStories";
-import { Heart, Instagram, Facebook, MessageCircle } from "lucide-react";
+import { Heart, Instagram, Facebook, MessageCircle, Dog } from "lucide-react";
 import { Link } from "wouter";
 
 export default function Home() {
@@ -19,14 +19,16 @@ export default function Home() {
             className="absolute inset-0 bg-cover bg-center z-0"
             style={{
               backgroundImage:
-                "url('https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&w=1920')",
+                "url('https://www.mascotahogar.com/Imagenes/fondos-de-perros-labradores.jpg')",
             }}
           >
             <div className="absolute inset-0 bg-black/40" />
           </div>
           <div className="max-w-screen-2xl mx-auto text-center relative z-10 px-4 w-full">
             <div className="flex justify-center mb-4">
-              <div className="w-12 h-12 text-primary">🦴</div>
+              <div className="w-12 h-12 text-white">
+                <Heart className="h-full w-full" />
+              </div>
             </div>
             <h1 className="text-3xl font-semibold mb-2 text-white">
               Adopta una mascota
@@ -76,8 +78,8 @@ export default function Home() {
           <div className="max-w-screen-2xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 px-4 w-full">
             {/* Left column - About text */}
             <div className="space-y-4">
-              <div className="w-12 h-12 bg-[#FF5C7F] rounded-full flex items-center justify-center mb-4">
-                <Heart className="h-6 w-6 text-white" />
+              <div className="w-20 h-20 flex items-center justify-center mb-4">
+                <img src="/images/logo.jpg" alt="Logo" className="h-20 w-20" /> 
               </div>
               <p className="text-sm text-gray-600">
                 Somos una fundación sin fines de lucro dedicada a rescatar

@@ -101,7 +101,7 @@ export function registerRoutes(app: Express): Server {
   app.post("/api/register", async (req, res) => {
     try {
       console.log("Datos recibidos:", req.body);
-      
+
       const userData = {
         ...req.body,
         rolNombre: "adoptante"
@@ -110,9 +110,9 @@ export function registerRoutes(app: Express): Server {
       const result = insertUserSchema.safeParse(userData);
       if (!result.success) {
         console.log("Error de validación:", result.error.errors);
-        return res.status(400).json({ 
+        return res.status(400).json({
           error: "Datos de usuario inválidos",
-          details: result.error.errors 
+          details: result.error.errors
         });
       }
 
@@ -129,7 +129,7 @@ export function registerRoutes(app: Express): Server {
       const { id, ...insertData } = result.data;
       const [newUser] = await db
         .insert(users)
-        .values({ ...insertData, createdAt: new Date() })
+        .values({ ...insertData })
         .returning();
 
       res.status(201).json({
@@ -148,6 +148,30 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  app.put("/api/users/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const user = await db.select().from(users).where(eq(users.id, Number(id))).limit(1);
+      if (!user) {
+        return res.status(404).json({ error: "Usuario no encontrado" });
+      }
+  
+      // Extraer y formatear fechaNacimiento
+      const { fechaNacimiento, ...restBody } = req.body;
+      const formattedDate = fechaNacimiento ? new Date(fechaNacimiento) : null;
+  
+      const updatedUser = await db.update(users).set({
+        ...restBody,
+        fechaNacimiento: formattedDate,
+        password: user[0].password
+      }).where(eq(users.id, Number(id))).returning();
+      
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error en actualizar usuario:", error);
+      res.status(500).json({ error: "Error al actualizar usuario" });
+    }
+  });
   // Ruta para obtener usuarios
   app.get("/api/users", async (_req, res) => {
     try {
@@ -321,7 +345,7 @@ export function registerRoutes(app: Express): Server {
       res.status(500).json({ error: "Error al actualizar la solicitud de adopción" });
     }
   });
-  
+
   app.post("/api/pets", upload.single('image'), async (req, res) => {
     try {
       const petData = {
@@ -335,40 +359,40 @@ export function registerRoutes(app: Express): Server {
         healthStatus: JSON.parse(req.body.healthStatus),
         personality: JSON.parse(req.body.personality),
         imageUrl: req.file ? `/uploads/${req.file.filename}` : null,
-                isAdopted: false
-            };
-    
-            const [newPet] = await db
-                .insert(pets)
-                .values({
-                    ...petData,
-                    imageUrl: petData.imageUrl ?? '' // Provide empty string as fallback instead of null
-                })
-                .returning();
-    
-            res.json(newPet);
-        } catch (error) {
-            console.error("Error creating pet:", error);
+        isAdopted: false
+      };
+
+      const [newPet] = await db
+        .insert(pets)
+        .values({
+          ...petData,
+          imageUrl: petData.imageUrl ?? '' // Provide empty string as fallback instead of null
+        })
+        .returning();
+
+      res.json(newPet);
+    } catch (error) {
+      console.error("Error creating pet:", error);
       res.status(500).json({ error: "Error al crear la mascota" });
     }
   });
-  
+
   // Add PUT endpoint for updating pets
   app.put("/api/pets/:id", upload.single('image'), async (req, res) => {
     try {
       const petId = parseInt(req.params.id);
-  
+
       // Verificar si la mascota existe
       const [existingPet] = await db
         .select()
         .from(pets)
         .where(eq(pets.id, petId))
         .limit(1);
-  
+
       if (!existingPet) {
         return res.status(404).json({ error: "Mascota no encontrada" });
       }
-  
+
       const updateData = {
         name: req.body.name,
         age: req.body.age,
@@ -382,13 +406,13 @@ export function registerRoutes(app: Express): Server {
         // Mantener la imagen existente si no se proporciona una nueva
         imageUrl: req.file ? `/uploads/${req.file.filename}` : existingPet.imageUrl
       };
-  
+
       const [updatedPet] = await db
         .update(pets)
         .set(updateData)
         .where(eq(pets.id, petId))
         .returning();
-  
+
       res.json(updatedPet);
     } catch (error) {
       console.error("Error updating pet:", error);

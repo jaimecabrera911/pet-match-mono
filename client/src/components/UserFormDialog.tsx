@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -61,15 +61,14 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
 
   const { errors } = form.formState;
 
-
-
   useEffect(() => {
-    console.error(errors);
+    console.log(errors);
+    console.log("USER", user)
     if (user) {
       form.reset({
         ...user,
         fechaNacimiento: user.fechaNacimiento ? new Date(user.fechaNacimiento) : new Date(),
-        password: "", // Don't show password
+        password: user.password,
       });
     } else {
       form.reset({
@@ -164,17 +163,18 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
     mutationFn: async (data: InsertUser & { id?: number }) => {
       console.log("Datos de actualización (updateUserMutation):", data);
       if (!user?.id) return;
-      const body= JSON.stringify({
-        ...data,
-        fechaNacimiento: data.fechaNacimiento.toISOString(),
-      })
 
-      console.log("BODY",body)
+      const formattedData = {
+        ...data,
+        fechaNacimiento: data.fechaNacimiento instanceof Date
+          ? data.fechaNacimiento.toISOString()
+          : new Date(data.fechaNacimiento).toISOString(),
+      };
 
       const response = await fetch(`/api/users/${user.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body,
+        body: JSON.stringify(formattedData),
         credentials: "include",
       });
 
@@ -192,6 +192,7 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
         description: "Usuario actualizado correctamente",
       });
       onClose();
+      form.reset();
     },
     onError: (error: Error) => {
       toast({
@@ -204,7 +205,7 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
 
   const onSubmit = async (data: InsertUser) => {
     console.log("Form submitted with data:", data); // Add logging
-    console.log("USER",user)
+    console.log("USER", user)
     try {
       if (user) {
         console.log("Datos de actualización (onSubmit):", data);
@@ -437,19 +438,6 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
             />
 
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="ciudad"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ciudad</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
               <FormField
                 control={form.control}
@@ -457,6 +445,19 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Departamento</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="ciudad"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ciudad</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -480,39 +481,20 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contraseña</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Contraseña</FormLabel>
-                  <FormControl>
-                    <Input type="password" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="createdAt"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Fecha de creación</FormLabel>
-                  <FormControl>
-                  <Input
-                      type="date"
-                      value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''}
-                      onChange={e => field.onChange(e.target.value ? new Date(e.target.value) : null)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
 
             <div className="flex justify-end gap-2 pt-4">

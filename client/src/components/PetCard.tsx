@@ -17,31 +17,30 @@ interface PetCardProps {
   onAdopt?: () => void;
 }
 
-export function PetCard({ 
-  name, 
-  age, 
-  breed, 
-  location, 
+export function PetCard({
+  name,
+  age,
+  breed,
+  location,
   imageUrl,
   size,
   requirements,
   healthStatus,
   personality,
-  onAdopt 
+  onAdopt
 }: PetCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [showAdoptDialog, setShowAdoptDialog] = useState(false);
 
   const handleAdopt = () => {
-    if (onAdopt) {
-      onAdopt();
-    }
-    setShowAdoptDialog(false);
+    window.location.href = '/auth/login';
+
   };
+
 
   return (
     <>
-      <div 
+      <div
         className="relative h-[500px] w-full [perspective:1000px]"
         onMouseEnter={() => setIsFlipped(true)}
         onMouseLeave={() => setIsFlipped(false)}
@@ -117,8 +116,8 @@ export function PetCard({
                   )}
                 </div>
               </div>
-              <Button 
-                className="w-full mt-4 bg-[#FF5C7F] hover:bg-[#FF5C7F]/90 transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg active:scale-95 active:shadow-md" 
+              <Button
+                className="w-full mt-4 bg-[#FF5C7F] hover:bg-[#FF5C7F]/90 transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg active:scale-95 active:shadow-md"
                 size="lg"
                 aria-label={`Adoptar a ${name}`}
                 role="button"
