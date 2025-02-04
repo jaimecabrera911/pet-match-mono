@@ -24,23 +24,23 @@ export default function ManageUsers() {
         credentials: "include",
       });
 
-      if (!response.ok) {
-        throw new Error("Error al eliminar el usuario");
+      console.log("RESPONSE:", response);
+
+      console.log("Datos de respuesta:", response.status);
+
+      if (response.status !== 200) { 
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "No se pudo eliminar el usuario",
+        });
+        return;
       }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       toast({
-        title: "Éxito",
-        description: "Usuario eliminado correctamente",
+        title: "Usuario eliminado correctamente",
+        description: "El usuario ha sido eliminado del sistema",
       });
-    },
-    onError: () => {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "No se pudo eliminar el usuario",
-      });
+      window.location.reload();
     },
   });
 

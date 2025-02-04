@@ -99,6 +99,25 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  app.delete("/api/users/:id", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const [deletedUser] = await db
+        .delete(users)
+        .where(eq(users.id, userId))
+        .returning();
+
+      if (!deletedUser) {
+        return res.status(404).json({ error: "Usuario no encontrado" });
+      }
+
+      res.json({ message: "Usuario eliminado correctamente" });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({ error: "Error al eliminar el usuario" });
+    }
+  });
+
   app.post("/api/register", async (req, res) => {
     try {
       console.log("Datos recibidos:", req.body);
