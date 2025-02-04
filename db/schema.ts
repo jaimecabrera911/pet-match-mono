@@ -36,7 +36,7 @@ export const users = pgTable("users", {
   correo: text("correo").unique().notNull(),
   password: text("password").notNull(),
   rolNombre: text("rol_nombre", { enum: userRoles }).notNull().default("adoptante"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(users, {
@@ -82,7 +82,7 @@ export const pets = pgTable("pets", {
   requirements: text("requirements").array().notNull(),
   healthStatus: text("health_status").array().notNull(),
   personality: text("personality").array().notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const insertPetSchema = createInsertSchema(pets, {

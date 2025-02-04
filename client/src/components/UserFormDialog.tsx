@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { insertUserSchema, type SelectUser, type InsertUser, documentTypes } from "@db/schema";
+import { DialogDescription } from "@radix-ui/react-dialog";
 
 interface UserFormDialogProps {
   isOpen: boolean;
@@ -46,7 +47,7 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
       nombres: "",
       apellidos: "",
       genero: "M",
-      fechaNacimiento: new Date(),
+      fechaNacimiento: undefined,
       telefono: "",
       direccion: "",
       ciudad: "",
@@ -54,11 +55,16 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
       ocupacion: "",
       correo: "",
       password: "",
-      rolNombre: "USER",
-    },
+      rolNombre: "admin"
+    }
   });
 
+  const { errors } = form.formState;
+
+
+
   useEffect(() => {
+    console.error(errors);
     if (user) {
       form.reset({
         ...user,
@@ -72,7 +78,7 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
         nombres: "",
         apellidos: "",
         genero: "M",
-        fechaNacimiento: new Date(),
+        fechaNacimiento: undefined,
         telefono: "",
         direccion: "",
         ciudad: "",
@@ -80,7 +86,7 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
         ocupacion: "",
         correo: "",
         password: "",
-        rolNombre: "USER",
+        rolNombre: "admin",
       });
     }
   }, [user, form]);
@@ -126,6 +132,7 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
 
   const updateUserMutation = useMutation({
     mutationFn: async (data: InsertUser & { id?: number }) => {
+      console.log("Datos de actualización:", data);
       if (!user?.id) return;
 
       const response = await fetch(`/api/users/${user.id}`, {
@@ -164,6 +171,7 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
 
   const onSubmit = async (data: InsertUser) => {
     console.log("Form submitted with data:", data); // Add logging
+    console.log("USER",user)
     try {
       if (user) {
         await updateUserMutation.mutateAsync(data);
@@ -182,10 +190,24 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
           <DialogTitle>
             {user ? "Editar Usuario" : "Crear Nuevo Usuario"}
           </DialogTitle>
+          <DialogDescription>
+            {user ? "Modifica los datos del usuario" : "Ingresa los datos del nuevo usuario"}
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(
+              (data) => {
+                console.log("Form submitted with data:", data);
+                onSubmit(data);
+              },
+              (errors) => {
+                console.log("Form validation errors:", errors);
+              }
+            )}
+            className="space-y-4"
+          >
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -289,8 +311,33 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
 
               <FormField
                 control={form.control}
+                name="rolNombre"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Rol</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccione rol" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="adoptante">Adoptante</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="fechaNacimiento"
-                 render={({ field }) => (
+                render={({ field }) => (
                   <FormItem>
                     <FormLabel>Fecha de Nacimiento</FormLabel>
                     <FormControl>
@@ -371,7 +418,7 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
 
               <FormField
                 control={form.control}
-                 name="departamento"
+                name="departamento"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Departamento</FormLabel>
@@ -384,21 +431,54 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
               />
             </div>
 
-            {!user && (
+            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="password"
+                name="ocupacion"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Contraseña</FormLabel>
+                    <FormLabel>Ocupación</FormLabel>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <Input {...field} value={field.value ?? ''} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            )}
+            </div>
+
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contraseña</FormLabel>
+                  <FormControl>
+                    <Input type="password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="createdAt"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fecha de creación</FormLabel>
+                  <FormControl>
+                  <Input
+                      type="date"
+                      value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''}
+                      onChange={e => field.onChange(e.target.value ? new Date(e.target.value) : null)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
 
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={onClose}>

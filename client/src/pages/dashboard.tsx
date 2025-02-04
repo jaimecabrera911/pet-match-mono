@@ -27,7 +27,7 @@ export default function Dashboard() {
 
   const handleLogout = async () => {
     try {
-      await logoutMutation.mutateAsync();
+      await logoutMutation.mutateAsync(undefined);
       window.location.href = "/auth/login";
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
