@@ -80,6 +80,7 @@ export function registerRoutes(app: Express): Server {
     try {
       // Create a copy of req.body to modify
       const updateData = { ...req.body };
+      updateData.fechaNacimiento = new Date(updateData.fechaNacimiento);
   
       const [updatedUser] = await db
         .update(users)
