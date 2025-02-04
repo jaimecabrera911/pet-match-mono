@@ -1,12 +1,12 @@
 import { cn } from "@/lib/utils";
-import { Home, Heart, FileText, Phone } from "lucide-react";
+import { Home, Heart, FileText, Phone, Dog } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 
 export function Navigation() {
   const navItems = [
     { icon: Home, label: "Inicio", href: "#hero" },
-    { icon: Heart, label: "Mascotas", href: "#mascotas" },
+    { icon: Dog, label: "Mascotas", href: "#mascotas" },
     { icon: FileText, label: "General", href: "#proceso" },
     { icon: Phone, label: "Contactar", href: "#contacto" }
   ];
@@ -16,8 +16,10 @@ export function Navigation() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-10">
           <div className="flex items-center">
-            <div className="w-8 h-8 bg-[#FF5C7F] rounded-full flex items-center justify-center">
-              <Heart className="h-4 w-4 text-white" />
+            <div className="w-10 h-10">
+              <Link href="/">
+                <img src="/images/logo.jpg" alt="Logo" className="h-10 w-10" />
+              </Link>
             </div>
           </div>
           <div className="flex items-center gap-4">

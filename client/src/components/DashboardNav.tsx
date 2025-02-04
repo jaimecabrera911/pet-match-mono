@@ -7,7 +7,7 @@ export function DashboardNav() {
 
   const navItems = [
     {
-      href: "/dashboard/panel-de-control",
+      href: "/",
       label: "Dashboard",
       icon: Home,
       roles: ["admin", "shelter", "adoptante"],
@@ -47,8 +47,7 @@ export function DashboardNav() {
             href="/dashboard/panel-de-control"
             className="flex items-center gap-2 text-xl font-semibold text-gray-900"
           >
-            <Heart className="h-6 w-6 text-[#FF5C7F]" />
-            <span>PetMatch</span>
+            <img src="/images/logo.jpg" alt="Logo" className="h-20 w-20" />
           </Link>
         </div>
         <div className="flex-1 px-4">

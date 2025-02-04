@@ -117,7 +117,6 @@ export function setupAuth(app: Express) {
         ...userData,
         id: undefined, // Ensure id is not included as it's auto-generated
         fechaNacimiento: new Date(userData.fechaNacimiento), // Ensure proper Date type
-        createdAt: new Date() // Add createdAt as Date type
       };
 
       const [newUser] = await db

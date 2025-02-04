@@ -36,5 +36,5 @@ export function ProtectedRoute({ path, requiredRole, component: Component }: Pro
     );
   }
 
-  return <Route path={path} component={Component} />;
+  return <Route path={path}>{(params) => <Component {...params} />}</Route>;
 }

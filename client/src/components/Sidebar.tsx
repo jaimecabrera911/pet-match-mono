@@ -64,9 +64,8 @@ export function Sidebar() {
       <div className="flex flex-col h-full">
         {/* Logo */}
         <div className="p-6">
-          <Link href="/dashboard/panel-de-control" className="flex items-center gap-2">
-            <Heart className="h-6 w-6 text-[#FF5C7F]" />
-            <span className="text-xl font-semibold">PetMatch</span>
+          <Link href="/" className="flex items-center gap-2">
+            <img src="/images/logo.jpg" alt="Logo" className="h-12 w-12" />
           </Link>
         </div>
 
@@ -86,13 +85,13 @@ export function Sidebar() {
                 )}
               >
                 <div className="flex items-center gap-3">
-                  <item.icon 
+                  <item.icon
                     className={cn(
                       "h-5 w-5",
-                      location === item.href 
-                        ? "text-[#FF5C7F]" 
+                      location === item.href
+                        ? "text-[#FF5C7F]"
                         : "text-gray-400"
-                    )} 
+                    )}
                   />
                   <span className="font-medium text-gray-900">
                     {item.label}
