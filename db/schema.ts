@@ -1,4 +1,11 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  serial,
+  integer,
+  boolean,
+  timestamp,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { relations } from "drizzle-orm";
 import { z } from "zod";
@@ -7,10 +14,10 @@ export const documentTypes = [
   "CEDULA DE CIUDADANIA",
   "PASAPORTE",
   "CEDULA DE EXTRANJERIA",
-  "TARJETA DE IDENTIDAD"
+  "TARJETA DE IDENTIDAD",
 ] as const;
 
-export const userRoles = ["USER", "ADMIN"] as const;
+export const userRoles = ["adoptante", "admin"] as const;
 export const petSizes = ["pequeño", "mediano", "grande"] as const;
 
 export const users = pgTable("users", {
@@ -28,28 +35,34 @@ export const users = pgTable("users", {
   ocupacion: text("ocupacion"),
   correo: text("correo").unique().notNull(),
   password: text("password").notNull(),
-  rolNombre: text("rol_nombre", { enum: userRoles }).notNull().default("USER"),
+  rolNombre: text("rol_nombre", { enum: userRoles }).notNull().default("adoptante"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(users, {
   tipoDocumento: z.enum(documentTypes),
-  numeroDocumento: z.string().min(5, "Número de documento debe tener al menos 5 caracteres"),
+  numeroDocumento: z
+    .string()
+    .min(5, "Número de documento debe tener al menos 5 caracteres"),
   nombres: z.string().min(2, "Nombres debe tener al menos 2 caracteres"),
   apellidos: z.string().min(2, "Apellidos debe tener al menos 2 caracteres"),
-  genero: z.enum(["M", "F", "O"], {
-    required_error: "Género es requerido",
-    invalid_type_error: "Género debe ser M, F u O",
-  }).default("M"),
+  genero: z
+    .enum(["M", "F", "O"], {
+      required_error: "Género es requerido",
+      invalid_type_error: "Género debe ser M, F u O",
+    })
+    .default("M"),
   fechaNacimiento: z.coerce.date(),
   telefono: z.string().min(7, "Teléfono debe tener al menos 7 caracteres"),
   direccion: z.string().min(5, "Dirección debe tener al menos 5 caracteres"),
   ciudad: z.string().min(3, "Ciudad debe tener al menos 3 caracteres"),
-  departamento: z.string().min(3, "Departamento debe tener al menos 3 caracteres"),
+  departamento: z
+    .string()
+    .min(3, "Departamento debe tener al menos 3 caracteres"),
   ocupacion: z.string().optional(),
   correo: z.string().email("Correo electrónico inválido"),
   password: z.string().min(6, "Contraseña debe tener al menos 6 caracteres"),
-  rolNombre: z.enum(userRoles).default("USER"),
+  rolNombre: z.enum(userRoles).default("adoptante"),
 });
 
 export const selectUserSchema = createSelectSchema(users);
@@ -73,17 +86,25 @@ export const pets = pgTable("pets", {
 });
 
 export const insertPetSchema = createInsertSchema(pets, {
-  requirements: z.array(z.string()).min(1, "Debe especificar al menos un requisito"),
-  healthStatus: z.array(z.string()).min(1, "Debe especificar al menos un estado de salud"),
-  personality: z.array(z.string()).min(1, "Debe especificar al menos un rasgo de personalidad"),
+  requirements: z
+    .array(z.string())
+    .min(1, "Debe especificar al menos un requisito"),
+  healthStatus: z
+    .array(z.string())
+    .min(1, "Debe especificar al menos un estado de salud"),
+  personality: z
+    .array(z.string())
+    .min(1, "Debe especificar al menos un rasgo de personalidad"),
   gender: z.enum(["macho", "hembra"], {
     required_error: "El género es requerido",
-    invalid_type_error: "El género debe ser macho o hembra"
+    invalid_type_error: "El género debe ser macho o hembra",
   }),
-  size: z.enum(petSizes, {
-    required_error: "El tamaño es requerido",
-    invalid_type_error: "El tamaño debe ser pequeño, mediano o grande"
-  }).default("mediano"),
+  size: z
+    .enum(petSizes, {
+      required_error: "El tamaño es requerido",
+      invalid_type_error: "El tamaño debe ser pequeño, mediano o grande",
+    })
+    .default("mediano"),
 });
 
 export const selectPetSchema = createSelectSchema(pets);
@@ -92,11 +113,19 @@ export type SelectPet = typeof pets.$inferSelect;
 
 export const adoptions = pgTable("adoptions", {
   id: serial("id").primaryKey(),
-  petId: integer("pet_id").references(() => pets.id).notNull(),
-  userId: integer("user_id").references(() => users.id).notNull(),
-  status: text("status", { enum: ["pending", "approved", "rejected"] }).notNull().default("pending"),
+  petId: integer("pet_id")
+    .references(() => pets.id)
+    .notNull(),
+  userId: integer("user_id")
+    .references(() => users.id)
+    .notNull(),
+  status: text("status", { enum: ["pending", "approved", "rejected"] })
+    .notNull()
+    .default("pending"),
   applicationDate: timestamp("application_date").notNull().defaultNow(),
   notes: text("notes"),
+  aprobada: boolean("aprobada").default(false).notNull(),
+  estadoDecision: text("estado_decision", { enum: ["aprobada", "rechazada"] }).notNull().default("rechazada"),
 });
 
 export const adoptionsRelations = relations(adoptions, ({ one }) => ({

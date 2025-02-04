@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
 
 export default function RegistroAdoptante() {
   const { toast } = useToast();
@@ -28,40 +29,50 @@ export default function RegistroAdoptante() {
       tipoDocumento: "CEDULA DE CIUDADANIA",
       rolNombre: "adoptante",
       genero: "M",
-      nombres: "",
-      apellidos: "",
-      numeroDocumento: "",
-      fechaNacimiento: "",
-      telefono: "",
-      correo: "",
-      direccion: "",
-      ciudad: "",
-      ocupacion: "",
-      password: "",
-    },
+      nombres: "Jaime",
+      apellidos: "Cabrera",
+      numeroDocumento: "1111111",
+      fechaNacimiento: new Date(),
+      departamento: "Bogota",
+      telefono: "23333333",
+      correo: "jaimecab@mail.com",
+      direccion: "CR 20 50",
+      ciudad: "Bogota",
+      ocupacion: "Desarrollador",
+      password: "1234567",
+    }
   });
 
+  // Obtener el estado del formulario que incluye errores
+  const { errors } = form.formState;
+
+  useEffect(() => {
+    console.log(errors);
+  }, [errors]);
+
   const onSubmit = async (data: InsertUser) => {
+    console.log(errors);
     console.log("Datos del formulario:", data);
     try {
       const formattedData = {
         ...data,
         rolNombre: "adoptante",
-        fechaNacimiento: data.fechaNacimiento instanceof Date 
-          ? data.fechaNacimiento.toISOString().split('T')[0]
-          : new Date(data.fechaNacimiento).toISOString().split('T')[0]
+        fechaNacimiento:
+          data.fechaNacimiento instanceof Date
+            ? data.fechaNacimiento.toISOString().split("T")[0]
+            : new Date(data.fechaNacimiento).toISOString().split("T")[0],
       };
 
       console.log("Enviando datos formateados:", formattedData);
-      
+
       const response = await fetch("http://localhost:5000/api/register", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json"
+          Accept: "application/json",
         },
         body: JSON.stringify(formattedData),
-        credentials: "include"
+        credentials: "include",
       });
 
       console.log("Respuesta del servidor:", response.status);
@@ -75,7 +86,8 @@ export default function RegistroAdoptante() {
 
       toast({
         title: "¡Registro exitoso!",
-        description: "Tu cuenta ha sido creada correctamente. Serás redirigido al inicio de sesión.",
+        description:
+          "Tu cuenta ha sido creada correctamente. Serás redirigido al inicio de sesión.",
       });
 
       setTimeout(() => {
@@ -86,7 +98,10 @@ export default function RegistroAdoptante() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error instanceof Error ? error.message : "No se pudo completar el registro",
+        description:
+          error instanceof Error
+            ? error.message
+            : "No se pudo completar el registro",
       });
     }
   };
@@ -211,7 +226,11 @@ export default function RegistroAdoptante() {
                   <FormItem>
                     <FormLabel>Fecha de Nacimiento</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input
+                        type="date"
+                        {...field}
+                        value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -266,6 +285,19 @@ export default function RegistroAdoptante() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
+                name="departamento"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Departamento</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="ciudad"
                 render={({ field }) => (
                   <FormItem>
@@ -278,6 +310,9 @@ export default function RegistroAdoptante() {
                 )}
               />
 
+
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="ocupacion"
@@ -285,27 +320,30 @@ export default function RegistroAdoptante() {
                   <FormItem>
                     <FormLabel>Ocupación</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} value={field.value || ''} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contraseña</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
             </div>
 
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Contraseña</FormLabel>
-                  <FormControl>
-                    <Input type="password" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
 
             <Button type="submit" className="w-full">
               Registrarse

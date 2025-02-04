@@ -9,7 +9,7 @@ import { eq } from "drizzle-orm";
 
 declare global {
   namespace Express {
-    interface User extends SelectUser {}
+    interface User extends SelectUser { }
   }
 }
 
@@ -110,12 +110,22 @@ export function setupAuth(app: Express) {
         ...result.data,
         genero: result.data.genero || "M",
         fechaNacimiento: result.data.fechaNacimiento || new Date(),
-        rolNombre: result.data.rolNombre || "USER"
+        rolNombre: result.data.rolNombre || "adoptante"
+      };
+
+      const userToInsert = {
+        ...userData,
+        id: undefined, // Ensure id is not included as it's auto-generated
+        fechaNacimiento: new Date(userData.fechaNacimiento), // Ensure proper Date type
+        createdAt: new Date() // Add createdAt as Date type
       };
 
       const [newUser] = await db
         .insert(users)
-        .values([userData])  // Wrap in array as insert expects array of values
+        .values({
+          ...userToInsert,
+          id: undefined
+        } as typeof users.$inferInsert)
         .returning();
 
       req.login(newUser, (err) => {
@@ -124,8 +134,8 @@ export function setupAuth(app: Express) {
         }
         return res.status(201).json({
           message: "Registro exitoso",
-          user: { 
-            id: newUser.id, 
+          user: {
+            id: newUser.id,
             correo: newUser.correo,
             nombres: newUser.nombres,
             apellidos: newUser.apellidos
@@ -159,8 +169,8 @@ export function setupAuth(app: Express) {
 
           return res.json({
             message: "Inicio de sesión exitoso",
-            user: { 
-              id: user.id, 
+            user: {
+              id: user.id,
               correo: user.correo,
               nombres: user.nombres,
               apellidos: user.apellidos

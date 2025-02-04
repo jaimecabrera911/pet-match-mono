@@ -1,7 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { AdoptionSteps } from "@/components/AdoptionSteps";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye, FileText } from "lucide-react";
@@ -12,19 +25,19 @@ const statusMap = {
   creada: "Creada",
   en_entrevista: "En Entrevista",
   aceptada: "Aceptada",
-  rechazada: "Rechazada"
+  rechazada: "Rechazada",
 };
 
 const getStatusBadgeVariant = (status: string) => {
   switch (status) {
-    case 'aceptada':
-      return 'default bg-green-100 text-green-800';
-    case 'rechazada':
-      return 'default bg-red-100 text-red-800';
-    case 'en_entrevista':
-      return 'default bg-yellow-100 text-yellow-800';
+    case "aceptada":
+      return "default bg-green-100 text-green-800";
+    case "rechazada":
+      return "default bg-red-100 text-red-800";
+    case "en_entrevista":
+      return "default bg-yellow-100 text-yellow-800";
     default:
-      return 'default bg-blue-100 text-blue-800';
+      return "default bg-blue-100 text-blue-800";
   }
 };
 
@@ -32,27 +45,25 @@ export default function UserAdoptions() {
   const { toast } = useToast();
 
   const { data: adoptions = [], isLoading } = useQuery({
-    queryKey: ['/api/adoptions/user'],
+    queryKey: ["/api/adoptions/user"],
     queryFn: async () => {
-      const res = await fetch('/api/adoptions/user');
+      const res = await fetch("/api/adoptions/user", {
+        method: "GET",
+        credentials: "include", // Cambio a same-origin para incluir credenciales si el servidor está en el mismo origen
+      });
       if (!res.ok) {
-        throw new Error('Error al cargar las adopciones');
+        throw new Error("Error al cargar las adopciones");
       }
       return res.json();
     },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
   });
 
   if (isLoading) {
-    return <div className="flex items-center justify-center min-h-screen">
-      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-    </div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+      </div>
+    );
   }
 
   return (
@@ -90,7 +101,7 @@ export default function UserAdoptions() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {adoptions?.map((adoption) => (
+              {adoptions.map((adoption: any) => (
                 <TableRow key={adoption.id}>
                   <TableCell>
                     <div className="flex items-center space-x-3">
@@ -113,11 +124,14 @@ export default function UserAdoptions() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {new Date(adoption.applicationDate).toLocaleDateString('es-ES', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
+                    {new Date(adoption.applicationDate).toLocaleDateString(
+                      "es-ES",
+                      {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      },
+                    )}
                   </TableCell>
                   <TableCell>
                     <Button variant="outline" size="icon">

@@ -1,0 +1,26 @@
+{
+  "files": {
+    "client/src/hooks/use-user.tsx": [
+      {
+        "id": "61f53e98-fe20-4bec-96eb-a983746f70f6",
+        "line": 23,
+        "version": 10,
+        "index": 583
+      },
+      {
+        "id": "42d7ef3d-4b63-4422-a331-fc2c067b28b0",
+        "line": 73,
+        "version": 9,
+        "index": 2022
+      }
+    ],
+    "server/auth.ts": [
+      {
+        "id": "ac1859b7-8db4-4395-ad2e-33a2a62c89fc",
+        "line": 6,
+        "version": 18,
+        "index": 233
+      }
+    ]
+  }
+}

@@ -104,9 +104,10 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ error: "El correo electrónico ya está registrado" });
       }
 
+      const { id, ...insertData } = result.data;
       const [newUser] = await db
         .insert(users)
-        .values([result.data])
+        .values({ ...insertData, createdAt: new Date() })
         .returning();
 
       res.status(201).json({
@@ -312,17 +313,20 @@ export function registerRoutes(app: Express): Server {
         healthStatus: JSON.parse(req.body.healthStatus),
         personality: JSON.parse(req.body.personality),
         imageUrl: req.file ? `/uploads/${req.file.filename}` : null,
-        isAdopted: false
-      };
-  
-      const [newPet] = await db
-        .insert(pets)
-        .values(petData)
-        .returning();
-  
-      res.json(newPet);
-    } catch (error) {
-      console.error("Error creating pet:", error);
+                isAdopted: false
+            };
+    
+            const [newPet] = await db
+                .insert(pets)
+                .values({
+                    ...petData,
+                    imageUrl: petData.imageUrl ?? '' // Provide empty string as fallback instead of null
+                })
+                .returning();
+    
+            res.json(newPet);
+        } catch (error) {
+            console.error("Error creating pet:", error);
       res.status(500).json({ error: "Error al crear la mascota" });
     }
   });
