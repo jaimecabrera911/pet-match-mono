@@ -76,6 +76,28 @@ export function registerRoutes(app: Express): Server {
     });
   });
 
+  app.put("/api/users/:id", async (req, res) => {
+    try {
+      // Create a copy of req.body to modify
+      const updateData = { ...req.body };
+  
+      const [updatedUser] = await db
+        .update(users)
+        .set(updateData)
+        .where(eq(users.id, parseInt(req.params.id)))
+        .returning();
+  
+      if (!updatedUser) {
+        return res.status(404).json({ error: "Usuario no encontrado" });
+      }
+  
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ error: "Error al actualizar el usuario" });
+    }
+  });
+
   app.post("/api/register", async (req, res) => {
     try {
       console.log("Datos recibidos:", req.body);

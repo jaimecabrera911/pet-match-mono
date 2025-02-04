@@ -92,8 +92,9 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
   }, [user, form]);
 
   const createUserMutation = useMutation({
-    mutationFn: async (data: InsertUser) => {
-      console.log("Sending data:", data); // Add logging
+  mutationFn: async (data: InsertUser) => {
+    try {
+      console.log("Sending data:", data);
       const response = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -104,44 +105,76 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
         credentials: "include",
       });
 
+      // Log the full response details
+      console.log("Response status:", response.status);
+      console.log("Response headers:", Object.fromEntries(response.headers.entries()));
+      
+      const contentType = response.headers.get("content-type");
+      console.log("Content type:", contentType);
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Error al crear el usuario");
+        const responseText = await response.text();
+        console.error("Error response body:", responseText);
+        
+        try {
+          // Try to parse as JSON if possible
+          const errorData = JSON.parse(responseText);
+          throw new Error(errorData.error || "Error al crear el usuario");
+        } catch (e) {
+          // If not JSON, throw with response details
+          throw new Error(
+            `Server Error (${response.status}): ${responseText.substring(0, 200)}...`
+          );
+        }
       }
 
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      toast({
-        title: "Éxito",
-        description: "Usuario creado correctamente",
-      });
-      onClose();
-      form.reset();
-    },
-    onError: (error: Error) => {
-      console.error("Error creating user:", error); // Add logging
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message,
-      });
-    },
-  });
+      const responseData = await response.text();
+      console.log("Success response body:", responseData);
+      
+      try {
+        return JSON.parse(responseData);
+      } catch (e) {
+        throw new Error(`Invalid JSON response: ${responseData.substring(0, 200)}...`);
+      }
+    } catch (error) {
+      console.error("Full error details:", error);
+      throw error;
+    }
+  },
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+    toast({
+      title: "Éxito",
+      description: "Usuario creado correctamente",
+    });
+    onClose();
+    form.reset();
+  },
+  onError: (error: Error) => {
+    console.error("Mutation error:", error);
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: error.message,
+    });
+  },
+});
 
   const updateUserMutation = useMutation({
     mutationFn: async (data: InsertUser & { id?: number }) => {
-      console.log("Datos de actualización:", data);
+      console.log("Datos de actualización (updateUserMutation):", data);
       if (!user?.id) return;
+      const body= JSON.stringify({
+        ...data,
+        fechaNacimiento: data.fechaNacimiento.toISOString(),
+      })
+
+      console.log("BODY",body)
 
       const response = await fetch(`/api/users/${user.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...data,
-          fechaNacimiento: data.fechaNacimiento.toISOString(),
-        }),
+        body,
         credentials: "include",
       });
 
@@ -174,8 +207,10 @@ export function UserFormDialog({ isOpen, onClose, user }: UserFormDialogProps) {
     console.log("USER",user)
     try {
       if (user) {
+        console.log("Datos de actualización (onSubmit):", data);
         await updateUserMutation.mutateAsync(data);
       } else {
+        console.log("Datos de creación (onSubmit):", data);
         await createUserMutation.mutateAsync(data);
       }
     } catch (error) {
