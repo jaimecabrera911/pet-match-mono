@@ -43,13 +43,18 @@ const getStatusBadgeVariant = (status: string) => {
 
 export default function UserAdoptions() {
   const { toast } = useToast();
+  const user = sessionStorage.getItem("user");
 
   const { data: adoptions = [], isLoading } = useQuery({
     queryKey: ["/api/adoptions/user"],
+
     queryFn: async () => {
       const res = await fetch("/api/adoptions/user", {
         method: "GET",
-        credentials: "include", // Cambio a same-origin para incluir credenciales si el servidor está en el mismo origen
+        credentials: "include",
+        headers: {
+          "user": sessionStorage.getItem("user") || ""
+        },
       });
       if (!res.ok) {
         throw new Error("Error al cargar las adopciones");

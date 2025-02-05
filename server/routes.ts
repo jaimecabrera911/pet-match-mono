@@ -216,9 +216,11 @@ export function registerRoutes(app: Express): Server {
 
   app.get("/api/adoptions/user", async (req, res) => {
     try {
-      if (!req.user) {
-        return res.status(401).json({ error: "No autenticado" });
+      const userHeader = req.headers.user;
+      if (!userHeader || typeof userHeader !== 'string') {
+        return res.status(400).json({ error: "User header is required" });
       }
+      const user = JSON.parse(userHeader);
 
       const userAdoptions = await db
         .select({
@@ -226,8 +228,6 @@ export function registerRoutes(app: Express): Server {
           status: adoptions.status,
           applicationDate: adoptions.applicationDate,
           notes: adoptions.notes,
-          aprobada: adoptions.aprobada,
-          estadoDecision: adoptions.estadoDecision,
           pet: {
             id: pets.id,
             name: pets.name,
@@ -242,7 +242,7 @@ export function registerRoutes(app: Express): Server {
           },
         })
         .from(adoptions)
-        .where(eq(adoptions.userId, req.user.id))
+        .where(eq(adoptions.userId, user.id))
         .innerJoin(pets, eq(pets.id, adoptions.petId))
         .innerJoin(users, eq(users.id, adoptions.userId));
 
