@@ -5,27 +5,27 @@ export function AdoptionSteps() {
     {
       number: 1,
       title: "Regístrate",
-      description: "Completa tu perfil para poder adoptar"
+      description: "Queremos ayudarte a dar el primer paso, diligencia los datos solicitados para iniciar el proceso."
     },
     {
       number: 2,
       title: "Selecciona tu amigo",
-      description: "Encuentra la mascota que mejor se adapte a ti"
+      description: "Busca en nuestra lista y selecciona el amigo que quieres adoptar."
     },
     {
       number: 3,
-      title: "Responder cuestionario",
-      description: "Completa un breve formulario sobre tu estilo de vida"
+      title: "Responder simulador",
+      description: "Completa todas las preguntas, posteriormente recibirás la respuesta en línea del primer filtro."
     },
     {
       number: 4,
       title: "Entrevista",
-      description: "Conoce a tu futura mascota y a su cuidador actual"
+      description: "Queremos conocerte mejor y a la vez, hacer de tu primer encuentro con tu futuro amigo una experiencia especial."
     },
     {
       number: 5,
       title: "Entrega",
-      description: "¡Lleva a tu nuevo amigo a casa!"
+      description: "Formalizaremos el proceso para que puedas llevar a tu nuevo amigo a su hogar."
     }
   ];
 

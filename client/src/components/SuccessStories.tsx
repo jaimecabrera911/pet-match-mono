@@ -61,8 +61,8 @@ export function SuccessStories() {
     <section className="py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-12">
-          <Heart className="w-12 h-12 text-primary mx-auto mb-4" />
-          <h2 className="text-3xl font-bold mb-4">Historias de Éxito</h2>
+          <Heart className="w-12 h-12 text-[#FF585F] mx-auto mb-4" />
+          <h2 className="text-3xl font-bold mb-4 text-[#FF585F]">Historias de Éxito</h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
             Cada adopción es una historia de amor y esperanza. Conoce a algunas de las mascotas que han encontrado su hogar para siempre.
           </p>
@@ -107,9 +107,12 @@ export function SuccessStories() {
                       <p className="text-sm text-gray-500">Adoptado por {story.adopterName} - {story.adoptionDate}</p>
                     </div>
                     <p className="text-gray-600 italic">"{story.testimony}"</p>
-                    <Button variant="outline" className="w-full">
-                      Leer más
-                    </Button>
+                    <Button 
+                    variant="outline" 
+                    className="w-full border-[#FF585F] text-[#FF585F] hover:bg-[#FF585F]/10"
+                  >
+                    Leer más
+                  </Button>
                   </div>
                 </CardContent>
               </Card>

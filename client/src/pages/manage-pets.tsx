@@ -70,12 +70,12 @@ export default function ManagePets() {
           </p>
         </div>
         <Button
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 bg-[#FF585F] text-white hover:bg-[#e04c52]"
           onClick={handleAdd}
           aria-label="Agregar nueva mascota"
         >
           <PlusCircle className="h-5 w-5" />
-          Agregar Mascota
+          Agregar Mascota 
         </Button>
       </div>
 

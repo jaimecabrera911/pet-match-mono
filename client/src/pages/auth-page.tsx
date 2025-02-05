@@ -89,7 +89,7 @@ export default function AuthPage() {
                 )}
               />
 
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full bg-[#FF585F] text-white hover:bg-[#e04c52]">
                 Iniciar Sesión
               </Button>
             </form>
@@ -98,7 +98,7 @@ export default function AuthPage() {
           <div className="mt-4 text-center">
             <span className="text-sm text-gray-600">¿No tienes una cuenta? </span>
             <Link href="/auth/registro-adoptante">
-              <a className="text-sm text-primary hover:underline">Regístrate como adoptante</a>
+              <a className="text-sm text-[#FF585F] hover:underline">Regístrate como adoptante</a>
             </Link>
           </div>
         </CardContent>

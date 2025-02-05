@@ -83,7 +83,7 @@ export default function ManageAdoptions() {
         </div>
         <Button 
           onClick={handleCreateAdoption}
-          className="bg-[#FF5C7F] hover:bg-[#FF5C7F]/90"
+          className="bg-[#FF585F] hover:bg-[#e04c52] text-white"
         >
           <PlusCircle className="h-5 w-5 mr-2" />
           Crear Adopción

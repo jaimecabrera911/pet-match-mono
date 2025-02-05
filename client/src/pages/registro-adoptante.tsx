@@ -29,17 +29,17 @@ export default function RegistroAdoptante() {
       tipoDocumento: "CEDULA DE CIUDADANIA",
       rolNombre: "adoptante",
       genero: "M",
-      nombres: "Jaime",
-      apellidos: "Cabrera",
-      numeroDocumento: "1111111",
+      nombres: "",
+      apellidos: "",
+      numeroDocumento: "",
       fechaNacimiento: new Date(),
-      departamento: "Bogota",
-      telefono: "23333333",
-      correo: "jaimecab@mail.com",
-      direccion: "CR 20 50",
-      ciudad: "Bogota",
-      ocupacion: "Desarrollador",
-      password: "1234567",
+      departamento: "",
+      telefono: "",
+      correo: "",
+      direccion: "",
+      ciudad: "",
+      ocupacion: "",
+      password: "",
     }
   });
 
@@ -345,7 +345,7 @@ export default function RegistroAdoptante() {
 
 
 
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full bg-[#FF585F] text-white hover:bg-[#e04c52]">
               Registrarse
             </Button>
           </form>

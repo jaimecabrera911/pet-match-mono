@@ -70,7 +70,7 @@ export default function ManageUsers() {
           </p>
         </div>
         <Button
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 bg-[#FF585F] text-white hover:bg-[#e04c52]"
           onClick={handleAdd}
           aria-label="Agregar nuevo usuario"
         >
