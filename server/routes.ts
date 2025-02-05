@@ -473,7 +473,10 @@ export function registerRoutes(app: Express): Server {
       return res.status(400).json({ error: "User header is required" });
     }
 
-    const user = JSON.parse(userHeader);
+
+    const user = JSON.parse(userHeader);;
+
+
     // const questionary = await db.select().from(questionaries).where(eq(questionaries.userId, user?.id)).limit(1);
 
     // if (questionary.length > 0) {
@@ -481,14 +484,18 @@ export function registerRoutes(app: Express): Server {
     // }
     try {
       const points = calculatePoints(req.body);
-    
-      const status= points >= 50 ? "approved" : "rejected";
+
+      const status = points >= 50 ? "approved" : "rejected";
       const questionaryData = {
         ...req.body,
         status,
         points,
         userId: user?.id
       };
+
+      await db.update(adoptions)
+        .set({ status: status=="approved" ? "en_entrevista" : "rechazada" })
+        .where(eq(adoptions.userId, user?.id))
 
       const userModel = await db.select().from(users).where(eq(users.id, user?.id)).limit(1);
       if (!userModel) {

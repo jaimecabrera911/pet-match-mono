@@ -122,7 +122,7 @@ export const adoptions = pgTable("adoptions", {
   userId: integer("user_id")
     .references(() => users.id)
     .notNull(),
-  status: text("status", { enum: ["pending", "approved", "rejected"] })
+  status: text("status", { enum: ["pending", "en_entrevista", "creada", "aprobada", "rechazada", "approved", "rejected"] })
     .notNull()
     .default("pending"),
   applicationDate: timestamp("application_date").notNull().defaultNow(),

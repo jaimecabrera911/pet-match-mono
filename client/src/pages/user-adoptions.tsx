@@ -18,7 +18,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye, FileText } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 
 const statusMap = {
@@ -26,9 +25,11 @@ const statusMap = {
   en_entrevista: "En Entrevista",
   aceptada: "Aceptada",
   rechazada: "Rechazada",
+  pending: "Pendiente"
 };
 
 const getStatusBadgeVariant = (status: string) => {
+  console.log(status);
   switch (status) {
     case "aceptada":
       return "default bg-green-100 text-green-800";
@@ -36,16 +37,16 @@ const getStatusBadgeVariant = (status: string) => {
       return "default bg-red-100 text-red-800";
     case "en_entrevista":
       return "default bg-yellow-100 text-yellow-800";
+    case "pending":
+      return "default bg-write-100 text-yellow-800";
     default:
       return "default bg-blue-100 text-blue-800";
   }
 };
 
 export default function UserAdoptions() {
-  const { toast } = useToast();
-  const user = sessionStorage.getItem("user");
 
-  const { data: adoptions = [], isLoading } = useQuery({
+  const { data: adoptions = [], isLoading: isLoadingAdoptions } = useQuery({
     queryKey: ["/api/adoptions/user"],
 
     queryFn: async () => {
@@ -63,7 +64,32 @@ export default function UserAdoptions() {
     },
   });
 
-  if (isLoading) {
+  const { data: questionaries, isLoading: isLoadingQuestionaries } = useQuery({
+    queryKey: ["Questionaries"],
+    queryFn: async () => {
+      const res = await fetch("/api/questionaries", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "user": sessionStorage.getItem("user") || ""
+        },
+      });
+      if (!res.ok) {
+        throw new Error("Error al cargar las adopciones");
+      }
+      return res.json();
+    },
+  });
+
+  if (isLoadingAdoptions) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (isLoadingQuestionaries) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
@@ -147,6 +173,24 @@ export default function UserAdoptions() {
               ))}
             </TableBody>
           </Table>
+        </CardContent>
+      </Card>
+
+
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Estado de cuestionario</CardTitle>
+          <CardDescription>
+            Aquí puedes ver el estado de los cuestionarios
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {questionaries && questionaries.length > 0 && (
+            questionaries[0].status === "approved" ?
+              <Badge color="green">Aprobado</Badge>
+              :
+              <Badge color="red">Rechazado</Badge>
+          )}
         </CardContent>
       </Card>
 

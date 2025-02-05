@@ -53,6 +53,7 @@ export default function CuestionarioAdopcion() {
       form.reset();
       setTimeout(() => {
         navigate("/dashboard/user-adoptions");
+        window.location.reload();
       }, 1500);
     },
     onError: (error) => {

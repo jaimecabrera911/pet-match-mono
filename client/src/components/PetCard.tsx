@@ -37,7 +37,6 @@ export function PetCard({
 
   };
 
-
   return (
     <>
       <div
