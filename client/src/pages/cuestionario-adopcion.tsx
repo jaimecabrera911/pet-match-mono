@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { adoptionFormSchema, type AdoptionFormData } from "@/lib/schemas/adoption-form";
+import { questionaireSchema, type QuestionarieSchema } from "@/lib/schemas/adoption-form";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -13,12 +13,60 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import { navigate } from "wouter/use-browser-location";
 
 export default function CuestionarioAdopcion() {
   const { toast } = useToast();
 
-  const form = useForm<AdoptionFormData>({
-    resolver: zodResolver(adoptionFormSchema),
+  const submitQuestionaire = useMutation({
+    mutationFn: async (data: QuestionarieSchema) => {
+      await fetch("/api/questionaries", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "user": sessionStorage.getItem("user") || ""
+        },
+        body: JSON.stringify(data),
+      });
+
+      /*if (response.status !== 201) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "No se pudo enviar el cuestionario",
+        });
+        return;
+      }
+
+      toast({
+        title: "Cuestionario enviado correctamente",
+        description: "Gracias por enviar tu cuestionario",
+      });*/
+    },
+    onSuccess: () => {
+      toast({
+        title: "¡Gracias!",
+        description: "Tu cuestionario ha sido enviado con éxito",
+      });
+      form.reset();
+      setTimeout(() => {
+        navigate("/dashboard/user-adoptions");
+      }, 1500);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Hubo un problema al enviar el cuestionario. Por favor, intenta nuevamente.",
+        variant: "destructive",
+      });
+      console.error("Error submitting questionnaire:", error);
+    },
+  })
+
+  const form = useForm<QuestionarieSchema>({
+    resolver: zodResolver(questionaireSchema),
     mode: "onChange",
   });
 
@@ -92,8 +140,8 @@ export default function CuestionarioAdopcion() {
       field: "compromisoLargoPlazo",
       title: "¿Estás dispuesto a hacerte cargo de un perro durante toda su vida, que puede ser de 10 a 15 años o más?",
       options: [
-        "Sí, estoy comprometido/a",
-        "No estoy seguro/a",
+        "Sí, estoy comprometido",
+        "No estoy seguro",
         "No"
       ]
     },
@@ -107,7 +155,7 @@ export default function CuestionarioAdopcion() {
       ]
     },
     {
-      field: "reaccionDaños",
+      field: "reaccionDanos",
       title: "Si tu perro mastica tus pertenencias, como zapatos o muebles, ¿cómo reaccionarías?",
       options: [
         "Buscaría un adiestrador para corregir el comportamiento",
@@ -117,8 +165,9 @@ export default function CuestionarioAdopcion() {
     }
   ];
 
-  const onSubmit = async (data: AdoptionFormData) => {
+  const onSubmit = async (data: QuestionarieSchema) => {
     console.log("Form submitted:", data);
+    submitQuestionaire.mutate(data);
     toast({
       title: "¡Gracias!",
       description: "Tu cuestionario ha sido enviado con éxito"
@@ -133,7 +182,9 @@ export default function CuestionarioAdopcion() {
       </h1>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-8">
           <Card>
             <CardHeader>
               <CardTitle className="text-xl">
@@ -145,7 +196,7 @@ export default function CuestionarioAdopcion() {
                 <FormField
                   key={question.field}
                   control={form.control}
-                  name={question.field as keyof AdoptionFormData}
+                  name={question.field as keyof QuestionarieSchema}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-base font-semibold">

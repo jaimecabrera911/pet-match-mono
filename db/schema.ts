@@ -5,10 +5,11 @@ import {
   integer,
   boolean,
   timestamp,
+  point,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { relations } from "drizzle-orm";
-import { z } from "zod";
+import { number, z } from "zod";
 
 export const documentTypes = [
   "CEDULA DE CIUDADANIA",
@@ -37,6 +38,10 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   rolNombre: text("rol_nombre", { enum: userRoles }).notNull().default("adoptante"),
 });
+
+export const usersRelation = relations(users, ({ many }) => ({
+  questionaries: many(questionaries)
+}));
 
 export const insertUserSchema = createInsertSchema(users, {
   tipoDocumento: z.enum(documentTypes),
@@ -126,6 +131,7 @@ export const adoptions = pgTable("adoptions", {
   estadoDecision: text("estado_decision", { enum: ["aprobada", "rechazada"] }).notNull().default("rechazada"),
 });
 
+
 export const adoptionsRelations = relations(adoptions, ({ one }) => ({
   pet: one(pets, {
     fields: [adoptions.petId],
@@ -141,3 +147,37 @@ export const insertAdoptionSchema = createInsertSchema(adoptions);
 export const selectAdoptionSchema = createSelectSchema(adoptions);
 export type InsertAdoption = typeof adoptions.$inferInsert;
 export type SelectAdoption = typeof adoptions.$inferSelect;
+
+
+export const questionaries = pgTable("questionaries", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .references(() => users.id)
+    .notNull(),
+  status: text("status").notNull().default("pending"),
+  applicationDate: timestamp("application_date").notNull().defaultNow(),
+  notes: text("notes"),
+  points: integer("points").notNull().default(0),
+  experienciaMascotas: text("experiencia_mascotas").notNull(),
+  tipoVivienda: text("tipo_vivienda").notNull(),
+  cuidadoExtraTiempo: text("cuidado_extra_tiempo").notNull(),
+  otrasMascotas: text("otras_mascotas").notNull(),
+  adaptacionNuevaVivienda: text("adaptacion_nueva_vivienda").notNull(),
+  problemasComportamiento: text("problemas_comportamiento").notNull(),
+  presupuestoMensual: text("presupuesto_mensual").notNull(),
+  compromisoLargoPlazo: text("compromiso_largo_plazo").notNull(),
+  atencionVeterinaria: text("atencion_veterinaria").notNull(),
+  reaccionDanos: text("reaccion_danos").notNull(),
+})
+
+export const questionariesRelation = relations(questionaries, ({ one }) => ({
+  user: one(users, {
+    fields: [questionaries.userId],
+    references: [users.id],
+  }),
+}));
+
+export const insertQuestionarySchema = createInsertSchema(questionaries);
+export const selectQuestionarySchema = createSelectSchema(questionaries);
+export type InsertQuestionary = typeof questionaries.$inferInsert;
+export type SelectQuestionary = typeof questionaries.$inferSelect;

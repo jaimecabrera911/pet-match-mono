@@ -80,7 +80,7 @@ export default function UserAdoptions() {
             Gestiona tus procesos de adopción y sigue su estado
           </p>
         </div>
-        <Link href="/dashboard/cuestionario-adopcion">
+        <Link href="/dashboard/cuestionario">
           <Button className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             Contestar Cuestionario

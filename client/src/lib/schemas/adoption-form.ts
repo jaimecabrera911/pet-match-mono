@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const adoptionFormSchema = z.object({
+export const questionaireSchema = z.object({
   experienciaMascotas: z.enum([
     "Si, he tenido perros antes",
     "Si, pero no he tenido perros",
@@ -53,8 +53,8 @@ export const adoptionFormSchema = z.object({
     required_error: "Por favor selecciona un rango de presupuesto"
   }),
   compromisoLargoPlazo: z.enum([
-    "Sí, estoy comprometido/a",
-    "No estoy seguro/a",
+    "Sí, estoy comprometido",
+    "No estoy seguro",
     "No"
   ], {
     required_error: "Por favor indica tu nivel de compromiso"
@@ -66,7 +66,7 @@ export const adoptionFormSchema = z.object({
   ], {
     required_error: "Por favor selecciona una opción"
   }),
-  reaccionDaños: z.enum([
+  reaccionDanos: z.enum([
     "Buscaría un adiestrador para corregir el comportamiento",
     "Intentaría entrenarlo por mi cuenta y proporcionarle juguetes adecuados",
     "Ignoraría el comportamiento, esperando que pase"
@@ -75,4 +75,4 @@ export const adoptionFormSchema = z.object({
   })
 });
 
-export type AdoptionFormData = z.infer<typeof adoptionFormSchema>;
+export type QuestionarieSchema = z.infer<typeof questionaireSchema>;

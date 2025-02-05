@@ -44,6 +44,7 @@ function DashboardRouter() {
       <Route path="/dashboard/panel-de-control" component={Dashboard} />
       <Route path="/dashboard/user-adoptions" component={UserAdoptions} />
       <Route path="/dashboard/available-pets" component={AvailablePets} />
+      <Route path="/dashboard/cuestionario" component={CuestionarioAdopcion} />
       <ProtectedRoute 
         path="/dashboard/mascotas"
         requiredRole={["admin", "shelter"]}

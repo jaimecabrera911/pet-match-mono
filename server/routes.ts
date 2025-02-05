@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { db } from "@db";
-import { pets, users, adoptions, type InsertPet, type InsertUser, type InsertAdoption, insertUserSchema } from "@db/schema";
+import { pets, users, adoptions, type InsertPet, type InsertUser, type InsertAdoption, insertUserSchema, questionaries, selectUserSchema } from "@db/schema";
 import { eq } from "drizzle-orm";
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
@@ -81,17 +81,17 @@ export function registerRoutes(app: Express): Server {
       // Create a copy of req.body to modify
       const updateData = { ...req.body };
       updateData.fechaNacimiento = new Date(updateData.fechaNacimiento);
-  
+
       const [updatedUser] = await db
         .update(users)
         .set(updateData)
         .where(eq(users.id, parseInt(req.params.id)))
         .returning();
-  
+
       if (!updatedUser) {
         return res.status(404).json({ error: "Usuario no encontrado" });
       }
-  
+
       res.json(updatedUser);
     } catch (error) {
       console.error("Error updating user:", error);
@@ -175,17 +175,17 @@ export function registerRoutes(app: Express): Server {
       if (!user) {
         return res.status(404).json({ error: "Usuario no encontrado" });
       }
-  
+
       // Extraer y formatear fechaNacimiento
       const { fechaNacimiento, ...restBody } = req.body;
       const formattedDate = fechaNacimiento ? new Date(fechaNacimiento) : null;
-  
+
       const updatedUser = await db.update(users).set({
         ...restBody,
         fechaNacimiento: formattedDate,
         password: user[0].password
       }).where(eq(users.id, Number(id))).returning();
-      
+
       res.json(updatedUser);
     } catch (error) {
       console.error("Error en actualizar usuario:", error);
@@ -465,6 +465,144 @@ export function registerRoutes(app: Express): Server {
 
   // Serve static files from the uploads directory
   app.use('/uploads', express.static('uploads'));
+
+
+  app.post("/api/questionaries", async (req, res) => {
+    const userHeader = req.headers.user;
+    if (!userHeader || typeof userHeader !== 'string') {
+      return res.status(400).json({ error: "User header is required" });
+    }
+
+    const user = JSON.parse(userHeader);
+    // const questionary = await db.select().from(questionaries).where(eq(questionaries.userId, user?.id)).limit(1);
+
+    // if (questionary.length > 0) {
+    //   return res.status(400).json({ error: "Ya existe una encuesta para este usuario" });
+    // }
+    try {
+      const points = calculatePoints(req.body);
+    
+      const status= points >= 50 ? "approved" : "rejected";
+      const questionaryData = {
+        ...req.body,
+        status,
+        points,
+        userId: user?.id
+      };
+
+      const userModel = await db.select().from(users).where(eq(users.id, user?.id)).limit(1);
+      if (!userModel) {
+        return res.status(400).json({ error: "Usuario no encontrado" });
+      }
+
+      const [newQuestionary] = await db
+        .insert(questionaries)
+        .values({
+          ...questionaryData,
+          userId: userModel[0].id
+        })
+        .returning();
+
+      res.json(newQuestionary);
+    } catch (error) {
+      console.error("Error creating questionary:", error);
+      res.status(500).json({ error: "Error al crear la cuestionario" });
+    }
+  });
+
+  app.get("/api/questionaries", async (req, res) => {
+    const userHeader = req.headers.user;
+    if (!userHeader || typeof userHeader !== 'string') {
+      return res.status(400).json({ error: "User header is required" });
+    }
+    const user = JSON.parse(userHeader);
+    const questionary = await db.select().from(questionaries).where(eq(questionaries.userId, user?.id));
+    res.json(questionary);
+  });
+
+
+  function calculatePoints(answers: Record<string, string>): number {
+    // Primero verificamos las respuestas críticas que resultan en cero automático
+    const zeroPointAnswers = {
+      atencionVeterinaria: "Esperar a ver si mejora por sí solo",
+      reaccionDanos: "Ignoraría el comportamiento, esperando que pase",
+      compromisoLargoPlazo: "No",
+      problemasComportamiento: "Devolverlo al refugio",
+      adaptacionNuevaVivienda: "No haría nada específico, esperando que se adapte solo",
+      cuidadoExtraTiempo: "Dejaría suficiente comida y agua, esperando que se maneje solo"
+    };
+
+    // Verificar si hay alguna respuesta crítica que resulte en cero
+    for (const [field, zeroAnswer] of Object.entries(zeroPointAnswers)) {
+      if (answers[field] === zeroAnswer) {
+        return 0; // Retorna 0 inmediatamente si encuentra una respuesta crítica
+      }
+    }
+
+    // Si no hay respuestas críticas, proceder con el cálculo normal
+    const answerPoints = {
+      experienciaMascotas: {
+        "Si, he tenido perros antes": 20,
+        "Si, pero no he tenido perros": 15,
+        "No, nunca he tenido mascotas": 5
+      },
+      tipoVivienda: {
+        "Casa con jardín grande": 20,
+        "Casa con jardín pequeño": 15,
+        "Apartamento grande": 10,
+        "Apartamento pequeño": 5
+      },
+      cuidadoExtraTiempo: {
+        "Contrataría un cuidador de mascotas o dejaría a mi perro en una guardería": 20,
+        "Pediría a un amigo o familiar que lo cuide": 15
+      },
+      otrasMascotas: {
+        "Sí, otro perro": 20,
+        "Sí, un gato": 15,
+        "Sí, otras mascotas": 10,
+        "No, no tengo otras mascotas": 5
+      },
+      adaptacionNuevaVivienda: {
+        "Llevarlo gradualmente para que se familiarice con el lugar": 20,
+        "Proporcionarle sus juguetes y objetos familiares": 15
+      },
+      problemasComportamiento: {
+        "Consultar a un adiestrador profesional": 20,
+        "Intentar entrenarlo por mi cuenta": 10
+      },
+      presupuestoMensual: {
+        "Más de $350.000": 20,
+        "Entre $250.000 y $350.000": 15,
+        "Menos de $250.000": 5
+      },
+      compromisoLargoPlazo: {
+        "Sí, estoy comprometido": 20,
+        "No estoy seguro": 5
+      },
+      atencionVeterinaria: {
+        "Llevarlo al veterinario de inmediato, sin importar el costo": 20,
+        "Consultar opciones económicas antes de tomar una decisión": 10
+      },
+      reaccionDanos: {
+        "Buscaría un adiestrador para corregir el comportamiento": 20,
+        "Intentaría entrenarlo por mi cuenta y proporcionarle juguetes adecuados": 15
+      }
+    };
+
+    let totalPoints = 0;
+    let maxPossiblePoints = 0;
+
+    Object.entries(answers).forEach(([field, answer]) => {
+      const categoryPoints = answerPoints[field as keyof typeof answerPoints];
+      if (categoryPoints && typeof answer === 'string') {
+        totalPoints += (categoryPoints as Record<string, number>)[answer] || 0;
+        maxPossiblePoints += 20;
+      }
+    });
+
+    // Convertir a porcentaje
+    return Math.round((totalPoints / maxPossiblePoints) * 100);
+  }
 
   const httpServer = createServer(app);
   return httpServer;
