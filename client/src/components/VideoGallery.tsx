@@ -31,7 +31,7 @@ export function VideoGallery() {
 
   return (
     <div className="max-w-7xl mx-auto px-4">
-      <h2 className="text-2xl font-semibold text-center mb-8">Consejos en Video</h2>
+      <h1 className="text-2xl font-bold text-center mb-8 text-[#FF585F]">Tips y Consejos</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {videos.map((video) => (
           <div key={video.id} className="group relative">

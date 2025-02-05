@@ -76,7 +76,7 @@ export default function UserAdoptions() {
           </p>
         </div>
         <Link href="/dashboard/cuestionario-adopcion">
-          <Button className="flex items-center gap-2">
+          <Button className="flex items-center gap-2 bg-[#FF585F] text-white hover:bg-[#e04c52]">
             <FileText className="h-4 w-4" />
             Contestar Cuestionario
           </Button>

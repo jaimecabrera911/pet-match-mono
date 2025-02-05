@@ -136,15 +136,20 @@ export function PetCard({
             <AlertDialogTitle>Confirmar Adopción</AlertDialogTitle>
             <AlertDialogDescription>
               ¿Estás seguro de que deseas adoptar a {name}? Al confirmar, iniciarás el proceso de adopción.
-              Nuestro equipo se pondrá en contacto contigo para los siguientes pasos.
+              
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleAdopt}>Confirmar Adopción</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            <AlertDialogAction 
+        onClick={handleAdopt} 
+        className="bg-[#FF585F] text-white hover:bg-[#e04c52]"
+      >
+        Confirmar Adopción
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
     </>
   );
 }
